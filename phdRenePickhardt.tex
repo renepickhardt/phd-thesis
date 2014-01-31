@@ -2,7 +2,7 @@
 
 \documentclass[•]{book}
 \title{Effective and efficient top-$k$ retrieval.}
-\author{Rene Pickhardt}
+\author{Rene Pickhardt (expecting 92 - 123 pages content without structure)}
 \date{\today}
 \begin{document}
 \maketitle
@@ -14,8 +14,8 @@
 %%% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \part{Foundations}
-\chapter{Introduction}
-\section{Overview of the topic}
+\chapter{Introduction (6-10 pages)}
+\section{Overview of the topic (3-5)}
 Most information retrieval systems \cite{} have a much larger result set for most queries than the user is actually able to look through.
 For these cases the notion of relevance of documents in the result set has been introduced. 
 This makes it possible to rank the result set according to their given relevance scores.
@@ -43,12 +43,13 @@ For the data base indices we proved the runtime of CRUD operations of our soluti
 Additionally we conducted empirical evaluations on various data sets of our indices against the state of the art baselines to demonstrate that the proposed run times can actually be implemented and achieved.
 
 In all cases we demonstrate the superiority of our algorithms which are all available as open source programs together with the used data sets under an open licence.
-\section{Running example probably Facebook}
+\section{Running example probably Facebook or even Wikipedia (1-2)}
 
-\section{structure of the text}
+\section{structure of the text (1-2)}
 
-\section{Acknowledgements}
+\section{Acknowledgements (1)}
 \begin{itemize}
+\item The community of the web providing this large mine of information. Especially the developers and everyone who publishes under an open licence and provides services. In particular the wikipedia foundation and stack exchange. 
 \item My students from whom I learnt most
 \item Steffen and Institute for creating and providing such a good environment
 \item advisor Steffen, Thomas, Gerd.
@@ -65,7 +66,7 @@ In all cases we demonstrate the superiority of our algorithms which are all avai
 %%%	Definitions and Overview
 %%% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Foundations of the thesis}
+\chapter{Foundations of the thesis (20 pages)}
 \section{Effective methods in Information retrieval}
 \subsection{Basic Definitions in Information Retrieval}
 Thomas script on information retrieval could be of relevance here.
@@ -103,7 +104,7 @@ Thomas script on information retrieval could be of relevance here.
 %%%	Top k queries in information retrieval is a two sided problem
 %%% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Top $k$ queries in information retrieval is a two sided problem}
+\chapter{Top $k$ queries in information retrieval is a two sided problem (3 pages)}
 is this the correct spot or does this have to be after related work because we can work this out from the related work?
 \section{Effectiveness: Calculating the ranking for the top $k$ set}
 \section{Efficiency: Building indices for fast retrieval of the top $k$ set}
@@ -120,7 +121,7 @@ is this the correct spot or does this have to be after related work because we c
 %%%	generalized language models
 %%% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{generalized language models}
+\chapter{generalized language models (10 - 15 pages)}
 \begin{itemize}
 \item paper almost done. 
 \item might need some resubmissions but then lets go.
@@ -132,7 +133,7 @@ is this the correct spot or does this have to be after related work because we c
 %%%	personalized search / autocomplete rankings
 %%% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Personalized search / autocomplete rankings}
+\chapter{Personalized search / autocomplete rankings (10 - 15 pages)}
 \begin{itemize}
 \item a current bachlor thesis goes into this direction
 \end {itemize}
@@ -149,7 +150,7 @@ is this the correct spot or does this have to be after related work because we c
 %%%	general difficulty
 %%% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{arbitrary top $k$ queries are inefficient}
+\chapter{arbitrary top $k$ queries are inefficient (3 - 5 pages)}
 e.g. top $k$ aggregation joins might need a full materialization of the join and a complete walk through the result set to calculate the top $k$ join set. 
 
 Could be moved to foundations?
@@ -158,7 +159,7 @@ Could be moved to foundations?
 %%%	scored top k prefix queries
 %%% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Indices for top $k$ scored prefix queries}
+\chapter{Indices for top $k$ scored prefix queries (10 - 15 pages)}
 \begin{itemize}
 \item Powering generalized language models or any form of auto completion. 
 \item Problem solved. 
@@ -171,7 +172,7 @@ Could be moved to foundations?
 %%%	graphity indices for top $k$ joins on temporal ordered data
 %%% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Indices for top $k$ joins on temporal ordered data}
+\chapter{Indices for top $k$ joins on temporal ordered data (10 - 15 pages)}
 \begin{itemize}
 \item Graphity and the principles behind this. 
 \item paper done 
@@ -182,7 +183,7 @@ Could be moved to foundations?
 %%%	solving holger bast problem faster
 %%% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{solving Holger Bast problem more elegant}
+\chapter{solving Holger Bast problem more elegant (10 - 15 pages)}
 \begin{itemize}
 \item To be done (no ideas yet! but it can't be difficult).
 \item Holger Bast solves the problem of instant document retrieval while keyword typing \cite{RW:Bast:2006} (also taking into account all possible auto completions which are way to many and make the result set irrelevant but which is needed for his kind of algorithm). 
@@ -201,7 +202,7 @@ Could be moved to foundations?
 %%%	Conclusions / contributions
 %%% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Conclusion / Contributions}
+\chapter{Conclusion / Contributions (5 pages)}
 \begin{itemize}
 \item For well known top $k$ queries it is possible to find efficient indices. This requires large effort. 
 \item so far best known solution of some well known problems with rich applications. 
@@ -211,7 +212,7 @@ Could be moved to foundations?
 %%%	Future work
 %%% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Future work}
+\chapter{Future work (5 pages)}
 \section{developing a complete theory of which kind of queries lead to efficient indices}
 \section{proofing that current indices achieve the best possible runtime}
 
