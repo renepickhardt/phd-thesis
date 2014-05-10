@@ -1,3 +1,4 @@
+*.bak
 *.aux
 *.glo
 *.idx
@@ -26,3 +27,4 @@
 phdRenePickhardt.pdf
 phdRenePickhardt.ps
 todos
+paper/
