@@ -16,6 +16,7 @@ so far it seems like we will be testing 9 frameworks about the correctness of im
 * Randlm
 * kenLM
 * DALM
+* http://code.google.com/p/mitlm/ (efficient implementation)
 
 ## dimensions to check
 * do probabilities sum up to one?
