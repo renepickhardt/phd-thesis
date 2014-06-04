@@ -1,0 +1,73 @@
+=== T1: logging ===
+* logger output
+** date
+** logfile
+** in the best case information about the experiment
+
+=== T2: where to implement what ===
+* discuss is unit tests the correct format? 
+* we are running into tests which don't make sense as a unit test
+** I guess unit tests are for correctness of code (is the semantics as expected)
+** experiments are experiments and the experimental framework is not contained in unit tesing
+
+example: 
+Class A should correspond with SRILM
+* JUnit test runs class A and SRILM and compares if the results match
+* We know from the semantics and implementation that an Estimator doesn't sum up to 1 ==> no unit test (mismatch in the notation of estimator)
+
+=== T3: controlling experimental results ===
+* pipline for plotting! (I guess gnuplot is the tool of our choice)
+* could be a bunch of shell scripts (never change the log format) 
+* since we have a new logformat our old scripts broke
+* is there a better way? 
+
+=== Tx: ===
+* make experimental data more robust and even (in our case tesing setences)
+* find a heuristic which are the only test data to be evaluated (should depend on the smoother + training data but should be possible) (we know for correct smoothers all smoothers will probably have 0 probabilities)
+
+=== Ty: learn length distribution ===
+* from the training data one could learn a length distribution of sentences
+
+=== Tz: ===
+* what about markov assumptions?
+** obviously without length distribution the notion of a real LM is hard anyway
+** provide testcases and APIs to program against those
+
+=== T? ===
+* implement standard formats and standard libraries?!? to what extend and how?
+
+=== T? ===
+* potential bachlor thesis
+* compriminieren und indizieren von (geskippte) n-gramen
+
+=== T4: implement ConcCount likelihood ===
+* contcount likelihood estimator
+** find out: are there also false and true variants? 
+** I guess we will see this during implementation
+
+=== T5: test: MLE against libs ===
+* test cases (just have the reimplementation of 
+** stanford libs
+** maybe others? which ones?
+
+=== T6: implement smoother ===
+* general interpol smoother
+* recursive (lambda, 1-lambda) interpol smoother
+* backof smoother
+* absolute discounter
+** double check if the fix of yesterday will work making it possible to implement absolute discount on top of fractional distributions
+* KN - Smoother (special case of Absolute discounting)
+* MKN - smoother
+
+=== T7: what about ===
+* witten bell smoother
+* katz smoother
+* laplace smoothing
+* good turing
+* unigram smoothing (e.g. adding uniform distribution (e.g. interpol with uniform distribution))
+* 
+
+=== T8: Solve the magic ===
+* at least understand how various libs are using the magic
+* unk (and the philosphy)
+* <s> </s> (and the philosophy)
