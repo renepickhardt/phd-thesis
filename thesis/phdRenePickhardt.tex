@@ -39,8 +39,8 @@ The core idea would be to choose an example or example setting of a person in hi
 
 \section{Acknowledgements (1)}
 \begin{itemize}
-\item The community of the web providing this large mine of information. Especially the developers and everyone who publishes under an open licence and provides services. In particular the wikipedia foundation and stack exchange. 
-\item My students from whom I learnt most
+\item The community of the web providing this large mine of information. Especially the developers and everyone who publishes under an open licence and provides services. In particular the Wikimedia foundation and Stack Exchange. 
+\item My students from whom I learnt most.
 \item Steffen and Institute for creating and providing such a good environment
 \item advisor Steffen, Thomas, Gerd.
 \item Co authors for great discussion and good spirit (Thomas, Jonas, Till, Paul, Heinrich, Martin,)
@@ -55,24 +55,76 @@ The core idea would be to choose an example or example setting of a person in hi
 %%%	Let's try something
 %%% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Language Models - related work mathematical foundations}
-basics
-\chapter{Generalized Language Models}
-basic theory
-\chapter{skipped language models}
-acl paper
-\chapter{part of speech language models}
-EMNLP
-\chapter{del language models}
-\chapter{smooting methods}
-\chapter{applications: next word prediction setting}
-CIKM / WWW
-\chapter{applications: machine translation}
-ACL 2015 ?
-\chapter{Open ends}
+\chapter{Mathematical foundations of Language Models (10 pages)}
+\section{Definition of a Language Model}
+\section{Definition of an $n$-gram Model}
+\section{The Chain rule of Probability for Marginal Probabilities}
+\section{The Chain rule of Probability for Conditional Probabilties}
+\section{Introduction of Maximum likelihood $n$-gram models}
+\section{Messuring the quality of a language model}
+
+\chapter{Mathematical foundations of Smoothing Methods (20 pages)}
+\section{Why smoothing Language Models?}
+\section{Averaging probability distributions}
+\section{Laplace Smoothing}
+\section{Absolute discounting}
+\section{Backoff methods}
+\section{Interpolated methods}
+\section{Kneser Ney Smoothing}
+
+\chapter{Problems with implementations of current methods (20 pages)}
+As it turns out many of the above mentioned algorithms have been implemented incorrectly. 
+A lot of the time the reason is improper notation which for example leads to the fact that marginal probabilities are used like conditional probabilities and vice verca. 
+
+\section{Test of correctness}
+All methods from the last chapter could be proven to be correct.
+But when we look at implementations and language modelling toolkits we frequently find many problems since a lot of formulas seem ambigious. 
+In these cases the implementations need to be checked for correctnes. 
+
+One simple yet very effective test for correctness is testing if the sum over the probability of all events that can occure is actually 1. 
+This is one reason why in a computer enviroment we will never talk about language models but $n$-gram models. 
+Even over finite alphabets there are infinite elements in the set of all sentences. 
+This means that doing this test for correct implementation is impossible for a computer.
+\section{Marginals are not conditional probabilities}
+\section{Marginals are not defined if the history was not seen}
+\section{Markov assumption}
+\section{Start and end of scentence tags}
+\section{Problems with the unk token}
+
+\chapter{Benchmark of Language model toolkits in terms of correctness (20 pages)}
+as we saw in the last chapter a lot of times notation is arbitrary.
+This means that we often have a choice. 
+The first goal of this chapter is to test all the choices one can make for the well established methods in order to understand what is the best known language model. 
+The second goal of this chapter is to test the existing implementations of the algorithms of correctness and be able to state which choices have been made by the toolkits.
+
+\chapter{Generalized Language Models (20 pages)}
+As we saw there exist good reasons to do backoff steps in language modelling. 
+The question is why making the history one word shorter?
+Another question is why actually making it shorter and not introducing a skip at the first position?
+At this point one might wonder why not introducing skips at other positions? 
+Introducing skips increases the probabilities. 
+Maybe this is too much so we would like to introduce something that is not an arbitrary skip but also not a concrete word. Part of speeches seem to be reasonable though they could be replaced by any class leading to class based aproaches\cite{CLASS:BASED:LMS} or factored language models\cite{FACTORED:LANGUAGE:MODEL}.
+
+Generalized Language models are a way to address these issues. 
+They are fully compatible with the above mentioned smoothing methods. 
+
+For the rest of this chapter we show how to define generalized language models and demonstrate their superiority in terms of perplexity. 
+We will also demonstrate their downsides in terms of model parameter and storage space.
+
+\section{Generalized ARPA format for Generalized Language Models}
+Also talking about the decoder
+
+\chapter{applications: next word prediction setting (5 pages)}
+We will answer the question if generalized language models are only better in terms of perplexity or also outperforming in an application like next word prediction.
+\chapter{applications: machine translation (5 pages)}
+We will also aim to answer the question of performance in the setting of machine translation.
+\chapter{Solving the Entropy Conjecture(10 - 15 pages)}
+The conjecture states: Better results in Entropy of a LM will always positive correlate with better BLUE scores or Word error rates. The reason why this did not happen is that many implementations did not produce proper probability distributions.
+\chapter{Open ends (3 pages)}
+\section{Pruning}
 \section{Indexing}
 \section{Distributed implementation}
-\chapter{conclusion}
+\chapter{conclusion (2 pages)}
 
 
 
