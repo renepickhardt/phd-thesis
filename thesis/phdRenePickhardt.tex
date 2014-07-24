@@ -96,6 +96,9 @@ as we saw in the last chapter a lot of times notation is arbitrary.
 This means that we often have a choice. 
 The first goal of this chapter is to test all the choices one can make for the well established methods in order to understand what is the best known language model. 
 The second goal of this chapter is to test the existing implementations of the algorithms of correctness and be able to state which choices have been made by the toolkits.
+\section{metrics for measuring - do we really need this?}
+\section{used data sets}
+
 
 \chapter{Generalized Language Models (20 pages)}
 As we saw there exist good reasons to do backoff steps in language modelling. 
@@ -111,120 +114,78 @@ They are fully compatible with the above mentioned smoothing methods.
 For the rest of this chapter we show how to define generalized language models and demonstrate their superiority in terms of perplexity. 
 We will also demonstrate their downsides in terms of model parameter and storage space.
 
-\section{Generalized ARPA format for Generalized Language Models}
-Also talking about the decoder
 
-\chapter{applications: next word prediction setting (5 pages)}
-We will answer the question if generalized language models are only better in terms of perplexity or also outperforming in an application like next word prediction.
-\chapter{applications: machine translation (5 pages)}
-We will also aim to answer the question of performance in the setting of machine translation.
-\chapter{Solving the Entropy Conjecture(10 - 15 pages)}
-The conjecture states: Better results in Entropy of a LM will always positive correlate with better BLUE scores or Word error rates. The reason why this did not happen is that many implementations did not produce proper probability distributions.
-\chapter{Open ends (3 pages)}
-\section{Pruning}
-\section{Indexing}
-\section{Distributed implementation}
-\chapter{conclusion (2 pages)}
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%
-%%%	Definitions and Overview
-%%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{A theory of generalized language models (xxx pages)}
 \section{Introductionary example, definition of the probem}
 Here we would just do a maximum likelihood estimation of $n$-grams. 
 Introduce one or two example sentences (which have to be very well choosen)
-\section{definition of skipped $n$-grams and differential notation}
+\section{Definition of skipped $n$-grams and differential notation}
 \begin{enumerate}
 \item notation. 
-\item already have a motivation with some statistics taken from wikipedia ? 
+\item already have a motivation with some statistics taken from wikipedia or even put this earlier?
 \end{enumerate}
-\section{smoothing tequniques for generalized language models}
-\begin{enumerate}
-\item kneser ney
-\item laplace smoothing
-\item any other smoothing technique?
-\end{enumerate}
+
+
+\section{Generalized ARPA format for Generalized Language Models}
+Also talking about the decoder
+\section{API documentation to the GLM software toolkit}
+
 \section{Pascal triangle of generalized language models}
 how we can understand skipped $n$-grams and what our point of view should be
 
 \section{Standard language models as a special case of generalized language models}
 
+
+
+\chapter{Smoothing tequniques for generalized language models}
+ 
+\section{kneser ney}
+\section{laplace smoothing}
+\section{other smoothing technique?}
+
+
 \section{mathematical proof why generalized language models have to be better than language models}
 only if I find one and if this is possible
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%
-%%%	Emperical study of generalized language models
-%%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\chapter{an emperical study of generalized language models}
-\section{metrics for measuring}
-\section{data sets}
-\section{documentation to the GLM software toolkit}
-\section{experimental setup}
-\section{results}
-\section{discussion}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%
-%%%	APPLICATIONS of generalized language models
-%%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{applications of generalized language models}
-\section{next word prediction paper}
-maybe this year for cikm or www
+\chapter{applications: next word prediction setting (5 pages)}
+We will answer the question if generalized language models are only better in terms of perplexity or also outperforming in an application like next word prediction.
+\section{recycle the old SIGIR submission and redo the experiments}
 
-\section{classification task}
-together with ravi coote (don't know where)
+\chapter{applications: machine translation (5 pages)}
+\section{Implementing GLM in KenLM}
+\section{MOSES and basics of statistical Machine Translation}
+\section{Results}
+We will also aim to answer the question of performance in the setting of machine translation.
 
-\section{speech recognition}
+
+\chapter{Solving the Entropy Conjecture(10 - 15 pages)}
+The conjecture states: Better results in Entropy of a LM will always positive correlate with better BLUE scores or Word error rates. The reason why this did not happen is that many implementations did not produce proper probability distributions.
+\section{basics of speech recognition}
 find co-author maybe steffen can help
+\section{big comparison 3 methods: ASR, MT, NWP, vs various toolkits}
 
-\section{semantic relatedness of words}
-ESA work together with christoph schaefer
 
-\section{machine translation}
-also here not clear what to do and if co authors exist
+\chapter{Open ends (3 pages)}
+\section{Pruning}
+\section{Indexing}
 
-\section{languagemodels for information retrieval}
-together with thomas gottron. idea every document has its own langauge model...
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%
-%%%	INDEXING of Generalized language models
-%%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{indexing of generalized language models}
 first basic question: will indexing depend on the application ? I guess it does. but it sure makes sense to to be able to store generalized language models.
-\section{filtering GLM to acertain size}
+\subsection{filtering GLM to acertain size}
 shall I make this?
-\section{a data structure to store GLM}
+\subsection{a data structure to store GLM}
 also here no ideas and results available
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%
-%%%	Conclusions / contributions
-%%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Conclusion / Contributions (5 pages)}
-\begin{itemize}
-\item sparsity is solved
-\item so far best known solution of some well known problems with rich applications. 
-\end{itemize}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%
-%%%	Future work
-%%% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\chapter{Future work (5 pages)}
-\section{more applications}
+\section{Distributed implementation}
+\chapter{conclusion (2 pages)}
 
-\section{better index structures}
+
+
+\chapter{Won't do Future Work (3 pages)}
+\section{languagemodels for information retrieval}
+together with thomas gottron. idea every document has its own langauge model... an let us measure Kullback-Leibler divergence
+\subsection{semantic relatedness of words}
+ESA work together with christoph schaefer
 
 \bibliographystyle{plain}
 \bibliography{phdRenePickhardt}
