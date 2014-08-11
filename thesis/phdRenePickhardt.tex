@@ -55,7 +55,44 @@ The core idea would be to choose an example or example setting of a person in hi
 %%%	Let's try something
 %%% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\intersection}{\cap}
+\newcommand{\union}{\cup}
+\newcommand{\skp}{\_}
+
+
 \chapter{Mathematical foundations of Language Models (10 pages)}
+Let $\Omega=\{w_1,...w_N\}$ be the set of all words in a language and $\Sigma$ be the $\sigma$-algebra of $\Omega$. 
+A probability function $P:\Sigma \to [0,1]$ is a function such that.
+\begin{enumerate}
+  \item $P(\Omega) = 1$
+  \item $P(\emptyset) = 0$
+  \item $P(A_1 \cup A_2 \union \ldots \union A_n) = P(A_1) + P(A_2) + \ldots + P(A_n)$ \\
+with $A_i \intersection A_j = \emptyset$ $\forall i,j \leq n, n < \infty$
+\end{enumerate}
+We call $(\Omega, \Sigma, P)$ a probability space. 
+In future we will only have finit $\Omega$ and often fix $\Omega$ and $\Sigma$ but we will play around with $P$. 
+Often we will take $\Omega = W := \{\texttt{Words within a fixed natural language}\}.$
+Or we will take $\Omega = W^n$ the set of $n$-tuples or sequences of $n$ words over a given natural language. 
+
+Sometimes we will also implicitly play around with $\Omega$ and $\Sigma$ without explicitly saying so and with similar looking formulars of $P$.
+One of the resulting subtleties is pointed out in the following.
+As all computer scientists when being in the natural language setting we will write by abuse of notation $P(w_i)$ when we mean $P(\{w_i\})$. 
+We \textbf{must not confuse} $P(w_1 \union w_2) = P(\{w_1,w_2\})=P(\{w_1\}) + P(\{w_2\})$ by definition with $P'(w_1w_2):=P(\{(w_1,w_2)\})$ where $P'$ is defined on the $\sigma$-algebra of $W^2$ and P is defined on the $\sigma$-algebra of $W$.
+
+Another example where abuse of notation leads to subtleties on $W^2$ is the following: We will often see something like $P'(w_2|w_1)$. 
+Natural language experts wish to interpret this formula as the probability of a word $w_2$ occuring after a word $w_1$ has been seen.
+For the sake of rigour we will once carry out the full argument of how this formula should be interpreted but in future stick to the abuse of notation. 
+After the above discussion one might think that $P'(w_2|w_1)$ should read $P'(\{w_2\}|\{w_1\})$ which by definition of conditional probabilities is given by $\frac{P'(\{w_2\}\intersection \{w_1\})}{P'(\{w_1\})}$.
+As we can see this does not make sense for the following two reasons.
+First the result would always have to be $0$ as $P'(\{w_2\}\intersection \{w_1\}) = P'(\emptyset) = 0$ as long as $w_1\neq w_2$.
+Second $\{w_1\}$ and $\{w_2\}$ are not subsets of $W^2$ and thus not elements of the $\sigma$-algebra of $W^2$ which means that $P'$ is not defined for the arguments we have been trying to pass to it so the expression does not carry any proper semantics if interpreted as above. 
+
+A better interpretation is the following $P'(w_2|w_1):=\frac{P(w_1\skp \intersection \skp w_2)}{P'(w_1\skp)}$. 
+In this case we define $w_1 \skp := \{(w_1,x)|x\in W\}\subset W^2$ and $\skp w_2 := \{(y,w_2)|y \in W\}\subset W^2$.
+The intersection will be $P(w_1\skp \intersection \skp w_2) = P(\{(w_1,w_2)\})$ which is well defined. 
+Also the probabilities $w_1 \skp$ and $\skp w_2$ are well defined since $W$ was assumed to be finite and we can create a disjoint union as we can see for $P(w_1 \skp) = P(\cup_{y\in W}\{(w_1,y)\}) = \sum_{y\in W}P(\{(w_1, y)\})$. $P(\skp w_2)$ will be calculated in an analogue way.
+
+
 \section{Definition of a Language Model}
 \section{Definition of an $n$-gram Model}
 \section{The Chain rule of Probability for Marginal Probabilities}
