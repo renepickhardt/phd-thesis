@@ -10,6 +10,7 @@ so far it seems like we will be testing 9 frameworks about the correctness of im
 * nltk
 * kylm
 * SRIlm
+  * http://www.speech.sri.com/projects/srilm/manpages/srilm-faq.7.html  
 * glmtk
 * openngrm
 * IRST
