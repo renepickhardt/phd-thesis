@@ -4,9 +4,19 @@
 \title{A study of generalized language models.}
 \author{Rene Pickhardt (expecting xxx -yyy pages content without structure)}
 \date{\today}
+
+\usepackage{color}
+
 \begin{document}
 \maketitle
 \tableofcontents
+
+
+
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{TODO}: #1}}
+\newcommand{\rp}[1]{\textcolor{blue}{Rene: #1}}
+%newcommand{\rp}[1]{}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%
@@ -76,22 +86,40 @@ Or we will take $\Omega = W^n$ the set of $n$-tuples or sequences of $n$ words o
 
 Sometimes we will also implicitly play around with $\Omega$ and $\Sigma$ without explicitly saying so and with similar looking formulars of $P$.
 One of the resulting subtleties is pointed out in the following.
-As all computer scientists when being in the natural language setting we will write by abuse of notation $P(w_i)$ when we mean $P(\{w_i\})$. 
-We \textbf{must not confuse} $P(w_1 \union w_2) = P(\{w_1,w_2\})=P(\{w_1\}) + P(\{w_2\})$ by definition with $P'(w_1w_2):=P(\{(w_1,w_2)\})$ where $P'$ is defined on the $\sigma$-algebra of $W^2$ and P is defined on the $\sigma$-algebra of $W$.
+As all computer scientists when being in the natural language setting we will write by abuse of notation $P(w_i)$ when we mean $P(\{w_i\})$ where $P:2^W \to [0,1]$ is a probability measure $(W, 2^W, P)$. 
+We \textbf{must not confuse} $P(w_1 \union w_2) = P(\{w_1,w_2\})=P(\{w_1\}) + P(\{w_2\})$ with $P'(w_1w_2):=P(\{(w_1,w_2)\})$ where $P': 2^{W^2} \to [0,1]$. 
+As one can see $P'$ is defined on the $\sigma$-algebra of $W^2$ and $P$ is defined on the $\sigma$-algebra of $W$.
 
-Another example where abuse of notation leads to subtleties on $W^2$ is the following: We will often see something like $P'(w_2|w_1)$. 
-Natural language experts wish to interpret this formula as the probability of a word $w_2$ occuring after a word $w_1$ has been seen.
-For the sake of rigour we will once carry out the full argument of how this formula should be interpreted but in future stick to the abuse of notation. 
+Another example where abuse of notation leads to subtleties on $W^2$ is the following: 
+We will often see something like $P'(w_2|w_1)$. We note that in most papers we will never see an explicit statement on which space the probability function is defined
+Natural language experts wish to interpret this formula as the conditional probability of a word $w_2$ occuring after a word $w_1$ has been seen.
+For the sake of rigour we will once carry out the full argument of how this formula should be interpreted.
+In future stick to the abuse of notation and leave it to the reader to make sure to know on what spaces the functions are defined. 
+The following will also help to demonstrate the though process which can be used to decide how $P'(w_2|w_1)$ should be interpreted.
 After the above discussion one might think that $P'(w_2|w_1)$ should read $P'(\{w_2\}|\{w_1\})$ which by definition of conditional probabilities is given by $\frac{P'(\{w_2\}\intersection \{w_1\})}{P'(\{w_1\})}$.
 As we can see this does not make sense for the following two reasons.
 First the result would always have to be $0$ as $P'(\{w_2\}\intersection \{w_1\}) = P'(\emptyset) = 0$ as long as $w_1\neq w_2$.
 Second $\{w_1\}$ and $\{w_2\}$ are not subsets of $W^2$ and thus not elements of the $\sigma$-algebra of $W^2$ which means that $P'$ is not defined for the arguments we have been trying to pass to it so the expression does not carry any proper semantics if interpreted as above. 
+As stated often it is not as clear as in our setting that $P'$ is defined on $2^{W^2}$.
 
 A better interpretation is the following $P'(w_2|w_1):=\frac{P(w_1\skp \intersection \skp w_2)}{P'(w_1\skp)}$. 
 In this case we define $w_1 \skp := \{(w_1,x)|x\in W\}\subset W^2$ and $\skp w_2 := \{(y,w_2)|y \in W\}\subset W^2$.
-The intersection will be $P(w_1\skp \intersection \skp w_2) = P(\{(w_1,w_2)\})$ which is well defined. 
-Also the probabilities $w_1 \skp$ and $\skp w_2$ are well defined since $W$ was assumed to be finite and we can create a disjoint union as we can see for $P(w_1 \skp) = P(\cup_{y\in W}\{(w_1,y)\}) = \sum_{y\in W}P(\{(w_1, y)\})$. $P(\skp w_2)$ will be calculated in an analogue way.
+The probability of the intersection will be $P(w_1\skp \intersection \skp w_2) = P(\{(w_1,w_2)\})$ which is well defined.
+Again we often see $P(\{(w_1,w_2)\}) = P(w_1w_2)$ by abuse of notation. \todo{already walk through the chain rule of probability.}
+Also the probabilities $w_1 \skp$ and $\skp w_2$ are well defined since $W$ was assumed to be finite and we can created a disjoint union \todo{look up disjoint union tex command} as we can see for $P(w_1 \skp) = P(\cup_{y\in W}\{(w_1,y)\}) = \sum_{y\in W}P(\{(w_1, y)\})$. $P(\skp w_2)$ will be calculated in an analogue way.
 
+One thing we see very frequently is the chain rule of probability which for natural language processing and a bi-gram is written as $P(w_1w_2)=P(w_2|w_1)P(w_1)$.
+Let us again walk through the formulas and give them a proper semantic.
+We have seen that the left hand side of the equation should read $P(\{(w_1,w_2)\})$ on the right hand we can substitude the conditional probability with $\frac{P(w_1\skp \intersection \skp w_2)}{P'(w_1\skp)}$. 
+Since the numerator is exactly the left hand side we can divide and imply \todo{look up how to make and ! over an equal sign}$1=\frac{P(w_1)}{P(w_1\skp)}$. 
+This equation can only hold if numerator and denominator are equal leading to $P(\{w_1\})=P(w_1):=P(w_1\skp)$.
+This formular is particularly difficult because we had to know that we are in a bi-gram setting which means that the set of events was $W^2$.
+\todo{introduce marginals here and show that there is another way to interpret this formula which is a little bit more tricky because it is harder to define but also has some nice advantages}
+\todo{discuss the case of an "empty" or unseen condition which is at the moment not clear to me how to define}
+
+The above example can be expressed without skips. What is cruicial to understand that we have been moving around in the space of tuples. 
+This is what we have to keep in mind when interpreting the formula $P(w_2|w_1)$. 
+We can now also ask ourselves how this formula has to be interpreted if we are talking about so called $3$-gram model. \todo{bad here I talk about something I did not properly define}
 
 \section{Definition of a Language Model}
 \section{Definition of an $n$-gram Model}
