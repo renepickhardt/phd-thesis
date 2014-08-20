@@ -68,21 +68,59 @@ The core idea would be to choose an example or example setting of a person in hi
 \newcommand{\intersection}{\cap}
 \newcommand{\union}{\cup}
 \newcommand{\skp}{\_}
+\newcommand{\pow}[1]{2^{#1}}
 
+
+% what is the story line I am trying to tell?
+% basic definitions of probability functions (n-gram models)
+% conditionsl probabilities
+% a formular often defines infinite many probability functions
+% a lot of notation is unprecise and we need to think about how to interpret this (sometimes we even have choices)
+% putting the probability space to the probability function will help
+% chainrule (marginal vs conditional case)
+% introducing skips
+% bring real world examples that already show how it matters.
 
 \chapter{Mathematical foundations of Language Models (10 pages)}
-Let $\Omega=\{w_1,...w_N\}$ be the set of all words in a language and $\Sigma$ be the $\sigma$-algebra of $\Omega$. 
+The following text will introduce some basic notation for natural language processing. 
+In particular we will review some mathematical background and the standard notation that is currently being used.
+Since we discuss ambigious ways of interpreting the standard notation with respect to a rigour mathematical interpretation  we strongly recommend even the experienced reader to walk carefully through this chapter. 
+
+Let $\Omega=\{w_1,...w_N\}$ be the set of all words in a language and $\Sigma$ be the $\sigma$-algebra of $\Omega$.
+In the case of finite $\Omega$ the $\sigma$-algebra will always be the power set $\pow{\Omega}$. 
 A probability function $P:\Sigma \to [0,1]$ is a function such that.
 \begin{enumerate}
   \item $P(\Omega) = 1$
   \item $P(\emptyset) = 0$
   \item $P(A_1 \cup A_2 \union \ldots \union A_n) = P(A_1) + P(A_2) + \ldots + P(A_n)$ \\
-with $A_i \intersection A_j = \emptyset$ $\forall i,j \leq n, n < \infty$
+with $A_i\in\Sigma,$ $A_i \intersection A_j = \emptyset$ $\forall i,j \leq n, n < \infty$
 \end{enumerate}
-We call $(\Omega, \Sigma, P)$ a probability space. 
-In future we will only have finit $\Omega$ and often fix $\Omega$ and $\Sigma$ but we will play around with $P$. 
+We call the triple $(\Omega, \Sigma, P)$ a probability space $\Omega$ with probability function $P$.
+The elements of $\Sigma$ --- which are subsets of $\Omega$ ---  will be called events. 
 Often we will take $\Omega = W := \{\texttt{Words within a fixed natural language}\}.$
-Or we will take $\Omega = W^n$ the set of $n$-tuples or sequences of $n$ words over a given natural language. 
+Or we will take $\Omega = W^n :=\underbrace{W\times\dots\times W}_{n-times}$ the set of $n$-tuples or sequences of $n$ words over a given natural language. 
+Since $\Omega$ is finite $\Sigma=\pow{\Omega}$ will most of the time not be named explicitly.  
+
+Let us now consider the computer scientist point of view together with a first example:
+Let $w_1^n:=w_1\dots w_n$ be a sequence of $n$ words and $c(w_1^n)$ the frequency of the sequence in a given training corpus we can define the maximum likelihood probability $P(w_1^n):=\frac{c(w_1^n)}{N_n}$ where $N_n:=\sum_{w_1^n}c(w_1^n)$.
+While this definition seems to be clear and is much shorter than all the technical details needed for mathematicians formulation we will quickly see that there is much trouble with definitions like this.
+Let us first try to see the problems a mathematician has with the above defition. \todo{they might seem negligable but in fact they are not as mentioned above}
+It is not clear if $P$ is a probability function and what its probability space is.
+The best way to work this out will actually be to say that the above formula defined an infinite amount of probability functions $P_n$ for every $n \in IN$. 
+Each $P_n$ is defined defined on different $\sigma$-algebra coming from a different $\Omega$. 
+Explicitely this means that for every $n$ we will have $P_n:\pow{W^n}\to [0,1]$ with $P_n(\{(w_1,\dots,w_n)\}):=\frac{c_n((w_1,\dots,w_n))}{N_n}$ where $c_n:W^n\to IN$ is the counting function and $N_n$ is defined as above.
+\todo{there is another subtlety here with the counting function with now goes from omega but P goes from the sigma algebra. Even worse only du to the axioms of probability we have defined $P$ on complete $\Sigma$. We can see it is a lot of overhead in notation to be precise}
+
+\todo{stoped here: roadmap introduce shorter notation without set notation and also accept the computer scientists notation $w_1^n$. then go over to conditional probabilities stay with computer scientists state problems of how this should be defined. afterwards name the problem of NOT naming the which n-gram model the probability function is id est saying $P$ instead of $P_n$}
+
+\todo{Think about the following statement: In future we will only have finit $\Omega$ and often fix $\Omega$ and $\Sigma$ but we will play around with $P$. }
+
+For a given probability space with probability function $P$ we define the conditional probability of an event $A$ given the event $B$ to be $\frac{P(A\intersection B)}{P(B)}=:P(A|B)$. 
+This definition can only hold if $P(B) > 0$. \todo{ask what happens once I go to unseen words or empty set and an empty intersection but also $P(B) = 0$}
+
+\textbf{Example:} Often we will see something like $P(w_n|w_1^{n-1})=\frac{c(w_1^{n-1})}{c(w_1^n)}$.
+Even though we just see one formular in this case we really defined an infinite but countable amount of probability functions which all live on different spaces. 
+\todo{do I really want to bring an example here? this is really a complex question since I am missing much notation (which I do not really whish to introduce at this point.) On the other hand I need to make clear that there is stuff going on. Even worse it is not even clear if we just wrote down conditionals on different spaces or marginals with different parameter spaces all on the same space.}
 
 Sometimes we will also implicitly play around with $\Omega$ and $\Sigma$ without explicitly saying so and with similar looking formulars of $P$.
 One of the resulting subtleties is pointed out in the following.
