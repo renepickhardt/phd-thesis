@@ -85,62 +85,94 @@ The core idea would be to choose an example or example setting of a person in hi
 The following text will introduce some basic notation for natural language processing. 
 In particular we will review some mathematical background and the standard notation that is currently being used.
 Since we discuss ambigious ways of interpreting the standard notation with respect to a rigour mathematical interpretation  we strongly recommend even the experienced reader to walk carefully through this chapter. 
-
+\section{computer scientists vs mathematicians formalism}
 Let $\Omega=\{w_1,...w_N\}$ be the set of all words in a language and $\Sigma$ be the $\sigma$-algebra of $\Omega$.
-In the case of finite $\Omega$ the $\sigma$-algebra will always be the power set $\pow{\Omega}$. 
 A probability function $P:\Sigma \to [0,1]$ is a function such that.
 \begin{enumerate}
   \item $P(\Omega) = 1$
   \item $P(\emptyset) = 0$
-  \item $P(A_1 \cup A_2 \union \ldots \union A_n) = P(A_1) + P(A_2) + \ldots + P(A_n)$ \\
+  \item $P(A_1 \union \ldots \union A_n) = P(A_1) + \ldots + P(A_n)$ \\
 with $A_i\in\Sigma,$ $A_i \intersection A_j = \emptyset$ $\forall i,j \leq n, n < \infty$
 \end{enumerate}
 We call the triple $(\Omega, \Sigma, P)$ a probability space $\Omega$ with probability function $P$.
 The elements of $\Sigma$ --- which are subsets of $\Omega$ ---  will be called events. 
 Often we will take $\Omega = W := \{\texttt{Words within a fixed natural language}\}.$
 Or we will take $\Omega = W^n :=\underbrace{W\times\dots\times W}_{n-times}$ the set of $n$-tuples or sequences of $n$ words over a given natural language. 
-Since $\Omega$ is finite $\Sigma=\pow{\Omega}$ will most of the time not be named explicitly.  
+In the case of finite $\Omega$ --- which is almost always our case --- the $\sigma$-algebra has to be the power set $\pow{\Omega}$ \cite{FINDMATHBOOK}.
+So most of the time $\Sigma$ will not be named explicitly.  
 
 Let us now consider the computer scientist point of view together with a first example:
-Let $w_1^n:=w_1\dots w_n$ be a sequence of $n$ words and $c(w_1^n)$ the frequency of the sequence in a given training corpus we can define the maximum likelihood probability $P(w_1^n):=\frac{c(w_1^n)}{N_n}$ where $N_n:=\sum_{w_1^n}c(w_1^n)$.
-While this definition seems to be clear and is much shorter than all the technical details needed for mathematicians formulation we will quickly see that there is much trouble with definitions like this.
-Let us first try to see the problems a mathematician has with the above defition. \todo{they might seem negligable but in fact they are not as mentioned above}
-It is not clear if $P$ is a probability function and what its probability space is.
-The best way to work this out will actually be to say that the above formula defined an infinite amount of probability functions $P_n$ for every $n \in IN$. 
-Each $P_n$ is defined defined on different $\sigma$-algebra coming from a different $\Omega$. 
-Explicitely this means that for every $n$ we will have $P_n:\pow{W^n}\to [0,1]$ with $P_n(\{(w_1,\dots,w_n)\}):=\frac{c_n((w_1,\dots,w_n))}{N_n}$ where $c_n:W^n\to IN$ is the counting function and $N_n$ is defined as above.
-\todo{there is another subtlety here with the counting function with now goes from omega but P goes from the sigma algebra. Even worse only du to the axioms of probability we have defined $P$ on complete $\Sigma$. We can see it is a lot of overhead in notation to be precise}
+Let $w_1^n:=w_1\dots w_n$ be a sequence of $n$ words and $c(w_1^n)$ the frequency of the sequence in a given training corpus we can define $P(w_1^n):=\frac{c(w_1^n)}{N_n}$ where $N_n:=\sum_{w_1^n}c(w_1^n)$.
+It is commonly accepted that the above definition of $P$ is the maximum likelihood probability for an $n$-gram to occur in some training data.
+While this definition seems to be clear and is much shorter than all the technical details needed for the mathematicians formulation we will quickly see that there is much trouble with definitions like this.
+For example it is not clear if $P$ is a probability function and what its probability space is.
+Though in this simple case the following discussion might seem artificial we will quickly see how important it is to ask these kind of questions.
+One way to work this out\footnote{one could also try to create a real language model on $\Omega=W^*$ which --- starting from the formula --- would be rather complex but possible to sum to $1$. The important point to note is that already with the most basic definition we see that there is some choice how we interpret the formula.} is to say that the above formula defined not one probability function but for every $n$ it defined a different probability function $P_n:\pow{W^n}\to[0,1]$.
+Note that for each $P_n$ we had to define a different $\sigma$-algebra coming from a different $\Omega=W^n$. 
+Explicitely this means that for every $n$ we will have $P_n(\{(w_1,\dots,w_n)\}):=\frac{c_n((w_1,\dots,w_n))}{N_n}$ where $c_n:W^n\to IN$ is the counting function saying how often the $n$-gram occured in the training data and $N_n$ is defined as above.
+The definition only defined $P_n$ on $\Sigma_1=\{A\in\Sigma|$ $|A| = 1\}\subset \Sigma$ which are the events of $\Sigma$ that contain only one element.
+Due to the fact that $\Omega$ is finite all other elements of $\Sigma$ can be created by finite units. 
+By the axioms of a probability function we must have $P_n(A_1 \union \ldots \union A_j) = P_n(A_1) + \ldots + P_n(A_j)$.
+Thus with the above interpretation of the formula $P_n$ is well defined on all of $\Sigma$.
+\todo{not clear of the following should be mentioned.}In particular we implicitly used a projection function $\pi:\Sigma_1\to W^n$  which maps the elements of $\Sigma$ which as subsets of $\Omega$ contained only one element to this particular element.
 
+\section{Useful shortcuts in notation}
+\todo{Reformulate the following section paragraphs}
+In the last section we have seen that it makes sense to cary the $n$ of the $n$-gram length in the name of the probability function to make clear on which space it is defined.
+Let us now see what happens if we did not do this. 
+Computer scientists often are interested in the probability of a sequence of words e.g. $w_1w_2 $ occuring.
+They will thus say the probability is $P(w_1w_2)$. 
+As we have seen $P$ is defined on some $\sigma$-algebra and thus should have a set as an argument. 
+We could say that the computer scientist means $P(\{w_1,w_2\})$. 
+This could be seen as $P(\{w_1\}\union \{w_2\}) = P(\{w_1\}) + P(\{w_2\})$. 
+In particular this would mean that $P$ is just defined on $\pow{W}$ which is most certainly not what the computer scientist meant \todo{spelling}to say.
+The computer scientist would probably rather interpret $P(w_1w_2)$ as $P(\{(w_1,w_2)\})$ which is defined on $\Sigma=\pow{W^2}$.
+This is another reason why it makes sense to carry the $n$ as a subset of the name of the probability function.
+
+Even though we used the term $n$-gram before it is now time to define what a $n$-gram model is.\footnote{this is not a language model yet. In fact we will most certainly do all our work on n-gram models. Since they are defined on finite spaces everything becomes more easily to handle.}
+\textbf{Definition:} A $n$-gram language model or just in short $n$-gram model is a probability function $P_n:\pow{W_n}\to [0,1]$ where $W$ is a \textbf{finite} set of Words in natural language. 
+Obviously fixing ourselves to the case of words is an arbitrary choice.
+The entire theory will work on any finite alphabet.
+In particular a unigram model is $P_1:\pow{W}to [0,1]$.
 \todo{stoped here: roadmap introduce shorter notation without set notation and also accept the computer scientists notation $w_1^n$. then go over to conditional probabilities stay with computer scientists state problems of how this should be defined. afterwards name the problem of NOT naming the which n-gram model the probability function is id est saying $P$ instead of $P_n$}
 
 \todo{Think about the following statement: In future we will only have finit $\Omega$ and often fix $\Omega$ and $\Sigma$ but we will play around with $P$. }
 
-For a given probability space with probability function $P$ we define the conditional probability of an event $A$ given the event $B$ to be $\frac{P(A\intersection B)}{P(B)}=:P(A|B)$. 
-This definition can only hold if $P(B) > 0$. \todo{ask what happens once I go to unseen words or empty set and an empty intersection but also $P(B) = 0$}
-
-\textbf{Example:} Often we will see something like $P(w_n|w_1^{n-1})=\frac{c(w_1^{n-1})}{c(w_1^n)}$.
-Even though we just see one formular in this case we really defined an infinite but countable amount of probability functions which all live on different spaces. 
-\todo{do I really want to bring an example here? this is really a complex question since I am missing much notation (which I do not really whish to introduce at this point.) On the other hand I need to make clear that there is stuff going on. Even worse it is not even clear if we just wrote down conditionals on different spaces or marginals with different parameter spaces all on the same space.}
-
 Sometimes we will also implicitly play around with $\Omega$ and $\Sigma$ without explicitly saying so and with similar looking formulars of $P$.
 One of the resulting subtleties is pointed out in the following.
 As all computer scientists when being in the natural language setting we will write by abuse of notation $P(w_i)$ when we mean $P(\{w_i\})$ where $P:2^W \to [0,1]$ is a probability measure $(W, 2^W, P)$. 
-We \textbf{must not confuse} $P(w_1 \union w_2) = P(\{w_1,w_2\})=P(\{w_1\}) + P(\{w_2\})$ with $P'(w_1w_2):=P(\{(w_1,w_2)\})$ where $P': 2^{W^2} \to [0,1]$. 
-As one can see $P'$ is defined on the $\sigma$-algebra of $W^2$ and $P$ is defined on the $\sigma$-algebra of $W$.
+We \textbf{must not confuse} $P(w_1 \union w_2) = P(\{w_1,w_2\})=P(\{w_1\}) + P(\{w_2\})$ with $P_2(w_1w_2):=P(\{(w_1,w_2)\})$ where $P_2: 2^{W^2} \to [0,1]$. 
+As one can see $P_2$ is defined on the $\sigma$-algebra of $W^2$ and $P$ is defined on the $\sigma$-algebra of $W$.
+
+\todo{state somewhere that will also use some abbrevations like $P(w_1^n)$ in the following}
+
+\section{Conditional Probabilities and Chain rule of probability}
+For a given probability space with probability function $P$ we define the conditional probability of an event $A$ given the event $B$ to be $\frac{P(A\intersection B)}{P(B)}=:P(A|B)$. 
+This definition can only hold if $P(B) > 0$. \todo{ask what happens once I go to unseen words or empty set and an empty intersection but also $P(B) = 0$}
+
+The key question for us is how will this definition of conditional probabilities transfer to the setting of natural language processing and $n$-gram language models?
+We will switch again to the notation that is pretty standard in computer science  where we will see something like: $P(w_2|w_1)$.
+Though it is pretty clear what the non mathematical semantics should be --- e.g. the probability of a word $w_2$ occuring after $w_1$ has been seen\footnote{interestingly this formula does not even say anything about $w_2$ occuring directly after $w_1$. It could also read the probability of $w_2$ to occur in a text knowing that $w_1$ already had occured before. This bag of word approach is actually conceptually a step towards the direction of the generalized language model case where the key idea is to soften the riged structure of word sequences} --- it is due to the underspecifications in notation not quite clear how to give a mathematically proper semantics to the formula.
+In order to do so we must decide on which probability space $P$ should be defined to start using the formalism of conditional probabilities.
+There are only two choices for $\Omega$ that seem reasonable. We will discuss both
+\begin{enumerate}
+\item Let $\Omega=W$ 
+\item Let $\Omega=W^2$
+\end{enumerate}
 
 Another example where abuse of notation leads to subtleties on $W^2$ is the following: 
-We will often see something like $P'(w_2|w_1)$. We note that in most papers we will never see an explicit statement on which space the probability function is defined
+We will often see something like $P_2(w_2|w_1)$. We note that in most papers we will never see an explicit statement on which space the probability function is define
 Natural language experts wish to interpret this formula as the conditional probability of a word $w_2$ occuring after a word $w_1$ has been seen.
 For the sake of rigour we will once carry out the full argument of how this formula should be interpreted.
 In future stick to the abuse of notation and leave it to the reader to make sure to know on what spaces the functions are defined. 
-The following will also help to demonstrate the though process which can be used to decide how $P'(w_2|w_1)$ should be interpreted.
-After the above discussion one might think that $P'(w_2|w_1)$ should read $P'(\{w_2\}|\{w_1\})$ which by definition of conditional probabilities is given by $\frac{P'(\{w_2\}\intersection \{w_1\})}{P'(\{w_1\})}$.
+The following will also help to demonstrate the though process which can be used to decide how $P_2(w_2|w_1)$ should be interpreted.
+After the above discussion one might think that $P_2(w_2|w_1)$ should read $P_2(\{w_2\}|\{w_1\})$ which by definition of conditional probabilities is given by $\frac{P_2(\{w_2\}\intersection \{w_1\})}{P_2(\{w_1\})}$.
 As we can see this does not make sense for the following two reasons.
-First the result would always have to be $0$ as $P'(\{w_2\}\intersection \{w_1\}) = P'(\emptyset) = 0$ as long as $w_1\neq w_2$.
-Second $\{w_1\}$ and $\{w_2\}$ are not subsets of $W^2$ and thus not elements of the $\sigma$-algebra of $W^2$ which means that $P'$ is not defined for the arguments we have been trying to pass to it so the expression does not carry any proper semantics if interpreted as above. 
-As stated often it is not as clear as in our setting that $P'$ is defined on $2^{W^2}$.
+First the result would always have to be $0$ as $P_2(\{w_2\}\intersection \{w_1\}) = P_2(\emptyset) = 0$ as long as $w_1\neq w_2$.
+Second $\{w_1\}$ and $\{w_2\}$ are not subsets of $W^2$ and thus not elements of the $\sigma$-algebra of $W^2$ which means that $P_2$ is not defined for the arguments we have been trying to pass to it so the expression does not carry any proper semantics if interpreted as above. 
+As stated often it is not as clear as in our setting that $P_2$ is defined on $2^{W^2}$.
 
-A better interpretation is the following $P'(w_2|w_1):=\frac{P(w_1\skp \intersection \skp w_2)}{P'(w_1\skp)}$. 
+A better interpretation is the following $P_2(w_2|w_1):=\frac{P(w_1\skp \intersection \skp w_2)}{P_2(w_1\skp)}$. 
 In this case we define $w_1 \skp := \{(w_1,x)|x\in W\}\subset W^2$ and $\skp w_2 := \{(y,w_2)|y \in W\}\subset W^2$.
 The probability of the intersection will be $P(w_1\skp \intersection \skp w_2) = P(\{(w_1,w_2)\})$ which is well defined.
 Again we often see $P(\{(w_1,w_2)\}) = P(w_1w_2)$ by abuse of notation. \todo{already walk through the chain rule of probability.}
@@ -148,7 +180,7 @@ Also the probabilities $w_1 \skp$ and $\skp w_2$ are well defined since $W$ was 
 
 One thing we see very frequently is the chain rule of probability which for natural language processing and a bi-gram is written as $P(w_1w_2)=P(w_2|w_1)P(w_1)$.
 Let us again walk through the formulas and give them a proper semantic.
-We have seen that the left hand side of the equation should read $P(\{(w_1,w_2)\})$ on the right hand we can substitude the conditional probability with $\frac{P(w_1\skp \intersection \skp w_2)}{P'(w_1\skp)}$. 
+We have seen that the left hand side of the equation should read $P(\{(w_1,w_2)\})$ on the right hand we can substitude the conditional probability with $\frac{P(w_1\skp \intersection \skp w_2)}{P_2(w_1\skp)}$. 
 Since the numerator is exactly the left hand side we can divide and imply \todo{look up how to make and ! over an equal sign}$1=\frac{P(w_1)}{P(w_1\skp)}$. 
 This equation can only hold if numerator and denominator are equal leading to $P(\{w_1\})=P(w_1):=P(w_1\skp)$.
 This formular is particularly difficult because we had to know that we are in a bi-gram setting which means that the set of events was $W^2$.
@@ -158,6 +190,11 @@ This formular is particularly difficult because we had to know that we are in a 
 The above example can be expressed without skips. What is cruicial to understand that we have been moving around in the space of tuples. 
 This is what we have to keep in mind when interpreting the formula $P(w_2|w_1)$. 
 We can now also ask ourselves how this formula has to be interpreted if we are talking about so called $3$-gram model. \todo{bad here I talk about something I did not properly define}
+
+\textbf{Example:} Often we will see something like $P(w_n|w_1^{n-1})=\frac{c(w_1^{n-1})}{c(w_1^n)}$.
+Even though we just see one formular in this case we really defined an infinite but countable amount of probability functions which all live on different spaces. 
+\todo{do I really want to bring an example here? this is really a complex question since I am missing much notation (which I do not really whish to introduce at this point.) On the other hand I need to make clear that there is stuff going on. Even worse it is not even clear if we just wrote down conditionals on different spaces or marginals with different parameter spaces all on the same space.}
+
 
 \section{Definition of a Language Model}
 \section{Definition of an $n$-gram Model}
