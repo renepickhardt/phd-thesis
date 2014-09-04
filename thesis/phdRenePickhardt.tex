@@ -100,21 +100,25 @@ Often we will take $\Omega = W := \{\texttt{Words within a fixed natural languag
 Or we will take $\Omega = W^n :=\underbrace{W\times\dots\times W}_{n-times}$ the set of $n$-tuples or sequences of $n$ words over a given natural language. 
 In the case of finite $\Omega$ --- which is almost always our case --- the $\sigma$-algebra has to be the power set $\pow{\Omega}$ \cite{FINDMATHBOOK}.
 So most of the time $\Sigma$ will not be named explicitly.  
+\todo{maybe already do one or 2 examples including natural language here. maybe switch around with the computer scientist. do computer scientist notation first. since it might be easier to read}
 
 Let us now consider the computer scientist point of view together with a first example:
-Let $w_1^n:=w_1\dots w_n$ be a sequence of $n$ words and $c(w_1^n)$ the frequency of the sequence in a given training corpus we can define $P(w_1^n):=\frac{c(w_1^n)}{N_n}$ where $N_n:=\sum_{w_1^n}c(w_1^n)$.
+Let $w_1^n:=w_1\dots w_n$ be a sequence of $n$ words and $c(w_1^n)$ the frequency of the sequence in a given training corpus we can define $P(w_1^n):=\frac{c(w_1^n)}{N_n}$ where $N_n:=\sum_{w_1^n}c(w_1^n)$ is the amount of seen sequences of length $n$.
 It is commonly accepted that the above definition of $P$ is the maximum likelihood probability for an $n$-gram to occur in some training data.
 While this definition seems to be clear and is much shorter than all the technical details needed for the mathematicians formulation we will quickly see that there is much trouble with definitions like this.
 For example it is not clear if $P$ is a probability function and what its probability space is.
+Is the probability space the space of $n$-tuples or is it the space of sequences?
 Though in this simple case the following discussion might seem artificial we will quickly see how important it is to ask these kind of questions.
-One way to work this out\footnote{one could also try to create a real language model on $\Omega=W^*$ which --- starting from the formula --- would be rather complex but possible to sum to $1$. The important point to note is that already with the most basic definition we see that there is some choice how we interpret the formula.} is to say that the above formula defined not one probability function but for every $n$ it defined a different probability function $P_n:\pow{W^n}\to[0,1]$.
+One way to work this out\footnote{one could also try to create a real language model on $\Omega=W^*$ which --- starting from the formula --- would be rather complex but possible to sum to $1$. The important point to note is that already with the most basic definition we see that there is some choice how we interpret the formula.} is to say that the above formula defined not one probability function but a family $\{P_n\}_{n\in IN}$\todo{fix IN} of probability functions. 
+This means for every $n$ we define a probability function $P_n:\pow{W^n}\to[0,1]$.
 Note that for each $P_n$ we had to define a different $\sigma$-algebra coming from a different $\Omega=W^n$. 
-Explicitely this means that for every $n$ we will have $P_n(\{(w_1,\dots,w_n)\}):=\frac{c_n((w_1,\dots,w_n))}{N_n}$ where $c_n:W^n\to IN$ is the counting function saying how often the $n$-gram occured in the training data and $N_n$ is defined as above.
-The definition only defined $P_n$ on $\Sigma_1=\{A\in\Sigma|$ $|A| = 1\}\subset \Sigma$ which are the events of $\Sigma$ that contain only one element.
-Due to the fact that $\Omega$ is finite all other elements of $\Sigma$ can be created by finite units. 
-By the axioms of a probability function we must have $P_n(A_1 \union \ldots \union A_j) = P_n(A_1) + \ldots + P_n(A_j)$.
-Thus with the above interpretation of the formula $P_n$ is well defined on all of $\Sigma$.
-\todo{not clear of the following should be mentioned.}In particular we implicitly used a projection function $\pi:\Sigma_1\to W^n$  which maps the elements of $\Sigma$ which as subsets of $\Omega$ contained only one element to this particular element.
+Explicitly this means that for every $n$ we will have $P_n(\{(w_1,\dots,w_n)\}):=\frac{c_n((w_1,\dots,w_n))}{N_n}$ where $c_n:W^n\to IN$ is the counting function saying how often the $n$-gram occured in the training data and $N_n$ is defined as above.
+To be precise we note that that $P_n$ is well defined. Let $\Sigma$ be the $\sigma$-algebra of $W^n$. 
+The above formula defined $P_n$ only on $\Sigma_1=\{A\in\Sigma|$ $|A| = 1\}\subset \Sigma$ which are the events of $\Sigma$ that contain only one element.
+$P_n$ is well defined since we made the assumption that $\Omega$ is finite. 
+Therefor we can use the third axiom for a probability function whih states that finite unions behave additive. 
+This means for any $A\in\Sigma$ we will find $A_j,\dots,A_k\in\Sigma_1$ such that $A=\union_{i=1\dots j}A_i$ and we thus have $P_n(A)=P_n(A_1 \union \ldots \union A_j) = P_n(A_1) + \ldots + P_n(A_j)$ defining $P_n$ uniquely for every element of $\Sigma$.
+\todo{not clear of the following should be mentioned. We could define injections and projections as well as bijections on Simga1} In particular we implicitly used a projection function $\pi:\Sigma_1\to W^n$  which maps the elements of $\Sigma$ which as subsets of $\Omega$ contained only one element to this particular element.
 
 \section{Useful shortcuts in notation}
 \todo{Reformulate the following section paragraphs}
@@ -125,19 +129,20 @@ They will thus say the probability is $P(w_1w_2)$.
 As we have seen $P$ is defined on some $\sigma$-algebra and thus should have a set as an argument. 
 We could say that the computer scientist means $P(\{w_1,w_2\})$. 
 This could be seen as $P(\{w_1\}\union \{w_2\}) = P(\{w_1\}) + P(\{w_2\})$. 
-In particular this would mean that $P$ is just defined on $\pow{W}$ which is most certainly not what the computer scientist meant \todo{spelling}to say.
+In particular this would mean that $P$ is just defined on $\Sigma=\pow{W}$ which is most certainly not what the computer scientist meant \todo{spelling}to say.
 The computer scientist would probably rather interpret $P(w_1w_2)$ as $P(\{(w_1,w_2)\})$ which is defined on $\Sigma=\pow{W^2}$.
 This is another reason why it makes sense to carry the $n$ as a subset of the name of the probability function.
 
 Even though we used the term $n$-gram before it is now time to define what a $n$-gram model is.\footnote{this is not a language model yet. In fact we will most certainly do all our work on n-gram models. Since they are defined on finite spaces everything becomes more easily to handle.}
-\textbf{Definition:} A $n$-gram language model or just in short $n$-gram model is a probability function $P_n:\pow{W_n}\to [0,1]$ where $W$ is a \textbf{finite} set of Words in natural language. 
-Obviously fixing ourselves to the case of words is an arbitrary choice.
+\textbf{Definition:} A $n$-gram language model or just in short $n$-gram model is a probability function $P_n:\pow{W_n}\to [0,1]$ where $W$ is a \textbf{finite} set of Words\footnote{obviously it is not even easy to define what a word ist. Should "New York" be one word or two words? In the following we will assume that words are seperated by a space.} of a natural language. 
+Obviously fixing ourselves to the case of words of a natural language is an arbitrary choice.
 The entire theory will work on any finite alphabet.
 In particular a unigram model is $P_1:\pow{W}to [0,1]$.
 \todo{stoped here: roadmap introduce shorter notation without set notation and also accept the computer scientists notation $w_1^n$. then go over to conditional probabilities stay with computer scientists state problems of how this should be defined. afterwards name the problem of NOT naming the which n-gram model the probability function is id est saying $P$ instead of $P_n$}
 
 \todo{Think about the following statement: In future we will only have finit $\Omega$ and often fix $\Omega$ and $\Sigma$ but we will play around with $P$. }
 
+\todo{probably remove the rest of the paragraph as this is already mentioned.}
 Sometimes we will also implicitly play around with $\Omega$ and $\Sigma$ without explicitly saying so and with similar looking formulars of $P$.
 One of the resulting subtleties is pointed out in the following.
 As all computer scientists when being in the natural language setting we will write by abuse of notation $P(w_i)$ when we mean $P(\{w_i\})$ where $P:2^W \to [0,1]$ is a probability measure $(W, 2^W, P)$. 
@@ -149,6 +154,7 @@ As one can see $P_2$ is defined on the $\sigma$-algebra of $W^2$ and $P$ is defi
 \section{Conditional Probabilities and Chain rule of probability}
 For a given probability space with probability function $P$ we define the conditional probability of an event $A$ given the event $B$ to be $\frac{P(A\intersection B)}{P(B)}=:P(A|B)$. 
 This definition can only hold if $P(B) > 0$. \todo{ask what happens once I go to unseen words or empty set and an empty intersection but also $P(B) = 0$}
+\todo{here is one of the biggest problems. with the semantics computer scientists would like to give to this formula we will often have $P(B)=0$ in these cases computer scientists go to a super set of $B$ by a method they call backoff\footnote{note that the term backoff in language modelling has actually two different meanings. A backoff smoothing model where exactly in this case we are allowed to exchange the probability function and the just mentioned backoff.} hard todo: restructure and emphesize these points}
 
 The key question for us is how will this definition of conditional probabilities transfer to the setting of natural language processing and $n$-gram language models?
 We will switch again to the notation that is pretty standard in computer science  where we will see something like: $P(w_2|w_1)$.
@@ -159,6 +165,8 @@ There are only two choices for $\Omega$ that seem reasonable. We will discuss bo
 \item Let $\Omega=W$ 
 \item Let $\Omega=W^2$
 \end{enumerate}
+
+\todo{stopped here for restructruring the text. use the following text to more clearly walk through these two examples.}
 
 Another example where abuse of notation leads to subtleties on $W^2$ is the following: 
 We will often see something like $P_2(w_2|w_1)$. We note that in most papers we will never see an explicit statement on which space the probability function is define
