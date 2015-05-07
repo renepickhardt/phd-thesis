@@ -82,6 +82,18 @@ The core idea would be to choose an example or example setting of a person in hi
 % bring real world examples that already show how it matters.
 
 \chapter{Mathematical foundations of Language Models (10 pages)}
+Within papers we frequently see something like: \textit{We are interested in the probability $P$ of a word $w$ given a history $h$ of preceding words.}
+This is often stated as $P(w|h)$ or in a more concrete setting $P(\texttt{Model}|\texttt{This is a Language})$. 
+While most readers will have an intuition what is meant with this conditional probability from a mathematical point of view the semantics of the above formulars are not clear.
+Let $P:\Omega \rightarrow [0,1]$ be a probability function then for $A,B \subset \Omega$ with $P(B)>0$ we have: $P(A|B)=\frac{P(A\cap B)}{P(B)}$.
+Turning back to our example we have $P(\texttt{Model}|\texttt{This is a Language}) = \frac{P(\texttt{Model}\cap\texttt{This is a Language})}{P(\textit{This is a Language})}$.
+We quickly see that there are several reasonable choices for $\Omega$ and with each choice the word $w$ or the fragment of a sentence (history) $h$ would represent a certain set for the intersection to make sense.
+While this problem might seam artificial for this easy example we recall that learning a language Model even nowadays with corpora as big as the World Wide Web yields a data sparsity problem so that the Models have to be smoothed. 
+One important smoothing technique is that of backing off (c.f. \cite{katz}\{kneser:ney:1994}). \footnote{\cite{chen:goodman} state that backoff methods generally perform worse than interpolated methods a result that will be questioned within this thesis.}
+In short the idea is to replace the probability function $P$ with another function for unseen events. 
+In practice the history is shortend by the first word. 
+Now we can ask again: Is the backoffed function defined on the same $\Omega$ or do we just look at different eventclasses?
+
 The following text will introduce some basic notation for natural language processing. 
 In particular we will review some mathematical background and the standard notation that is currently being used.
 Since we discuss ambigious ways of interpreting the standard notation with respect to a rigour mathematical interpretation  we strongly recommend even the experienced reader to walk carefully through this chapter. 
@@ -98,7 +110,7 @@ We call the triple $(\Omega, \Sigma, P)$ a probability space $\Omega$ with proba
 The elements of $\Sigma$ --- which are subsets of $\Omega$ ---  will be called events. 
 Often we will take $\Omega = W := \{\texttt{Words within a fixed natural language}\}.$
 Or we will take $\Omega = W^n :=\underbrace{W\times\dots\times W}_{n-times}$ the set of $n$-tuples or sequences of $n$ words over a given natural language. 
-In the case of finite $\Omega$ --- which is almost always our case --- the $\sigma$-algebra has to be the power set $\pow{\Omega}$ \cite{FINDMATHBOOK}.
+In the case of finite $\Omega$ --- which is almost always our case --- the $\sigma$-algebra can and will be the power set $\pow{\Omega}$.
 So most of the time $\Sigma$ will not be named explicitly.  
 \todo{maybe already do one or 2 examples including natural language here. maybe switch around with the computer scientist. do computer scientist notation first. since it might be easier to read}
 
