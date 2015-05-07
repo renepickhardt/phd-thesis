@@ -1,0 +1,28 @@
+== user stories ==
+define some user stories (interview rene)
+take into consideration the follwing lists and ideas (which are incomplete and might change over time).
+=== major requirements  ===
+* calculate probability (frequency) of a word, bigram, trigram,... given some corpus
+* be able to use different estimators to estimate probabilities for the above use cases.
+* output statistics about the probability space of a certain corpus
+* output statistics about the probability space of a certain corpus with smoothing techniques
+* check if a language model sums correctly to one (input ARPA file?)
+* given a sequence of words predict the next word
+* given a training and test corpus calculate training perplexity / entropy as well as those values of the test corpus on the training one
+* be able to decide if calculates shoul take place in memory or on disc (this process could be somewhat automated depending on trainingscorpus size and memory limits
+* decide weather to use a cache or index a language model
+* be able to cope with test corpora that have vocab which is not consistent with trainings corpus
+* be able to combine various language models
+* be able to quickly cound some patterns
+* be able to present some statistics about distributions
+
+=== minor requirements ===
+* be able to combine varios language models
+* be able to differentiate if one would consider smoothing as staying within in the same probability space and just refining conditions or wether one is allowed to combina varios probability spaces.
+
+== interfaces ==
+* design interfaces that make people achieve these user stories.
+* write example code of how to use the interfaces
+
+== integrate other toolkits ==
+* be able to integrate other toolkits into our "blueprints" of interfaces.
