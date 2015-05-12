@@ -6,6 +6,8 @@
 \date{\today}
 
 \usepackage{color}
+\usepackage{amsmath}
+\usepackage{amssymb}
 
 \begin{document}
 \maketitle
@@ -346,6 +348,55 @@ also here no ideas and results available
 together with thomas gottron. idea every document has its own langauge model... an let us measure Kullback-Leibler divergence
 \subsection{semantic relatedness of words}
 ESA work together with christoph schaefer
+
+\begin{appendix}
+\chapter{Kneser Ney Smoothing}
+In the original paper Kneser and Ney introduce Kneser Ney Smoothing as a back-off method. 
+In the following we will write down the concrete semantics of Kneser Ney Smoothing acording to our notation. 
+\section{Kneser Ney Smoothing on n-gram models}
+We assume $\Omega=W^n$ to be the probability space of an $n$-gram model. 
+In this sense Kneser and Ney are interested in the following probability function
+\[
+p(w|h)=
+\begin{cases}
+  \alpha(w|h),&\text{if } c(h,w)>0 \iff h\cap w\not\subseteq c^{-1}(0)\\
+  \gamma(h)\beta(w|\hat h), &\text c(h,w)=0 \iff h\cap w\subset c^{-1}(0)
+\end{cases}
+\]
+where $\alpha,\beta: 2^\Omega \rightarrow [0,1]$ are probability functions and $c:\Omega\rightarrow \mathbb{N}$ is a discrete random variable. 
+In this setting we can define the following sets:
+\[
+h:=\{v_1^n\in\Omega|v_1^{n-1}=h_1^{n-1}\}
+\]
+\[
+w:=\{v_1^n\in\Omega|v_n{n}=w\}
+\]
+and a generalization of $\hat h$ of $h$ such that $h\subset\hat h\subset\Omega$\footnote{note that the generalization Kneser and Ney probably had in their mind was the event that consisted of tuples where the first condition was ignored (which is equivalent to removing the first word). Generalized langauge models can be thought of removing any word.}
+With this understanding of $h$ and $w$ the conditional probabilities make sense as $\alpha(w|h)=\frac{\alpha(w \cap h)}{\alpha(h)}$ and $w\cap h=\{w_1^n\in \Omega | w_1^{n-1}=h_1^{n-1}, w_n=w\} = \{(h_1,\dots,h_{n-1},w)\}$ the set with just one n-gram consisting of the word and the history.
+Analougus mathematically meaningful definitions hold for $\beta$ and $p$.
+
+Kneser Ney state that $p(.|h):2^W\rightarrow [0,1]$ are indeed a probability functions $\forall h$ if $\gamma$ is defined correctly to shift probability mass from $\alpha$ to $\beta$. 
+We already see some confusion: Starting with $n$-gram models $\alpha$ and $\beta$ we are now looking at a Next Word Model. 
+In order to calculate $\gamma$ the following equations must hold $P(W|h)=1, \forall h$.
+Now we can do the following calculation:
+\[
+1=P(W|h)=P(\cup_{w\in W}w|h)=\sum_{w\in W}P(w|h)=\sum_{w:c(h,w)>0}p(w|h)+\sum_{w:c(h,w)=0}p(w|h)
+\]
+\[
+=\sum_{w:c(h,w)>0}\alpha(w|h)+\sum_{w:c(h,w)=0}\gamma(h)\beta(w|h) = \sum_{w:c(h,w)>0}\alpha(w|h)+\gamma(h)\sum_{w:c(h,w)=0}\beta(w|h)
+\] 
+\[
+\iff \gamma(h)=\frac{1-\sum_{w:c(h,w)>0}\alpha(w|h)}{\sum_{w:c(h,w)=0}\beta(w|h)}
+\]
+we need to discuss if the denumerator can be zero.
+
+in order for $p$ to be a probability function $\gamma$ has to be defined correctly (for every $h$). 
+Especially for any history $h$ that was unseen. 
+
+\section{Kneser Ney Smoothing on parameterized Next Word Models}
+\todo{is next word model a good name?}
+
+\end{appendix}
 
 \bibliographystyle{plain}
 \bibliography{phdRenePickhardt}
