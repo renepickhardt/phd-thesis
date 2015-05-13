@@ -369,7 +369,7 @@ In this setting we can define the following sets:
 h:=\{v_1^n\in\Omega|v_1^{n-1}=h_1^{n-1}\}
 \]
 \[
-w:=\{v_1^n\in\Omega|v_n{n}=w\}
+w:=\{v_1^n\in\Omega|v_n=w\}
 \]
 and a generalization of $\hat h$ of $h$ such that $h\subset\hat h\subset\Omega$\footnote{note that the generalization Kneser and Ney probably had in their mind was the event that consisted of tuples where the first condition was ignored (which is equivalent to removing the first word). Generalized langauge models can be thought of removing any word.}
 With this understanding of $h$ and $w$ the conditional probabilities make sense as $\alpha(w|h)=\frac{\alpha(w \cap h)}{\alpha(h)}$ and $w\cap h=\{w_1^n\in \Omega | w_1^{n-1}=h_1^{n-1}, w_n=w\} = \{(h_1,\dots,h_{n-1},w)\}$ the set with just one n-gram consisting of the word and the history.
@@ -380,15 +380,38 @@ We already see some confusion: Starting with $n$-gram models $\alpha$ and $\beta
 In order to calculate $\gamma$ the following equations must hold $P(W|h)=1, \forall h$.
 Now we can do the following calculation:
 \[
-1=P(W|h)=P(\cup_{w\in W}w|h)=\sum_{w\in W}P(w|h)=\sum_{w:c(h,w)>0}p(w|h)+\sum_{w:c(h,w)=0}p(w|h)
+1=p(W|h)=p(\cup_{w\in W}w|h)=\sum_{w\in W}p(w|h)=
+\sum_{w:c(h,w)>0}p(w|h)+\sum_{w:c(h,w)=0}p(w|h)
 \]
 \[
-=\sum_{w:c(h,w)>0}\alpha(w|h)+\sum_{w:c(h,w)=0}\gamma(h)\beta(w|h) = \sum_{w:c(h,w)>0}\alpha(w|h)+\gamma(h)\sum_{w:c(h,w)=0}\beta(w|h)
+=\sum_{w:c(h,w)>0}\alpha(w|h)+\sum_{w:c(h,w)=0}\gamma(h)\beta(w|h) = \sum_{w:c(h,w)>0}\alpha(w|h)+\gamma(h)\sum_{w:c(h,w)=0}\beta(w|\hat h)
 \] 
 \[
-\iff \gamma(h)=\frac{1-\sum_{w:c(h,w)>0}\alpha(w|h)}{\sum_{w:c(h,w)=0}\beta(w|h)}
+\iff \gamma(h)=\frac{1-\sum_{w:c(h,w)>0}\alpha(w|h)}{\sum_{w:c(h,w)=0}\beta(w|\hat h)}
 \]
-we need to discuss if the denumerator can be zero.
+In the original paper $\beta$ was an arbitrary probability function. 
+This yields a problem since it could be that $\beta(w|\hat h)=0, \forall w\in W : c(h,w)=0$.
+In that case the denominator would be $0$ and $\gamma$ is not well defined. 
+This becomes a problem in the case where $\hat h$ was not seen in the training data.\footnote{remember $\hat h$ was just a superset of $h$. By definition it has to contain one element. But it is not quite clear how this is reflected in the formalizem of being a history of just one word shorter.}
+Luckily the goal of Kneser Ney Smoothing is to find $\beta$ such that the marginal constraint is given \todo{formulate the marginal constraint in a good way}\todo{check if this also implies the condition that the denominator is larger than zero.}
+
+With this notation and setting let us see how the argument of finding a good probability distribution $\beta$ goes along. 
+For the sake of better understanding let us assume $n=4$.\footnote{the prooves goes the same for all $n\geq 2$ but in higher orders some side effects and questions arise.}
+It is assumed that for $c(h,w)>0$ the distribution $p(w|h)=\alpha(w|h)$ are well known and fixed. 
+take in mind $\alpha$ is usually thought of a discounted maximum likelihood estimator like: $\alpha(w|h)=\frac{|h \cap w|-D}{|h|}$ for some discount value $D$.
+We emphasize that $|h|$ is not the same as the numbers of often the sequence $h_1^{n-1}$ occurs in the training data.
+It is rather the number of sequences $h_1^{n-1}$ followed by any word occure in the training data. 
+Since $\hat h$ is a superset of $h$ we have $|\hat h| \geq |h|$ as well as $|\hat h \cap w| \geq |h \cap w|$.
+In particular we can properly look at $p(h|\hat h)$ and $p(w|\hat h)$ which as $n$-gram models are well defined.
+For a stratification $G$\todo{look up the word and or explain it.} we can write: 
+\[
+p(w|\hat h) = \sum_{g\in G}p(w\cap g|\hat h)
+\]
+\[
+=\sum_{g\in G}\frac{w \cap g \cap \hat h}{p(\hat h)}={g\in G}\frac{p(w \cap g \cap \hat h)p()}{p(\hat h)}
+\]
+This can be written as:  \todo{continue calculation}
+Next they have a look at 
 
 in order for $p$ to be a probability function $\gamma$ has to be defined correctly (for every $h$). 
 Especially for any history $h$ that was unseen. 
