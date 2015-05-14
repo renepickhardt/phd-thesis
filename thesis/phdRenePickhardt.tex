@@ -398,7 +398,7 @@ Luckily the goal of Kneser Ney Smoothing is to find $\beta$ such that the margin
 With this notation and setting let us see how the argument of finding a good probability distribution $\beta$ goes along. 
 For the sake of better understanding let us assume $n=4$.\footnote{the prooves goes the same for all $n\geq 2$ but in higher orders some side effects and questions arise.}
 It is assumed that for $c(h,w)>0$ the distribution $p(w|h)=\alpha(w|h)$ are well known and fixed. 
-take in mind $\alpha$ is usually thought of a discounted maximum likelihood estimator like: $\alpha(w|h)=\frac{|h \cap w|-D}{|h|}$ for some discount value $D$.
+take in mind $\alpha$ is usually thought of a discounted maximum likelihood estimator like: $\alpha(w|h)=\frac{|h \cap w|-D}{|h|}$ for some discount value $D$.\todo{defining this with the size of the sets does not work. But the counting function is also rather hard to define (one could do something like $c(h,w)=n \iff) h\cap w \subset c^{-1}(n)$}
 We emphasize that $|h|$ is not the same as the numbers of often the sequence $h_1^{n-1}$ occurs in the training data.
 It is rather the number of sequences $h_1^{n-1}$ followed by any word occure in the training data. 
 Since $\hat h$ is a superset of $h$ we have $|\hat h| \geq |h|$ as well as $|\hat h \cap w| \geq |h \cap w|$.
@@ -408,9 +408,13 @@ For a stratification $G$\todo{look up the word and or explain it.} we can write:
 p(w|\hat h) = \sum_{g\in G}p(w\cap g|\hat h)
 \]
 \[
-=\sum_{g\in G}\frac{w \cap g \cap \hat h}{p(\hat h)}={g\in G}\frac{p(w \cap g \cap \hat h)p()}{p(\hat h)}
+=\sum_{g\in G}\frac{p(w \cap g \cap \hat h)}{p(\hat h)}=\sum_{g\in G}\frac{p(w \cap g \cap \hat h)p(g \cap \hat h)}{p(\hat h)p(g \cap 'hat h)}
 \]
-This can be written as:  \todo{continue calculation}
+\[
+=\sum_{g\in G}\frac{p(w \cap g \cap \hat h)}{p(g\cap \hat h)}\frac{p(g\cap\hat h)}{p(\hat h)} = \sum_{g\in G}p(w|g\cap \hat h)p(g|\hat h)
+\]
+One has to pay attention that $p(g\cap \hat h)$ has to be unequal to zero. \todo{how is this reflected in the original kneser ney proof? Also Kneser ney now have an argument like $p(g|\hat h)=0$ if $g$ is not a generalization of $\hat h$ in order to work the sum and probably also rescue the fraction. Check this.}
+
 Next they have a look at 
 
 in order for $p$ to be a probability function $\gamma$ has to be defined correctly (for every $h$). 
