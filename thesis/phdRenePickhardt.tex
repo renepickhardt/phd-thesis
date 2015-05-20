@@ -1,5 +1,3 @@
-%%%MAKE TODO COMMAND!
-
 \documentclass[•]{book}
 \title{A study of generalized language models.}
 \author{Rene Pickhardt (expecting xxx -yyy pages content without structure)}
@@ -363,6 +361,7 @@ p(w|h)=
   \gamma(h)\beta(w|\hat h), &\text c(h,w)=0 \iff h\cap w\subset c^{-1}(0)
 \end{cases}
 \]
+\todo{technically I cannot put in sets to the counting function... defining c properly is really painful}
 where $\alpha,\beta: 2^\Omega \rightarrow [0,1]$ are probability functions and $c:\Omega\rightarrow \mathbb{N}$ is a discrete random variable. 
 In this setting we can define the following sets:
 \[
@@ -371,8 +370,9 @@ h:=\{v_1^n\in\Omega|v_1^{n-1}=h_1^{n-1}\}
 \[
 w:=\{v_1^n\in\Omega|v_n=w\}
 \]
+\todo{sets have the same name as the variable especially w}
 and a generalization of $\hat h$ of $h$ such that $h\subset\hat h\subset\Omega$\footnote{note that the generalization Kneser and Ney probably had in their mind was the event that consisted of tuples where the first condition was ignored (which is equivalent to removing the first word). Generalized langauge models can be thought of removing any word.}
-With this understanding of $h$ and $w$ the conditional probabilities make sense as $\alpha(w|h)=\frac{\alpha(w \cap h)}{\alpha(h)}$ and $w\cap h=\{w_1^n\in \Omega | w_1^{n-1}=h_1^{n-1}, w_n=w\} = \{(h_1,\dots,h_{n-1},w)\}$ the set with just one n-gram consisting of the word and the history.
+With this understanding of $h$ and $w$ the conditional probabilities make sense as $\alpha(w|h)=\frac{\alpha(w \cap h)}{\alpha(h)}$ and $w\cap h=\{w_1^n\in \Omega | w_1^{n-1}=h_1^{n-1}, w_n=w\} = \{(h_1,\dots,h_{n-1},w)\}$ the set with just one n-gram consisting of the history followed by the word just as one expects.
 Analougus mathematically meaningful definitions hold for $\beta$ and $p$.
 
 Kneser Ney state that $p(.|h):2^W\rightarrow [0,1]$ are indeed a probability functions $\forall h$ if $\gamma$ is defined correctly to shift probability mass from $\alpha$ to $\beta$. 
@@ -390,13 +390,16 @@ Now we can do the following calculation:
 \iff \gamma(h)=\frac{1-\sum_{w:c(h,w)>0}\alpha(w|h)}{\sum_{w:c(h,w)=0}\beta(w|\hat h)}
 \]
 In the original paper $\beta$ was an arbitrary probability function. 
-This yields a problem since it could be that $\beta(w|\hat h)=0, \forall w\in W : c(h,w)=0$.
-In that case the denominator would be $0$ and $\gamma$ is not well defined. 
-This becomes a problem in the case where $\hat h$ was not seen in the training data.\footnote{remember $\hat h$ was just a superset of $h$. By definition it has to contain one element. But it is not quite clear how this is reflected in the formalizem of being a history of just one word shorter.}
-Luckily the goal of Kneser Ney Smoothing is to find $\beta$ such that the marginal constraint is given \todo{formulate the marginal constraint in a good way}\todo{check if this also implies the condition that the denominator is larger than zero.}
+This yields a problem since it could be that the denominator would be $0$ and $\gamma$ is not well defined. 
+This happens in the following cases:
+\begin{enumerate}
+\item $\beta(\hat h)=0$ since the conditional probability $\beta(w|\hat h)$ is not defined. For most estimators this will happen if $\hat h$ was also not seen in the training data.\footnote{remember $\hat h$ was just a superset of $h$. By definition it has to contain one element. But it is not quite clear how this is reflected in the formalism of being a history of just one word shorter.}
+\item even if $\hat h$ was seen we still could have $\beta(\hat h,w)=0)\forall w\in W : c(h,w)=0$
+\end{enumerate}
+Luckily the goal of Kneser Ney Smoothing is to find $\beta$ such that the marginal constraint is given \todo{formulate the marginal constraint in a good way}\todo{check if this also implies the condition that the denominator is larger than zero.} \todo{check if the proof of Kneser Ney is given in a way such that the resulting $\beta$ is really bigger than zero on $\hat h$}
 
 With this notation and setting let us see how the argument of finding a good probability distribution $\beta$ goes along. 
-For the sake of better understanding let us assume $n=4$.\footnote{the prooves goes the same for all $n\geq 2$ but in higher orders some side effects and questions arise.}
+For the sake of better understanding let us assume $n=4$.\footnote{the proofs go the same for all $n\geq 2$ but in higher orders some side effects and questions arise.}
 It is assumed that for $c(h,w)>0$ the distribution $p(w|h)=\alpha(w|h)$ are well known and fixed. 
 take in mind $\alpha$ is usually thought of a discounted maximum likelihood estimator like: $\alpha(w|h)=\frac{|h \cap w|-D}{|h|}$ for some discount value $D$.\todo{defining this with the size of the sets does not work. But the counting function is also rather hard to define (one could do something like $c(h,w)=n \iff) h\cap w \subset c^{-1}(n)$}
 We emphasize that $|h|$ is not the same as the numbers of often the sequence $h_1^{n-1}$ occurs in the training data.
@@ -408,20 +411,46 @@ For a stratification $G$\todo{look up the word and or explain it.} we can write:
 p(w|\hat h) = \sum_{g\in G}p(w\cap g|\hat h)
 \]
 \[
-=\sum_{g\in G}\frac{p(w \cap g \cap \hat h)}{p(\hat h)}=\sum_{g\in G}\frac{p(w \cap g \cap \hat h)p(g \cap \hat h)}{p(\hat h)p(g \cap 'hat h)}
+=\sum_{g\in G}\frac{p(w \cap g \cap \hat h)}{p(\hat h)}=\sum_{g\in G}\frac{p(w \cap g \cap \hat h)p(g \cap \hat h)}{p(\hat h)p(g \cap \hat h)}
 \]
 \[
 =\sum_{g\in G}\frac{p(w \cap g \cap \hat h)}{p(g\cap \hat h)}\frac{p(g\cap\hat h)}{p(\hat h)} = \sum_{g\in G}p(w|g\cap \hat h)p(g|\hat h)
 \]
-One has to pay attention that $p(g\cap \hat h)$ has to be unequal to zero. \todo{how is this reflected in the original kneser ney proof? Also Kneser ney now have an argument like $p(g|\hat h)=0$ if $g$ is not a generalization of $\hat h$ in order to work the sum and probably also rescue the fraction. Check this.}
+One has to pay attention that $p(g\cap \hat h)$ has to be unequal to zero. 
+The original paper writes this as $p(g|\hat h)=0$ if $\hat g \neq \hat h$. 
+This is a stronger requirement than having a non empty intersection of $g \cap \hat h$. 
+On the other side a non empty intersection is not suffucient since the probability of the event also has to be bigger than 0.
+\todo{check if Kneser Ney condition is sufficient I have the feeling it is not if g is a generalization of $\hat h$ then the intersection with $\hat h$ is $\hat h$ and in this case the conditional probability would always be one}.
 
-Next they have a look at 
-
+Appying the condition and inserting the backoff formula one gets:
+\todo{the following are not the same as in the paper}
+\[
+p(w|\hat h) =  \sum_{g\in G:\hat g = \hat h}p(w|g\cap \hat h)p(g|\hat h)
+\]
+\[
+=  \sum_{g\in G:\hat g = \hat h, c(\hat h, w)>0}\alpha(w|g\cap \hat h)p(g|\hat h) +  \sum_{g\in G:\hat g = \hat h, c(\hat h,w)=0}\beta(w|g\cap \hat h)p(g|\hat h)
+\]
 in order for $p$ to be a probability function $\gamma$ has to be defined correctly (for every $h$). 
 Especially for any history $h$ that was unseen. 
 
 \section{Kneser Ney Smoothing on parameterized Next Word Models}
-\todo{is next word model a good name?}
+\todo{is next word model a good name?} asdf
+
+\section{common mistakes done in current implementations of Kneser Ney Smoothing}
+\subsection{recursive implementation}
+\todo{do the calculation and check if the following argument really is a problem.}
+Assume a trigram model where the highest order is done by absolute discounting. 
+In that case we already know from the original paper that the backoff that results from skipping the first word in the history is a countinuation count estimator.
+This is usually taken as the bigram model to smooth the trigram model.
+People then also take continuation counts for all other lower orders e.g. the unigram model but Kneser Ney do only say in the case of starting with a discounted maximum likelihood as $\alpha$ the probability function $\beta$ should be a countinuation count estimator.
+In the case where 2-gram model is already a continuation count estimator taken as $\alpha$ one has to follow the argument of Kneser Ney and see how the new $\beta$ for the unigram distribution has to look like.\todo{do that calculation}
+\subsection{estimations in the calculation}
+Kneser and Ney only estimate the denominator in their formula the following example should give you insight of how this can become a problem. \todo{tex the example and code a small example in which one can calculate the correct $\alpha, \beta, \gamma$, numerator and denominator and check how big the difference is.}
+\subsection{double backoff step}
+As $\hat h$ is usually taken to be the history in which the first word is skipped (not removed!) it could happen that $\hat h$ was still not seen (in particular with the word $w$) in the training data. 
+What one can find in implemenatations is that people just do another backoff (meaning to skipp another word at the beginning of the history) while this is totally correct or let us say possible in the sense of Kneser Ney Smoothing (which does not really specify how to choose $\hat h$ using just the the continuation count of the $n-3$ gram in the history will not be the $\beta$ that Kneser and Ney suggest. 
+If everything else is implemented correclty the resulting function will still be a probability function and sum up to $1$ (which is good news) but it is not the optimal choice of beta. 
+The optimal choice of $\beta$ in that case uses a continuation count that states how many bigrames proceeded that doubly skipped histroy instead of how many unigrams preceeded it.\todo{tex the calculation for this and double check it}
 
 \end{appendix}
 
