@@ -13,6 +13,7 @@
 # smoothing and can export language models to ARPA format.
 #
 # Installs to: /usr/local
+# Needs /usr/local/lib in LD_LIBRARY_PATH
 #
 # Dependencies:
 # * OpenFst 1.4.0+ (installs 1.4.1)
