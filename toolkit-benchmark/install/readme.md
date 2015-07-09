@@ -23,7 +23,7 @@
 | [RandLM](http://randlm.sourceforge.net/)
  | ? |
 | [SRILM](http://www.speech.sri.com/projects/srilm/)
- | apparently |
+ | yes |
 
 ## Notes
 ### SRILM
