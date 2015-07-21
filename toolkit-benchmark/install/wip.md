@@ -35,3 +35,8 @@
 * Markoff: P(try|w1 w2 w3 w4) ~ P(try|w3 w4) (with P1 > P2!)
 * P(w1) instead of P(w1 _ _ _)
 
+## Open questions
+### Does ARPA support interpolation?
+from the SRILM manpages: 
+>Both backoff and interpolated models are represented in the same format. This means interpolation is done during model building and represented in the ARPA format with logprob and backoff weight using equation (6). 
+
