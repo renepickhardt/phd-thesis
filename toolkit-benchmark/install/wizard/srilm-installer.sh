@@ -62,6 +62,7 @@ function install_srilm {
       break
     done
   
+    echo
     echo 'Please wait while the wizard downloads your copy of SRILM.'
     POST_DATA="WWW_file=srilm-1.7.1.tar.gz&WWW_name=${NAME}&WWW_org=${ORGANIZATION}&WWW_address=${ADDRESS}&WWW_email=${EMAIL}&WWW_url=${WEBSITE}&WWW_list=${RECUP}"
     wget --post-data="$POST_DATA" 'http://www.speech.sri.com/projects/srilm/srilm_download.php' -O $SRILM_FILE
@@ -100,6 +101,7 @@ function install_srilm {
   fi
   
   # install
+  echo 'The wizard will compile and install SRILM now.'
   ## prepare
   ### set SRILM variable in Makefile (point at SRILM directory)
   DIR=$( getCurrentDir )
