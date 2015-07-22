@@ -32,6 +32,7 @@ function install_srilm {
   # download
   SRILM_DIR='srilm-1.7.1'
   SRILM_FILE=$SRILM_DIR'.tar.gz'
+  SRILM_FILE_SIZE="65498380"
   if [ ! -f $SRILM_FILE ]; then
     # collect user data for download form
     echo 'In order to use SRILM SRI requests you to provide some information.'
@@ -74,8 +75,8 @@ function install_srilm {
     echo 'Download completed.'
   fi
   # verify download
-  SRILM_FILE_SIZE=$(wc -c <"$SRILM_FILE")
-  if [ ! -f "$SRILM_FILE" -o "$SRILM_FILE_SIZE" -ne "65498380" ]; then
+  FILE_SIZE=$(wc -c <"$SRILM_FILE")
+  if [ ! -f "$SRILM_FILE" -o "$FILE_SIZE" -ne "$SRILM_FILE_SIZE" ]; then
     echo 'The installation file is corrupt.'
     echo 'Please download SRILM manually from http://www.speech.sri.com/projects/srilm/download.html'
     return 3
