@@ -53,13 +53,16 @@ function acceptLicense {
   cmd=(dialog --title "$1"' license agreement' --no-tags --radiolist 'By selecting '"'"'Yes'"'"' you accept the license of '"$1"'.
 You can find a copy of this license at '"$2"'
 
-If you reject the license, the installation will be skipped.' 22 76 16)
+If you reject the license, the installation of '"$1"' will be aborted.' 22 76 16)
   options=(
     0 Yes off
     1 No off
   )
   choice=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
   clear
+  if [ "$choice" -ne "0" ]; then
+    echo "You aborted the installation of $1 by rejecting its license."
+  fi
   return $choice
 }
 
