@@ -1,8 +1,12 @@
 # ULMA
 The core API manages the usage of any language model toolkit supported by ULMA.
 
+## Toolkits supported
 Currently ULMA supports
-* [SRILM](http://www.speech.sri.com/projects/srilm/)
+| Name | Toolkit flag |
+| ---- | ------------ |
+| [SRILM](http://www.speech.sri.com/projects/srilm/) | `srilm` |
+| [Kylm](http://www.phontron.com/kylm/) | `kylm` |
 
 ## Endpoints
 There is a central API endpoint `ulma.sh` that can use any of the toolkits supported by ULMA.
