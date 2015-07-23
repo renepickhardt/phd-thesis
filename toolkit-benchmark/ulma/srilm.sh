@@ -7,6 +7,8 @@
 # Authors: Sebastian Schlicht
 #
 
+SRILM_BIN=srilm-1.7.1/bin/*
+
 # start argument parsing with toolkit set
 if [ -z $ULMA_TOOLKIT ]; then
   ULMA_TOOLKIT=srilm
@@ -52,7 +54,7 @@ function lmplz {
     OPT_NGRAM_COUNT="$OPT_NGRAM_COUNT"' -interpolate'
   fi
   
-  echo "$OPT_NGRAM_COUNT"
-  #$(ngram-count $OPT_NGRAM_COUNT)
+  echo "$SRILM_BIN/ngram-count $OPT_NGRAM_COUNT"
+  $SRILM_BIN/ngram-count $OPT_NGRAM_COUNT
 }
 

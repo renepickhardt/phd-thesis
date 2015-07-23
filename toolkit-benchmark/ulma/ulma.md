@@ -1,5 +1,8 @@
 # ULMA
-The core API manages the usage of any language model toolkit supported by ULMA.
+The unified language modeling API wraps various language modeling tools and toolkits.
+Thus users can switch between the tools with no effort.
+
+In addition, ULMA comes with an [installation wizard](wizard/installer.sh) for all these tools.
 
 ## Toolkits supported
 Currently ULMA supports
