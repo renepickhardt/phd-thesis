@@ -4,7 +4,7 @@ The core API manages the usage of any language model toolkit supported by ULMA.
 ## Toolkits supported
 Currently ULMA supports
 
-| Name | Toolkit flag |
+| Name | Toolkit value |
 | ---- | ------------ |
 | [Kylm](http://www.phontron.com/kylm/) | `kylm` |
 | [SRILM](http://www.speech.sri.com/projects/srilm/) | `srilm` |
@@ -19,7 +19,7 @@ If you want to use a specific toolkit, you can call its endpoint directly as wel
 
     `./<toolkit>.sh PARAMETERS`
 
-## Core API parameters
+## Parameters
 
     `INPUT_FILE [OPTIONS] OUTPUT_FILE`
 
