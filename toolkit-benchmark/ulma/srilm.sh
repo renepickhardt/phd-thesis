@@ -1,7 +1,7 @@
 #!/bin/bash
 # ULMA.SRILM
 #
-# This script is part of the [ULMA API](https://).
+# This script is part of the [ULMA API](https://github.com/sebschlicht/phd-thesis/blob/lm/toolkit-benchmark/ulma/ulma.md).
 # It is a wrapper for the SRILM toolkit, to provide an endpoint for ULMA users.
 #
 # Authors: Sebastian Schlicht
