@@ -20,39 +20,39 @@ fi
 # ** [FAQ](http://www.speech.sri.com/projects/srilm/manpages/srilm-faq.7.html)
 # ** [man ngram-count](http://www.speech.sri.com/projects/srilm/manpages/ngram-count.1.html)
 function lmplz {
-  OPT_NGRAM_COUNT='-text '$INPUT_FILE' -order '$ORDER
+  OPT_NGRAM_COUNT='-text '"$INPUT_FILE"' -order '"$ORDER"
   
   # start-/end-of-sentence tags
   if ! $SOS; then
-    OPT_NGRAM_COUNT=$OPT_NGRAM_COUNT' -no-sos'
+    OPT_NGRAM_COUNT="$OPT_NGRAM_COUNT"' -no-sos'
   fi
   if ! $EOS; then
-    OPT_NGRAM_COUNT=$OPT_NGRAM_COUNT' -no-eos'
+    OPT_NGRAM_COUNT="$OPT_NGRAM_COUNT"' -no-eos'
   fi
-  OPT_NGRAM_COUNT=$OPT_NGRAM_COUNT' -lm '$OUTPUT_FILE
+  OPT_NGRAM_COUNT="$OPT_NGRAM_COUNT"' -lm '"$OUTPUT_FILE"
   
   # smoothing method
   case $SMOOTHING_METHOD in
     KN)
       # TODO
-      OPT_NGRAM_COUNT=$OPT_NGRAM_COUNT' -ukndiscount'
+      OPT_NGRAM_COUNT="$OPT_NGRAM_COUNT"' -ukndiscount'
       ;;
     MKN)
       # TODO
-      OPT_NGRAM_COUNT=$OPT_NGRAM_COUNT' -kndiscount'
+      OPT_NGRAM_COUNT="$OPT_NGRAM_COUNT"' -kndiscount'
       ;;
     # no / unknown smoothing method -> fallback to MLE
     *)
-      OPT_NGRAM_COUNT=$OPT_NGRAM_COUNT' -cdiscount 0'
+      OPT_NGRAM_COUNT="$OPT_NGRAM_COUNT"' -cdiscount 0'
       ;;
   esac
   
   # interpolation
   if [ "$SMOOTHING" == "INTERPOLATION" ]; then
-    OPT_NGRAM_COUNT=$OPT_NGRAM_COUNT' -interpolate'
+    OPT_NGRAM_COUNT="$OPT_NGRAM_COUNT"' -interpolate'
   fi
   
-  echo $OPT_NGRAM_COUNT
+  echo "$OPT_NGRAM_COUNT"
   #$(ngram-count $OPT_NGRAM_COUNT)
 }
 

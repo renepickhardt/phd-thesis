@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -a ULMA_TOOLKITS=([srilm]="srilm.sh")
+declare -A ULMA_TOOLKITS=([srilm]="srilm.sh" [kylm]="kylm.sh")
 
 # http://stackoverflow.com/questions/192292/bash-how-best-to-include-other-scripts
 function getCurrentDir {
@@ -98,7 +98,7 @@ function parseArguments {
   fi
   if checkValidToolkit $ULMA_TOOLKIT; then
     if [ ! $SOURCED ]; then
-      source ${ULMA_TOOLKITS["$ULMA_TOOLKIT"]}
+      source ${ULMA_TOOLKITS[$ULMA_TOOLKIT]}
     fi
   else
     echo 'There is no such toolkit '"'$ULMA_TOOLKIT'!"
