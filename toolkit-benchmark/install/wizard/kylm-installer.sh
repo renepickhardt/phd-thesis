@@ -17,10 +17,11 @@
 #
 # ## Installation target
 # './kylm-0.0.7/' which is stored in `$KYLM`
+# TODO: we could use a separate, user-chosen directory for the installations (defaults to e.g. /opt/glmtk-ulma) and use one single ENVVAR to point to this directory and use the tools
 # Executable JAR will be found in '.'
 #
 # ## Dependencies
-# * Java JRE (via apt)
+# * `java` (OpenJDK 7 JRE via apt)
 #
 function install_srilm {
   # license agreement
