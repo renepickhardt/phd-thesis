@@ -1,13 +1,19 @@
 # ULMA
-
-## API
-
-    `ulma TOOLKIT PARAMETERS`
-
-## Core API
 The core API manages the usage of any language model toolkit supported by ULMA.
 
-    `<toolkit> INPUT_FILE [OPTIONS] OUTPUT_FILE`
+## Endpoints
+There is a central API endpoint `ulma.sh` that can use any of the toolkits supported by ULMA.
+Simply pass the toolkit you want to use, along with the ULMA parameters.
+
+    `./ulma.sh -t TOOLKIT PARAMETERS`
+
+If you want to use a specific toolkit, you can call its endpoint directly as well.
+
+    `./<toolkit>.sh PARAMETERS`
+
+## Core API parameters
+
+    `INPUT_FILE [OPTIONS] OUTPUT_FILE`
 
 ### Input file
 Provide a text file with one sentence per line.
