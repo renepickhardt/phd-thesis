@@ -3,6 +3,7 @@ The core API manages the usage of any language model toolkit supported by ULMA.
 
 ## Toolkits supported
 Currently ULMA supports
+
 | Name | Toolkit flag |
 | ---- | ------------ |
 | [SRILM](http://www.speech.sri.com/projects/srilm/) | `srilm` |
