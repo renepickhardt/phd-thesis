@@ -14,6 +14,11 @@ if [ -z $ULMA_TOOLKIT ]; then
 fi
 
 # Creates a language model using the current application parameter state.
+#
+# # Resources:
+# * [SRILM documentation](http://www.speech.sri.com/projects/srilm/manpages/)
+# ** [FAQ](http://www.speech.sri.com/projects/srilm/manpages/srilm-faq.7.html)
+# ** [man ngram-count](http://www.speech.sri.com/projects/srilm/manpages/ngram-count.1.html)
 function lmplz {
   OPT_NGRAM_COUNT='-text '$INPUT_FILE' -order '$ORDER
   
