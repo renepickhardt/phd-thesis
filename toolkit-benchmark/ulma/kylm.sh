@@ -7,8 +7,7 @@
 # Authors: Sebastian Schlicht
 #
 
-KYLM_DIR=.
-KYLM_JAR=$KYLM_DIR/kylm.jar
+KYLM_JAR=kylm-0.0.7/kylm-0.0.7.jar
 
 # start argument parsing with toolkit set
 if [ -z $ULMA_TOOLKIT ]; then
@@ -52,7 +51,6 @@ function lmplz {
   
   OPT_COUNTNGRAMS="$OPT_COUNTNGRAMS"' -arpa '"$OUTPUT_FILE"
   
-  echo "$OPT_COUNTNGRAMS"
-  #$(java -cp "$KYLM_JAR" kylm.main.CountNgrams "$OPT_COUNTNGRAMS")
+  java -cp "$KYLM_JAR" kylm.main.CountNgrams $OPT_COUNTNGRAMS
 }
 

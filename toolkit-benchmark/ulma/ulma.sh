@@ -3,10 +3,9 @@
 declare -A ULMA_TOOLKITS=([srilm]="srilm.sh" [kylm]="kylm.sh")
 
 # http://stackoverflow.com/questions/192292/bash-how-best-to-include-other-scripts
-function getCurrentDir {
-  DIR="${BASH_SOURCE%/*}"
-  if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
-  echo "$DIR"
+function loadCurrentDir {
+  DIR_ULMA="${BASH_SOURCE%/*}"
+  if [[ ! -d "$DIR_ULMA" ]]; then DIR_ULMA="$PWD"; fi
 }
 
 # Prints the usage of the ULMA API via command line.
@@ -102,7 +101,7 @@ function parseArguments {
   fi
   if checkValidToolkit $ULMA_TOOLKIT; then
     if [ ! $SOURCED ]; then
-      source ${ULMA_TOOLKITS[$ULMA_TOOLKIT]}
+      source "$DIR_ULMA"/${ULMA_TOOLKITS[$ULMA_TOOLKIT]}
     fi
   else
     echo 'There is no such toolkit '"'$ULMA_TOOLKIT'!"
@@ -159,6 +158,7 @@ function handleParameter {
   return 0
 }
 
+loadCurrentDir
 parseArguments "$@"
 ERRCODE="$?"
 if [ "$ERRCODE" -ne "0" ]; then
