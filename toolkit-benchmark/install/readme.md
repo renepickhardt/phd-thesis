@@ -15,7 +15,7 @@
 | [KenLM](http://kheafield.com/code/kenlm/)
  | no | ? | ? | ? |
 | [Kylm](http://www.phontron.com/kylm/)
- | sos/eos only | ? | ? | ? |
+ | sos/eos only rdy | ? | ? | ? |
 | [NLTK](https://github.com/nltk/nltk)
  | unclear | ? | ? | ? |
 | [OpenGRM](http://opengrm.org/)

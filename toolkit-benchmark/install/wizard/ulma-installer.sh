@@ -50,12 +50,6 @@ function setEnvVar {
   echo 'export '"$1" >> ~/.profile
 }
 
-# Installs Boost 1.58 locally.
-function installBoost {
-  # TODO
-  return 0
-}
-
 # Asks the user to accept the license of a toolkit.
 # The choice of the user will be returned as a boolean value.
 #

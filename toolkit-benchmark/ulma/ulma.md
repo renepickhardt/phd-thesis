@@ -4,7 +4,7 @@ Thus users can switch between the tools with no effort.
 
 In addition, ULMA comes with an [installation wizard](wizard/installer.sh) for all these tools.
 
-## Toolkits supported
+## Supported toolkits
 Currently ULMA supports
 
 | Name | Toolkit value |

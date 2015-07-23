@@ -31,7 +31,7 @@ function install_srilm {
   
   # download
   SRILM_DIR='srilm-1.7.1'
-  SRILM_FILE=$SRILM_DIR'.tar.gz'
+  SRILM_FILE="$SRILM_DIR"'.tar.gz'
   SRILM_FILE_SIZE="65498380"
   if [ ! -f $SRILM_FILE ]; then
     # collect user data for download form
@@ -115,7 +115,7 @@ function install_srilm {
   SUCCESS=$?
   cd ..
   
-  if [ $SUCCESS ]; then
+  if [ "$SUCCESS" -eq 0 ]; then
     # export installation directory to environment variable
     #setEnvVar 'SRILM="'"$SRILM_DIR"'"'
     echo 'SRILM was installed successfully.'
