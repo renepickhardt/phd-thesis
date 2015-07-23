@@ -23,7 +23,7 @@
 # ## Dependencies
 # * `java` (OpenJDK 7 JRE via apt)
 #
-function install_srilm {
+function install_kylm {
   # license agreement
   if ! acceptLicense 'Kylm' 'GNU GPL v3.0' 'http://www.gnu.org/licenses/lgpl-3.0.txt'; then
     return 1
@@ -32,7 +32,7 @@ function install_srilm {
   # download
   KYLM_DIR='kylm-0.0.7'
   KYLM_FILE="$KYLM_DIR"'.jar'
-  if [ ! -f $KYLM_FILE ] && [ ! -f "$KYLM_DIR"/"$KYLM_FILE" ]; then
+  if [ ! -f $KYLM_FILE ]; then
     wget 'http://www.phontron.com/kylm/download/kylm-0.0.7.jar'
     SUCCESS=$?
     

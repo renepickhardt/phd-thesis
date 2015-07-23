@@ -13,8 +13,13 @@ function escapeSlashes {
   sed 's/\//\\\//g'
 }
 
-# 
-function getCommandPath {
+# Checks if a command is available.
+function checkCommand {
+  CMD_PATH=$( which "$1" )
+  if [ "$CMD_PATH" == "" ]; then
+    return 1
+  fi
+  return 0
 }
 
 # Checks if a package is installed.
@@ -31,11 +36,11 @@ function requirePackage {
   if ! checkPackage "$1"; then
     echo 'Package '"'$1'"' is missing and will be installed now.'
     sudo apt-get install "$1"
-    SUCCESS="$?"
+    SUCCESS=$?
     if [ "$SUCCESS" -ne 0 ]; then
       echo 'Failed to install package '"'$1'! Please install the package manually and try again."
     fi
-    return $SUCCESS
+    return "$SUCCESS"
   fi
   return 0
 }
@@ -56,7 +61,7 @@ function installBoost {
 #
 # Usage: acceptLicense application license_title license_url
 function acceptLicense {
-  cmd=(dialog --title "$1"' license agreement' --no-tags --radiolist 'By selecting '"'"'Yes'"'"' you accept the license of '"$1" ("$2")'.
+  cmd=(dialog --title "$1"' license agreement' --no-tags --radiolist 'By selecting '"'Yes'"' you accept the license of '"$1"' ('"$2"').
 You can find a copy of this license at '"$3"'
 
 If you reject the license, the installation of '"$1"' will be aborted.' 22 76 16)
@@ -77,9 +82,10 @@ if ! requirePackage dialog; then
   exit 9
 fi
 
-cmd=(dialog --title 'ULMA installation wi#zard' --separate-output --checklist "Select the toolkits you want to install:" 22 76 16)
+cmd=(dialog --title 'ULMA installation wizard' --separate-output --checklist "Select the toolkits you want to install:" 22 76 16)
 options=(
   1 "SRILM" on
+  2 "Kylm" on
 )
 choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 clear
@@ -89,12 +95,14 @@ for choice in $choices
 do
   case $choice in
     1)
+      # SRILM
       source srilm-installer.sh
       install_srilm
       ;;
     2)
-      # TODO
-      exit 1
+      # Kylm
+      source kylm-installer.sh
+      install_kylm
       ;;
   esac
 done
