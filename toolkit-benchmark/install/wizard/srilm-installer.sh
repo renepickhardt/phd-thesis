@@ -10,22 +10,22 @@
 # Sebastian Schlicht (sebastian@jablab.de)
 #
 
-# Installs SRILM and its dependencies
+# Installs SRILM and its dependencies.
 #
 # # SRILM 1.7.1
 # http://www.speech.sri.com/projects/srilm/
 #
 # ## Installation target
 # './srilm-1.7.1/' which is stored in `$SRILM`
-# Binaries will be found in './bin/<architecture>/'
+# Binaries will be found in 'bin/<architecture>/'
 #
 # ## Dependencies
 # * g++ 3.4.3+ (via apt)
 # * make (via apt)
-# 
+#
 function install_srilm {
   # license agreement
-  if ! acceptLicense 'SRILM' 'http://www.speech.sri.com/projects/srilm/docs/License'; then
+  if ! acceptLicense 'SRILM' 'custom license' 'http://www.speech.sri.com/projects/srilm/docs/License'; then
     return 1
   fi
   

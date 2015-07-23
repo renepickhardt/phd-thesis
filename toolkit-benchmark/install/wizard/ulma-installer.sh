@@ -13,6 +13,10 @@ function escapeSlashes {
   sed 's/\//\\\//g'
 }
 
+# 
+function getCommandPath {
+}
+
 # Checks if a package is installed.
 function checkPackage {
   PCKG_INSTALLED=$( dpkg-query -W --showformat='${Status}\n' $1|grep "install ok installed" 2>/dev/null )
@@ -49,9 +53,11 @@ function installBoost {
 
 # Asks the user to accept the license of a toolkit.
 # The choice of the user will be returned as a boolean value.
+#
+# Usage: acceptLicense application license_title license_url
 function acceptLicense {
-  cmd=(dialog --title "$1"' license agreement' --no-tags --radiolist 'By selecting '"'"'Yes'"'"' you accept the license of '"$1"'.
-You can find a copy of this license at '"$2"'
+  cmd=(dialog --title "$1"' license agreement' --no-tags --radiolist 'By selecting '"'"'Yes'"'"' you accept the license of '"$1" ("$2")'.
+You can find a copy of this license at '"$3"'
 
 If you reject the license, the installation of '"$1"' will be aborted.' 22 76 16)
   options=(
