@@ -22,7 +22,11 @@ function checkValidToolkit {
 
 # Prints the toolkits that are available.
 function printToolkits {
-  echo 'Valid choices for the toolkit are: '"'srilm'"
+  for tk in "${!ULMA_TOOLKITS[@]}"; do
+    TKS="$TKS"", '$tk'"
+  done
+  TKS=${TKS:2}
+  echo 'Valid toolkit choices are: '"$TKS"
 }
 
 # Extracts the arguments of an ULMA command line call with format:
