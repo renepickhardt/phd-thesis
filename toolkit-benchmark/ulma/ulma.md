@@ -6,8 +6,8 @@ Currently ULMA supports
 
 | Name | Toolkit flag |
 | ---- | ------------ |
-| [SRILM](http://www.speech.sri.com/projects/srilm/) | `srilm` |
 | [Kylm](http://www.phontron.com/kylm/) | `kylm` |
+| [SRILM](http://www.speech.sri.com/projects/srilm/) | `srilm` |
 
 ## Endpoints
 There is a central API endpoint `ulma.sh` that can use any of the toolkits supported by ULMA.
