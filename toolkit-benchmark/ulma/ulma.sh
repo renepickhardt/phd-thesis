@@ -1,9 +1,28 @@
 #!/bin/bash
 
+declare -a ULMA_TOOLKITS=([srilm]="srilm.sh")
+
+# http://stackoverflow.com/questions/192292/bash-how-best-to-include-other-scripts
+function getCurrentDir {
+  DIR="${BASH_SOURCE%/*}"
+  if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+  echo "$DIR"
+}
+
 # Prints the usage of the ULMA API via command line.
 function printUsage {
   echo 'Usage:'
   echo 'TODO: Insert usage'
+}
+
+# Checks if a valid toolkit was specified.
+function checkValidToolkit {
+  if [ ${ULMA_TOOLKITS["$1"]+_} ]; then return 0; else return 1; fi
+}
+
+# Prints the toolkits that are available.
+function printToolkits {
+  echo 'Valid choices for the toolkit are: '"'srilm'"
 }
 
 # Extracts the arguments of an ULMA command line call with format:
@@ -18,11 +37,22 @@ function parseArguments {
   SMOOTHING=BACKOFF
   SOS=false
   EOS=false
+  SOURCED=$( [ -z $ULMA_TOOLKIT ] )
   
   while [[ $# > 0 ]]
   do
     key="$1"
     case $key in
+      # help
+      -h|--help)
+      printUsage
+      exit 0
+      ;;
+      # toolkit
+      -t|--toolkit)
+      ULMA_TOOLKIT=$2
+      shift
+      ;;
       # ngram count (order)
       -n|--order)
       ORDER=$2
@@ -61,9 +91,29 @@ function parseArguments {
     shift
   done
   
+  if [ -z $ULMA_TOOLKIT ]; then
+    echo 'Too few arguments! Please specify the toolkit you want to use.'
+    printToolkits
+    return 2
+  fi
+  if checkValidToolkit $ULMA_TOOLKIT; then
+    if [ ! $SOURCED ]; then
+      source ${ULMA_TOOLKITS["$ULMA_TOOLKIT"]}
+    fi
+  else
+    echo 'There is no such toolkit '"'$ULMA_TOOLKIT'!"
+    printToolkits
+    return 3
+  fi
+  
+  if [ -z $INPUT_FILE ]; then
+    echo 'Too few arguments! Please specify an input file.'
+    return 4
+  fi
+  
   if [ -z $OUTPUT_FILE ]; then
     echo 'Too few arguments! Please specify an output file.'
-    return 1
+    return 5
   elif [ -a $OUTPUT_FILE ]; then
     read -p 'Warning: The output file '"'"$OUTPUT_FILE"'"' already exists. Do you wish to override it? ' yn
     case $yn in
@@ -72,15 +122,15 @@ function parseArguments {
           ;;
         *)
           echo 'Operation aborted by user.'
-          exit 2
+          return 5
           ;;
     esac
   fi
   
   # check for valid order
   if [ -z $ORDER ]; then
-    echo 'N-Gram order is missing! Please provide an order using e.g. '"'"'-n'"'"'.'
-    return 1
+    echo 'Too few arguments! Please provide a N-Gram order using e.g. '"'"'-n'"'"'.'
+    return 6
   fi
   
   # enforce interpolation when using MKN
@@ -105,8 +155,12 @@ function handleParameter {
   return 0
 }
 
-if ! parseArguments "$@"; then
-  printUsage
-  exit 1
+parseArguments "$@"
+ERRCODE="$?"
+if [ "$ERRCODE" -ne "0" ]; then
+  echo 'Use the '"'-h'"' switch for help.'
+  exit "$ERRCODE"
+else
+  lmplz
 fi
 

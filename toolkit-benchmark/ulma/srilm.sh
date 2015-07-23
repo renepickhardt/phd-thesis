@@ -7,7 +7,11 @@
 # Authors: Sebastian Schlicht
 #
 
-source ulma.sh
+# start argument parsing with toolkit set
+if [ -z $ULMA_TOOLKIT ]; then
+  ULMA_TOOLKIT=srilm
+  source ulma.sh
+fi
 
 # Creates a language model using the current application parameter state.
 function lmplz {
@@ -46,6 +50,4 @@ function lmplz {
   echo $OPT_NGRAM_COUNT
   #$(ngram-count $OPT_NGRAM_COUNT)
 }
-
-lmplz
 
