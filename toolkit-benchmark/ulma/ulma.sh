@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -A ULMA_TOOLKITS=([srilm]="srilm.sh" [kylm]="kylm.sh")
+declare -A ULMA_TOOLKITS=([srilm]="srilm.sh" [kylm]="kylm.sh" [kenlm]="kenlm.sh")
 
 # http://stackoverflow.com/questions/192292/bash-how-best-to-include-other-scripts
 function loadCurrentDir {
