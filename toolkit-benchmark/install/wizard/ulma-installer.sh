@@ -80,6 +80,7 @@ cmd=(dialog --title 'ULMA installation wizard' --separate-output --checklist "Se
 options=(
   1 "SRILM" on
   2 "Kylm" on
+  3 "KenLM" on
 )
 choices=$("${cmd[@]}" "${options[@]}" 2>&1 >/dev/tty)
 clear
@@ -97,6 +98,11 @@ do
       # Kylm
       source kylm-installer.sh
       install_kylm
+      ;;
+    3)
+      # KenLM
+      source kenlm-installer.sh
+      install_kenlm
       ;;
   esac
 done

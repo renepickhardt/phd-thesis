@@ -12,19 +12,19 @@
 
 # Installs KenLM and its dependencies.
 #
-# # KenLM 1.7.1
+# # KenLM
 # http://kheafield.com/code/kenlm/
 #
 # ## Installation target
-# './srilm-1.7.1/' which is stored in `$SRILM`
-# Binaries will be found in 'bin/<architecture>/'
+# './kenlm/' which is stored in `$KENLM`
+# Binaries will be found in 'bin/'
 #
 # ## Dependencies
 # * Boost 1.36.0+ (libboost-all-dev via apt)
 # * g++ (build-essential via apt)
 # * zlib (zlib1g-dev via apt)
 #
-function install_srilm {
+function install_kenlm {
   # license agreement
   if ! acceptLicense 'KenLM' 'custom license' 'https://raw.github.com/kpu/kenlm/master/LICENSE'; then
     return 1
@@ -34,7 +34,7 @@ function install_srilm {
   KENLM_DIR='kenlm'
   KENLM_FILE="$KENLM_DIR"'.tar.gz'
   if [ ! -f $KENLM_FILE ]; then
-    wget -O - http://kheafield.com/code/kenlm.tar.gz
+    wget 'http://kheafield.com/code/kenlm.tar.gz' -O "$KENLM_FILE"
     SUCCESS=$?
     
     if [ "$SUCCESS" -ne 0 ]; then
@@ -45,8 +45,8 @@ function install_srilm {
   fi
   
   # install dependencies
-  requirePackage build-essential
   requirePackage libboost-all-dev
+  requirePackage build-essential
   requirePackage zlib1g-dev
   
   # extract
@@ -55,7 +55,7 @@ function install_srilm {
     echo 'Failed to extract KenLM!'
     return 4
   fi
-  echo 'SRILM was extracted successfully.'
+  echo 'KenLM was extracted successfully.'
   
   # install
   echo 'The wizard will build and install KenLM now.'
