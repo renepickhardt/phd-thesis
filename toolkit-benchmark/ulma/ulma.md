@@ -2,13 +2,14 @@
 The unified language modeling API wraps various language modeling tools and toolkits.
 Thus users can switch between the tools with no effort.
 
-In addition, ULMA comes with an [installation wizard](wizard/installer.sh) for all these tools.
+In addition, ULMA comes with an [installation wizard](../install/wizard/ulma-installer.sh) for all these tools.
 
 ## Supported toolkits
 Currently ULMA supports
 
 | Name | Toolkit value |
 | ---- | ------------ |
+| [KenLM](http://kheafield.com/code/kenlm/) | `kenlm` |
 | [Kylm](http://www.phontron.com/kylm/) | `kylm` |
 | [SRILM](http://www.speech.sri.com/projects/srilm/) | `srilm` |
 

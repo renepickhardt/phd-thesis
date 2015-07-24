@@ -43,9 +43,9 @@ function lmplz {
   esac
   
   # interpolation
-  if [ "$SMOOTHING" == "INTERPOLATION" ]; then
-    # TODO: or doesn't it support backoff?
-    echo "[ERROR] Kylm doesn't support interpolation!"
+  if [ "$SMOOTHING" != "INTERPOLATION" ]; then
+    # TODO: or doesn't it support interploation?
+    echo "[ERROR] Kylm doesn't support backoff!"
     exit 99
   fi
   
