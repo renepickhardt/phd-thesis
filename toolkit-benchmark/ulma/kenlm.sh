@@ -24,6 +24,9 @@ function lmplz {
   # WARNING: KenLM interpretes blank lines in corpus!
   OPT_LMPLZ='-o '"$ORDER"' --text '"$INPUT_FILE"
   
+  # start-/end-of-sentence tags
+  print_info 'In KenLM you decide whether to use start-/end-of-sentence tags (or not) during querying.'
+  
   # smoothing method
   case $SMOOTHING_METHOD in
     MKN)

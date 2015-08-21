@@ -158,6 +158,11 @@ function handleParameter {
   return 0
 }
 
+# Prints an info message to stdout.
+function print_info {
+  echo '[INFO] '"$1"
+}
+
 loadCurrentDir
 parseArguments "$@"
 ERRCODE="$?"
