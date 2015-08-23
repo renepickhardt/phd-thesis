@@ -98,6 +98,17 @@ function query_models {
   srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_mkn-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_mkn_seos-"$ORDER".txt
 }
 
+function calc_p_srilm {
+  #TODO p may be in column 8+$ORDER instead of fixed column #9
+  # remove last 5 lines (statistics incl. ppl)
+  # 9th column is p (base:10)
+  P=$( head -n -5 "$1" | awk '{p=p+(10 ^ $9)} END{print p}' )
+  echo "$P"
+}
+function create_table_line {
+  
+}
+
 rm -rf overview/*
 mkdir overview/lm
 mkdir -p overview/query/request
