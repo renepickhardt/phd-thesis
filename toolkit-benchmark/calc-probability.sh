@@ -9,29 +9,29 @@ fi
 
 # use SRILM to create vocabulary
 function create_vocab {
-  #TODO order relevant for vocabulary?
   srilm-1.7.1/bin/*/ngram-count -order "$ORDER" -write-vocab "$VOCAB_FILE" -text "$TRAINING_FILE"
 }
 
 # create all the language models
 function create_models {
-  #TODO adapt ULMA API or modify calls to match current API version
+  #TODO renew ULMA API: -mle -text CORPUS -write-lm MODEL
   ## KenLM (nseos during querying)
-  ulma/ulma.sh -t "kenlm" -n "$ORDER" -mkn "$TRAINING_FILE" overview/lm/kenlm_mkn-"$ORDER".arpa
+  ulma/ulma.sh -t "kenlm" -n "$ORDER" -i -mkn "$TRAINING_FILE" overview/lm/kenlm_mkn-"$ORDER".arpa
+  #TODO doesn't work for n=1
   kenlm/bin/build_binary overview/lm/kenlm_mkn-"$ORDER".arpa overview/lm/kenlm_mkn-"$ORDER".bin
-  ## KyLM (doesn't support to disable seos)
-  ulma/ulma.sh -t "kylm" -n "$ORDER" -mle -seos "$TRAINING_FILE" overview/lm/kylm_mle_seos-"$ORDER".arpa
-  ulma/ulma.sh -t "kylm" -n "$ORDER" -kn -seos "$TRAINING_FILE" overview/lm/kylm_kn_seos-"$ORDER".arpa
-  ulma/ulma.sh -t "kylm" -n "$ORDER" -mkn -seos "$TRAINING_FILE" overview/lm/kylm_mkn_seos-"$ORDER".arpa
+  ## KyLM (doesn't support to disable seos, doesn't support backoff)
+  ulma/ulma.sh -t "kylm" -n "$ORDER" -i -seos "$TRAINING_FILE" overview/lm/kylm_mle_seos-"$ORDER".arpa
+  ulma/ulma.sh -t "kylm" -n "$ORDER" -i -kn -seos "$TRAINING_FILE" overview/lm/kylm_kn_seos-"$ORDER".arpa
+  ulma/ulma.sh -t "kylm" -n "$ORDER" -i -mkn -seos "$TRAINING_FILE" overview/lm/kylm_mkn_seos-"$ORDER".arpa
   ## SRILM
   ### no seos
-  ulma/ulma.sh -t "srilm" -n "$ORDER" -mle "$TRAINING_FILE" overview/lm/srilm_mle-"$ORDER".arpa
+  ulma/ulma.sh -t "srilm" -n "$ORDER" "$TRAINING_FILE" overview/lm/srilm_mle-"$ORDER".arpa
   ulma/ulma.sh -t "srilm" -n "$ORDER" -kn "$TRAINING_FILE" overview/lm/srilm_kn-"$ORDER".arpa
-  ulma/ulma.sh -t "srilm" -n "$ORDER" -mkn "$TRAINING_FILE" overview/lm/srilm_mkn-"$ORDER".arpa
+  ulma/ulma.sh -t "srilm" -n "$ORDER" -i -mkn "$TRAINING_FILE" overview/lm/srilm_mkn-"$ORDER".arpa
   ### with seos
-  ulma/ulma.sh -t "srilm" -n "$ORDER" -mle -seos "$TRAINING_FILE" overview/lm/srilm_mle_seos-"$ORDER".arpa
+  ulma/ulma.sh -t "srilm" -n "$ORDER" -seos "$TRAINING_FILE" overview/lm/srilm_mle_seos-"$ORDER".arpa
   ulma/ulma.sh -t "srilm" -n "$ORDER" -kn -seos "$TRAINING_FILE" overview/lm/srilm_kn_seos-"$ORDER".arpa
-  ulma/ulma.sh -t "srilm" -n "$ORDER" -mkn -seos "$TRAINING_FILE" overview/lm/srilm_mkn_seos-"$ORDER".arpa
+  ulma/ulma.sh -t "srilm" -n "$ORDER" -i -mkn -seos "$TRAINING_FILE" overview/lm/srilm_mkn_seos-"$ORDER".arpa
 }
 
 # create query files
@@ -78,32 +78,43 @@ function create_query_files {
 
 function query_models {
   ## KenLM
+  ###TODO doesn't work for n=1
   ### no seos
-  kenlm/bin/query -n overview/lm/kenlm_mkn-"$ORDER".bin <"$QUERY_KENLM" > "$QRES_DIR"/kenlm_mkn-"$ORDER".txt
+  ####TODO use binary file
+  kenlm/bin/query -n overview/lm/kenlm_mkn-"$ORDER".arpa <"$QUERY_KENLM" > "$QRES_DIR"/kenlm_mkn-"$ORDER".txt
   ### with seos
-  kenlm/bin/query overview/lm/kenlm_mkn-"$ORDER".bin <"$QUERY_KENLM" > "$QRES_DIR"/kenlm_mkn_seos-"$ORDER".txt
+  ####TODO use binary file
+  kenlm/bin/query overview/lm/kenlm_mkn-"$ORDER".arpa <"$QUERY_KENLM" > "$QRES_DIR"/kenlm_mkn_seos-"$ORDER".txt
   ## KyLM
-  #TODO no idea
+  ###TODO no idea
   ## SRILM
   ### no seos
-  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_mle-"$ORDER".arpa -counts "$QUERY_SRILM" > "$QRES_DIR"/srilm_mle-"$ORDER".txt
-  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_kn-"$ORDER".arpa -counts "$QUERY_SRILM" > "$QRES_DIR"/srilm_kn-"$ORDER".txt
-  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_mkn-"$ORDER".arpa -counts "$QUERY_SRILM" > "$QRES_DIR"/srilm_mkn-"$ORDER".txt
+  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_mle-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_mle-"$ORDER".txt
+  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_kn-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_kn-"$ORDER".txt
+  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_mkn-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_mkn-"$ORDER".txt
   ### with seos
-  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_mle-"$ORDER".arpa -counts "$QUERY_SRILM" > "$QRES_DIR"/srilm_mle_seos-"$ORDER".txt
-  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_kn-"$ORDER".arpa -counts "$QUERY_SRILM" > "$QRES_DIR"/srilm_kn_seos-"$ORDER".txt
-  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_mkn-"$ORDER".arpa -counts "$QUERY_SRILM" > "$QRES_DIR"/srilm_mkn_seos-"$ORDER".txt
+  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_mle-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_mle_seos-"$ORDER".txt
+  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_kn-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_kn_seos-"$ORDER".txt
+  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_mkn-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_mkn_seos-"$ORDER".txt
 }
+
+rm -rf overview/*
+mkdir overview/lm
+mkdir -p overview/query/request
+mkdir overview/query/result
 
 ORDER=1
 VOCAB_FILE=overview/training.txt.vocab
+
+#TODO order doesn't seem relevant for vocabulary
+create_vocab "$ORDER"
+
 while [ "$ORDER" -le "$MAX_ORDER" ]; do
-  VOCAB_FILE=overview/training.txt-"$ORDER".vocab
+  #VOCAB_FILE=overview/training.txt-"$ORDER".vocab
   QUERY_SRILM=overview/query/request/srilm-"$ORDER".txt
   QUERY_KENLM=overview/query/request/kenlm-"$ORDER".txt
   QRES_DIR=overview/query/result
   
-  create_vocab "$ORDER"
   create_models "$ORDER"
   create_query_files
   
