@@ -17,21 +17,21 @@ function create_vocab {
 function create_models {
   #TODO adapt ULMA API or modify calls to match current API version
   ## KenLM (nseos during querying)
-  ulma/ulma.sh -t "kenlm" -text "$TRAINING_FILE" -n "$ORDER" -mkn -write-lm overview/lm/kenlm_mkn-"$ORDER".arpa
+  ulma/ulma.sh -t "kenlm" -n "$ORDER" -mkn "$TRAINING_FILE" overview/lm/kenlm_mkn-"$ORDER".arpa
   kenlm/bin/build_binary overview/lm/kenlm_mkn-"$ORDER".arpa overview/lm/kenlm_mkn-"$ORDER".bin
   ## KyLM (doesn't support to disable seos)
-  ulma/ulma.sh -t "kylm" -text "$TRAINING_FILE" -n "$ORDER" -mle -seos -write-lm overview/lm/kylm_mle_seos-"$ORDER".arpa
-  ulma/ulma.sh -t "kylm" -text "$TRAINING_FILE" -n "$ORDER" -kn -seos -write-lm overview/lm/kylm_kn_seos-"$ORDER".arpa
-  ulma/ulma.sh -t "kylm" -text "$TRAINING_FILE" -n "$ORDER" -mkn -seos -write-lm overview/lm/kylm_mkn_seos-"$ORDER".arpa
+  ulma/ulma.sh -t "kylm" -n "$ORDER" -mle -seos "$TRAINING_FILE" overview/lm/kylm_mle_seos-"$ORDER".arpa
+  ulma/ulma.sh -t "kylm" -n "$ORDER" -kn -seos "$TRAINING_FILE" overview/lm/kylm_kn_seos-"$ORDER".arpa
+  ulma/ulma.sh -t "kylm" -n "$ORDER" -mkn -seos "$TRAINING_FILE" overview/lm/kylm_mkn_seos-"$ORDER".arpa
   ## SRILM
   ### no seos
-  ulma/ulma.sh -t "srilm" -text "$TRAINING_FILE" -n "$ORDER" -mle -write-lm overview/lm/srilm_mle-"$ORDER".arpa
-  ulma/ulma.sh -t "srilm" -text "$TRAINING_FILE" -n "$ORDER" -kn -write-lm overview/lm/srilm_kn-"$ORDER".arpa
-  ulma/ulma.sh -t "srilm" -text "$TRAINING_FILE" -n "$ORDER" -mkn -write-lm overview/lm/srilm_mkn-"$ORDER".arpa
+  ulma/ulma.sh -t "srilm" -n "$ORDER" -mle "$TRAINING_FILE" overview/lm/srilm_mle-"$ORDER".arpa
+  ulma/ulma.sh -t "srilm" -n "$ORDER" -kn "$TRAINING_FILE" overview/lm/srilm_kn-"$ORDER".arpa
+  ulma/ulma.sh -t "srilm" -n "$ORDER" -mkn "$TRAINING_FILE" overview/lm/srilm_mkn-"$ORDER".arpa
   ### with seos
-  ulma/ulma.sh -t "srilm" -text "$TRAINING_FILE" -n "$ORDER" -mle -seos -write-lm overview/lm/srilm_mle_seos-"$ORDER".arpa
-  ulma/ulma.sh -t "srilm" -text "$TRAINING_FILE" -n "$ORDER" -kn -seos -write-lm overview/lm/srilm_kn_seos-"$ORDER".arpa
-  ulma/ulma.sh -t "srilm" -text "$TRAINING_FILE" -n "$ORDER" -mkn -seos -write-lm overview/lm/srilm_mkn_seos-"$ORDER".arpa
+  ulma/ulma.sh -t "srilm" -n "$ORDER" -mle -seos "$TRAINING_FILE" overview/lm/srilm_mle_seos-"$ORDER".arpa
+  ulma/ulma.sh -t "srilm" -n "$ORDER" -kn -seos "$TRAINING_FILE" overview/lm/srilm_kn_seos-"$ORDER".arpa
+  ulma/ulma.sh -t "srilm" -n "$ORDER" -mkn -seos "$TRAINING_FILE" overview/lm/srilm_mkn_seos-"$ORDER".arpa
 }
 
 # create query files
@@ -109,6 +109,7 @@ while [ "$ORDER" -le "$MAX_ORDER" ]; do
   
   # query the probabilites of the vocabulary entries
   query_models
+  #TODO sum probabilities using the correct log base
   
   let ORDER=ORDER+1
 done
