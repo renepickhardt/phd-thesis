@@ -1,6 +1,7 @@
 #!/bin/bash
 TRAINING_FILE=training.txt
 MAX_ORDER="$1"
+ESTIMATORS=( mle kn mkn )
 
 if [ -z "$MAX_ORDER" ] || [ "$MAX_ORDER" -lt "1" ]; then
   echo 'Please pass an order (higher than zero)!'
@@ -80,11 +81,9 @@ function query_models {
   ## KenLM
   ###TODO doesn't work for n=1
   ### no seos
-  ####TODO use binary file
-  kenlm/bin/query -n overview/lm/kenlm_mkn-"$ORDER".arpa <"$QUERY_KENLM" > "$QRES_DIR"/kenlm_mkn-"$ORDER".txt
+  kenlm/bin/query -n overview/lm/kenlm_mkn-"$ORDER".bin <"$QUERY_KENLM" > "$QRES_DIR"/kenlm_mkn-"$ORDER".txt
   ### with seos
-  ####TODO use binary file
-  kenlm/bin/query overview/lm/kenlm_mkn-"$ORDER".arpa <"$QUERY_KENLM" > "$QRES_DIR"/kenlm_mkn_seos-"$ORDER".txt
+  kenlm/bin/query overview/lm/kenlm_mkn-"$ORDER".bin <"$QUERY_KENLM" > "$QRES_DIR"/kenlm_mkn_seos-"$ORDER".txt
   ## KyLM
   ###TODO no idea
   ## SRILM
@@ -98,15 +97,87 @@ function query_models {
   srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_mkn-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_mkn_seos-"$ORDER".txt
 }
 
+function calc_p_kenlm {
+  if [ ! -r $1 ]; then
+    echo 'n/a'
+    return 0
+  fi
+  
+  #TODO calculate sum(p) using query result file
+}
+function calc_p_kylm {
+  if [ ! -r $1 ]; then
+    echo 'n/a'
+    return 0
+  fi
+  
+  #TODO calculate sum(p) using query result file
+}
 function calc_p_srilm {
+  if [ ! -r $1 ]; then
+    echo 'n/a ('"$1"')'
+    return 0
+  fi
+  
   #TODO p may be in column 8+$ORDER instead of fixed column #9
   # remove last 5 lines (statistics incl. ppl)
   # 9th column is p (base:10)
   P=$( head -n -5 "$1" | awk '{p=p+(10 ^ $9)} END{print p}' )
   echo "$P"
 }
+function create_table_header {
+  echo '| Toolkit | MLE | MLE (seos) | KN | KN (seos) | MKN | MKN (seos) |' > "$1"
+  echo '| ------- | --- | ---------- | -- | --------- | --- | ---------- |' >> "$1"
+}
 function create_table_line {
+  declare -a probs=("${!3}")
+  L_LINE='| '"$2"' |'
+  for p in "${probs[@]}"; do
+    L_LINE="$L_LINE"' '"$p"' |'
+  done
+  echo "$L_LINE" >> "$1"
+}
+function create_table {
+  create_table_header "$1"
   
+  # KenLM
+  L_TOOL=KenLM
+  L_P_LINE=()
+  for estimator in "${ESTIMATORS[@]}"; do
+    L_P=$( calc_p_kenlm 'overview/query/result/'"${L_TOOL,,}"'_'"$estimator"'-'"$ORDER"'.txt' )
+    L_P_LINE+=("$L_P")
+    L_P_seos=$( calc_p_kenlm 'overview/query/result/'"${L_TOOL,,}"'_'"$estimator"'_seos-'"$ORDER"'.txt' )
+    L_P_LINE+=("$L_P_seos")
+  done
+  create_table_line "$1" "$L_TOOL" L_P_LINE[@]
+  
+  # KyLM
+  L_TOOL=KyLM
+  L_P_LINE=()
+  for estimator in "${ESTIMATORS[@]}"; do
+    L_P=$( calc_p_kylm 'overview/query/result/'"${L_TOOL,,}"'_'"$estimator"'-'"$ORDER"'.txt' )
+    L_P_LINE+=( "$L_P" )
+    L_P_seos=$( calc_p_kylm 'overview/query/result/'"${L_TOOL,,}"'_'"$estimator"'_seos-'"$ORDER"'.txt' )
+    L_P_LINE+=( "$L_P_seos" )
+  done
+  create_table_line "$1" "$L_TOOL" L_P_LINE[@]
+  
+  # SRILM
+  L_TOOL=SRILM
+  L_P_LINE=()
+  for estimator in "${ESTIMATORS[@]}"; do
+    L_P=$( calc_p_srilm 'overview/query/result/'"${L_TOOL,,}"'_'"$estimator"'-'"$ORDER"'.txt' )
+    L_P_LINE+=( "$L_P" )
+    L_P_seos=$( calc_p_srilm 'overview/query/result/'"${L_TOOL,,}"'_'"$estimator"'_seos-'"$ORDER"'.txt' )
+    L_P_LINE+=( "$L_P_seos" )
+  done
+  create_table_line "$1" "$L_TOOL" L_P_LINE[@]
+  
+  #TODO repeat for unk
+  
+  echo '' >> "$1"
+  echo '## Legend' >> "$1"
+  echo 'seos: with start-/end-of-sentence tags enabled' >> "$1"
 }
 
 rm -rf overview/*
@@ -131,7 +202,8 @@ while [ "$ORDER" -le "$MAX_ORDER" ]; do
   
   # query the probabilites of the vocabulary entries
   query_models
-  #TODO sum probabilities using the correct log base
+  # create table for current order
+  create_table overview/table-"$ORDER".md
   
   let ORDER=ORDER+1
 done
