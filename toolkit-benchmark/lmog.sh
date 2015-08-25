@@ -15,7 +15,6 @@ WORKING_DIR=/tmp
 
 # Prints the usage of the script in case of using the help command.
 function printUsage {
-  # TODO
   echo 'LMOG (language model overview generator)'
   echo 'Creates language models using different language model toolkits and generates an overview table with some statistics - in order to derive their correctness.'
   echo
