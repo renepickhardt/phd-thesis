@@ -5,6 +5,7 @@ ORDER=0
 CLEAR=false
 QUERY=false
 GENERATE_TABLE=false
+ESTIMATORS=( mle kn mkn )
 ## program binary directories
 ULMA=/glmtk/ulma
 KENLM=/glmtk/kenlm/bin
@@ -72,7 +73,7 @@ function parseArguments {
 
   # check for valid parameters
   if [ -z "$CORPUS" ]; then
-    echo '[ERROR] Please provide a corpus file!'
+    echo '[ERROR] Too few arguments! Please provide a corpus file.'
     return 1
   elif [ ! -f "$CORPUS" ]; then
     echo '[ERROR] There is no such corpus file '"'$CORPUS'"'!'
@@ -203,20 +204,128 @@ function create_query_files {
   mv "$CRR" "$QRY_KENLM"
 }
 
+# Queries a language model using KenLM.
+function query_kenlm {
+  local MODEL="$1"
+  local RESULT="$2"-"$ORDER".txt
+  local SEOS=false
+  if [ ! -z "$3" ]; then
+    SEOS=true
+  fi
+  
+  if ! $SEOS; then
+    "$KENLM"/query -n "$MODEL" <"$QRY_KENLM" > "$RESULT"
+  else
+    "$KENLM"/query "$MODEL" <"$QRY_KENLM" > "$RESULT"
+  fi
+}
+
+# Queries a language model using SRILM.
+function query_srilm {
+  local MODEL="$1"-"$ORDER".arpa
+  local RESULT="$2"-"$ORDER".txt
+  
+  "$SRILM"/ngram -lm "$MODEL" -counts "$QRY_SRILM" -debug 2 > "$RESULT"
+}
+
+# Queries all the language models.
 function query {
+  #TODO use different query files for non-seos?
+  
+  # KenLM
+  ## generate binary file for faster queries
+  local KENLM_MKN="$DIR_LM"/kenlm_mkn-"$ORDER".arpa
+  local KENLM_MKN_BIN="$DIR_LM"/kenlm_mkn-"$ORDER".bin
+  if [ ! -f "$KENLM_MKN_BIN" ]; then
+    "$KENLM"/build_binary "$KENLM_MKN" "$KENLM_MKN_BIN"
+  fi
+  ## non-seos
+  local QRES_KENLM_MKN="$DIR_QRES"/kenlm_mkn
+  query_kenlm "$KENLM_MKN_BIN" "$QRES_KENLM_MKN"
+  ## with seos
+  local QRES_KENLM_MKN_SEOS="$DIR_QRES"/kenlm_mkn_seos
+  query_kenlm "$KENLM_MKN_BIN" "$QRES_KENLM_MKN_SEOS" seos
+  
+  # KyLM
   #TODO
-  return 0
+  
+  # SRILM
+  ## non-seos
+  local SRILM_MLE="$DIR_LM"/srilm_mle
+  local QRES_SRILM_MLE="$DIR_QRES"/srilm_mle
+  query_srilm "$SRILM_MLE" "$QRES_SRILM_MLE"
+  local SRILM_KN="$DIR_LM"/srilm_kn
+  local QRES_SRILM_KN="$DIR_QRES"/srilm_kn
+  query_srilm "$SRILM_KN" "$QRES_SRILM_KN"
+  local SRILM_KN_I="$DIR_LM"/srilm_kn_i
+  local QRES_SRILM_KN_I="$DIR_QRES"/srilm_kn_i
+  query_srilm "$SRILM_KN_I" "$QRES_SRILM_KN_I"
+  local SRILM_MKN="$DIR_LM"/srilm_mkn
+  local QRES_SRILM_MKN="$DIR_QRES"/srilm_mkn
+  query_srilm "$SRILM_MKN" "$QRES_SRILM_MKN"
+  ## with seos
+  local SRILM_MLE_SEOS="$DIR_LM"/srilm_mle_seos
+  local QRES_SRILM_MLE_SEOS="$DIR_QRES"/srilm_mle_seos
+  query_srilm "$SRILM_MLE_SEOS" "$QRES_SRILM_MLE_SEOS"
+  local SRILM_KN_SEOS="$DIR_LM"/srilm_kn_seos
+  local QRES_SRILM_KN_SEOS="$DIR_QRES"/srilm_kn_seos
+  query_srilm "$SRILM_KN_SEOS" "$QRES_SRILM_KN_SEOS"
+  local SRILM_KN_I_SEOS="$DIR_LM"/srilm_kn_i_seos
+  local QRES_SRILM_KN_I_SEOS="$DIR_QRES"/srilm_kn_i_seos
+  query_srilm "$SRILM_KN_I_SEOS" "$QRES_SRILM_KN_I_SEOS"
+  local SRILM_MKN_SEOS="$DIR_LM"/srilm_mkn_seos
+  local QRES_SRILM_MKN_SEOS="$DIR_QRES"/srilm_mkn_seos
+  query_srilm "$SRILM_MKN_SEOS" "$QRES_SRILM_MKN_SEOS"
+}
+
+# Calculates sum(p) in the SRILM query results.
+function sump_srilm {
+  local RESULT="$1"
+  
+  # skip missing query result files
+  if [ ! -f "$RESULT" ]; then
+    echo 'n/a'
+    return 0
+  fi
+  
+  local COLUMN=7+"$ORDER"
+  local SUMP=$( head -n -5 "$RESULT" | awk '{p=p+($'"$COLUMN"')} END{print p}' )
+  echo "$SUMP"
+}
+
+# Adds a tool's line to the table, generated from an array of probabilities.
+function add_table_line {
+  local TABLE="$1"
+  local TOOL="$2"
+  # probability array: $3
+  
+  declare -a probs=("${!3}")
+  L_LINE='| '"$TOOL"' |'
+  for p in "${probs[@]}"; do
+    L_LINE="$L_LINE"' '"$p"' |'
+  done
+  echo "$L_LINE" >> "$TABLE"
 }
 
 # Generates an overview table using the query result files.
 function create_table {
+  #TODO unk
   local TABLE="$1"
   
   # table header
   echo '| Toolkit | MLE | MLE (seos) | KN | KN (seos) | MKN | MKN (seos) |' > "$TABLE"
   echo '| ------- | --- | ---------- | -- | --------- | --- | ---------- |' >> "$TABLE"
   
-  # TODO
+  # SRILM
+  L_TOOL=SRILM
+  L_P_LINE=()
+  for estimator in "${ESTIMATORS[@]}"; do
+    L_P=$( sump_srilm "$DIR_QRES"/"${L_TOOL,,}"'_'"$estimator"'-'"$ORDER"'.txt' )
+    L_P_LINE+=( "$L_P" )
+    L_P_seos=$( sump_srilm "$DIR_QRES"/"${L_TOOL,,}"'_'"$estimator"'_seos-'"$ORDER"'.txt' )
+    L_P_LINE+=( "$L_P_seos" )
+  done
+  add_table_line "$TABLE" "$L_TOOL" L_P_LINE[@]
   
   echo '' >> "$TABLE"
   echo '## Legend' >> "$TABLE"
