@@ -10,6 +10,7 @@ fi
 
 # use SRILM to create vocabulary
 function create_vocab {
+  #TODO WTF is "-pau-" that is added by SRILM?
   srilm-1.7.1/bin/*/ngram-count -order "$ORDER" -write-vocab "$VOCAB_FILE" -text "$TRAINING_FILE"
 }
 
@@ -25,14 +26,17 @@ function create_models {
   ulma/ulma.sh -t "kylm" -n "$ORDER" -i -kn -seos "$TRAINING_FILE" overview/lm/kylm_kn_seos-"$ORDER".arpa
   ulma/ulma.sh -t "kylm" -n "$ORDER" -i -mkn -seos "$TRAINING_FILE" overview/lm/kylm_mkn_seos-"$ORDER".arpa
   ## SRILM
+  ##TODO '-debug 2' prints counts and discount values
   ### no seos
   ulma/ulma.sh -t "srilm" -n "$ORDER" "$TRAINING_FILE" overview/lm/srilm_mle-"$ORDER".arpa
-  ulma/ulma.sh -t "srilm" -n "$ORDER" -kn "$TRAINING_FILE" overview/lm/srilm_kn-"$ORDER".arpa
-  ulma/ulma.sh -t "srilm" -n "$ORDER" -i -mkn "$TRAINING_FILE" overview/lm/srilm_mkn-"$ORDER".arpa
+  ulma/ulma.sh -t "srilm" -n "$ORDER" -kn "$TRAINING_FILE" overview/lm/srilm_kn-"$ORDER".arpa -kn"$ORDER" overview/lm/srilm_kn-"$ORDER".txt
+  ulma/ulma.sh -t "srilm" -n "$ORDER" -i -kn "$TRAINING_FILE" overview/lm/srilm_kn_interpolated-"$ORDER".arpa -kn"$ORDER" overview/lm/srilm_kn_interpolated-"$ORDER".txt
+  ulma/ulma.sh -t "srilm" -n "$ORDER" -i -mkn "$TRAINING_FILE" overview/lm/srilm_mkn-"$ORDER".arpa -kn"$ORDER" overview/lm/srilm_mkn-"$ORDER".txt
   ### with seos
   ulma/ulma.sh -t "srilm" -n "$ORDER" -seos "$TRAINING_FILE" overview/lm/srilm_mle_seos-"$ORDER".arpa
-  ulma/ulma.sh -t "srilm" -n "$ORDER" -kn -seos "$TRAINING_FILE" overview/lm/srilm_kn_seos-"$ORDER".arpa
-  ulma/ulma.sh -t "srilm" -n "$ORDER" -i -mkn -seos "$TRAINING_FILE" overview/lm/srilm_mkn_seos-"$ORDER".arpa
+  ulma/ulma.sh -t "srilm" -n "$ORDER" -kn -seos "$TRAINING_FILE" overview/lm/srilm_kn_seos-"$ORDER".arpa -kn"$ORDER" overview/lm/srilm_kn_seos-"$ORDER".txt
+  ulma/ulma.sh -t "srilm" -n "$ORDER" -i -kn -seos "$TRAINING_FILE" overview/lm/srilm_kn_interpolated_seos-"$ORDER".arpa -kn"$ORDER" overview/lm/srilm_kn_interpolated-"$ORDER".txt
+  ulma/ulma.sh -t "srilm" -n "$ORDER" -i -mkn -seos "$TRAINING_FILE" overview/lm/srilm_mkn_seos-"$ORDER".arpa -kn"$ORDER" overview/lm/srilm_mkn_seos-"$ORDER".txt
 }
 
 # create query files
@@ -78,6 +82,7 @@ function create_query_files {
 }
 
 function query_models {
+  #TODO create query files for seos and non-seos mode
   ## KenLM
   ###TODO doesn't work for n=1
   ### no seos
@@ -90,11 +95,13 @@ function query_models {
   ### no seos
   srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_mle-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_mle-"$ORDER".txt
   srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_kn-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_kn-"$ORDER".txt
+  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_kn_interpolated-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_kn_interpolated-"$ORDER".txt
   srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_mkn-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_mkn-"$ORDER".txt
   ### with seos
-  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_mle-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_mle_seos-"$ORDER".txt
-  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_kn-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_kn_seos-"$ORDER".txt
-  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_mkn-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_mkn_seos-"$ORDER".txt
+  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_mle_seos-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_mle_seos-"$ORDER".txt
+  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_kn_seos-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_kn_seos-"$ORDER".txt
+  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_kn_interpolated_seos-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_kn_interpolated_seos-"$ORDER".txt
+  srilm-1.7.1/bin/*/ngram -lm overview/lm/srilm_mkn_seos-"$ORDER".arpa -counts "$QUERY_SRILM" -debug 2 > "$QRES_DIR"/srilm_mkn_seos-"$ORDER".txt
 }
 
 function calc_p_kenlm {
@@ -122,7 +129,8 @@ function calc_p_srilm {
   #TODO p may be in column 8+$ORDER instead of fixed column #9
   # remove last 5 lines (statistics incl. ppl)
   # 9th column is p (base:10)
-  P=$( head -n -5 "$1" | awk '{p=p+(10 ^ $9)} END{print p}' )
+  local COLUMN=7+"$ORDER"
+  P=$( head -n -5 "$1" | awk '{p=p+(10 ^ $'"$COLUMN"')} END{print p}' )
   echo "$P"
 }
 function create_table_header {
@@ -139,7 +147,8 @@ function create_table_line {
 }
 function create_table {
   create_table_header "$1"
-  
+  #TODO print all perplexities from query result file
+
   # KenLM
   L_TOOL=KenLM
   L_P_LINE=()
@@ -185,7 +194,7 @@ mkdir overview/lm
 mkdir -p overview/query/request
 mkdir overview/query/result
 
-ORDER=1
+ORDER=2
 VOCAB_FILE=overview/training.txt.vocab
 
 #TODO order doesn't seem relevant for vocabulary
