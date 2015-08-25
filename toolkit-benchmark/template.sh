@@ -288,7 +288,8 @@ function sump_srilm {
     return 0
   fi
   
-  local COLUMN=7+"$ORDER"
+  local COLUMN=6
+  let COLUMN=COLUMN+"$ORDER"
   local SUMP=$( head -n -5 "$RESULT" | awk '{p=p+($'"$COLUMN"')} END{print p}' )
   echo "$SUMP"
 }
