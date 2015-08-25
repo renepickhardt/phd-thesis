@@ -16,16 +16,26 @@ WORKING_DIR=/tmp
 # Prints the usage of the script in case of using the help command.
 function printUsage {
   # TODO
-  echo 'TITLE'
-  echo 'DESCRIPTION'
+  echo 'LMOG (language model overview generator)'
+  echo 'Creates language models using different language model toolkits and generates an overview table with some statistics - in order to derive their correctness.'
   echo
-  echo 'Usage: SYNTAX'
+  echo 'Usage: ./lmog.sh [OPTIONS] CORPUS'
   echo
-  echo 'EXPLAIN GENERAL USAGE'
+  echo 'LMOG uses a corpus to create language models using different toolkits.'
+  echo 'Optionally these models are queried with every sequence that is possible with the corpus vocabulary.'
+  echo 'LMOG then generates an overview table that shows some statistics for each toolkit:'
+  echo '* the sum of all probabilities'
+  echo
+  echo 'All the files generated will be in '"'overview/<CORPUS>/'"'.'
   echo
   echo 'Options:'
-  echo '-h, --help	Displays this help message.'
-  echo 'OPTIONS'
+  echo '-h, --help    Displays this help message.'
+  echo '-n, --order   The order of the n-gram models that should be created.'
+  echo '              (defaults to 2)'
+  echo '-q, --query   Query the language models.'
+  echo 'Other Options:'
+  echo '-c, --clear   Clear the output directory. Everything LMOG needs to operate will be recreated automatically betimes.'
+  echo '-t, --table   Generate an overview table. This option will be set automatically, if you query the language models using the option '"'-q' or '--query'"'.'
 }
 
 # Parses the startup arguments into variables.
@@ -43,16 +53,20 @@ function parseArguments {
       shift
       ORDER="$1"
       ;;
-      # clear output data of current corpus
-      -c|--clear)
-      CLEAR=true
-      ;;
       # query the language models
       # * create model binaries if not existing
       # * create query files if not existing
       # * query the models
       -q|--query)
       QUERY=true
+      GENERATE_TABLE=true
+      ;;
+      # clear output data of current corpus
+      -c|--clear)
+      CLEAR=true
+      ;;
+      # generate an overview table
+      -t|--table)
       GENERATE_TABLE=true
       ;;
       # unknown option
