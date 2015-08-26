@@ -5,7 +5,7 @@ ORDER=0
 CLEAR=false
 QUERY=false
 GENERATE_TABLE=false
-ESTIMATORS=( mle kn mkn )
+MODELS=()
 ## program binary directories
 ULMA=/glmtk/ulma
 KENLM=/glmtk/kenlm/bin
@@ -121,55 +121,100 @@ function create_vocab {
   "$SRILM"/ngram-count -order "$ORDER" -write-vocab "$VOCAB_FILE" -text "$CORPUS"
 }
 
-function ulma {
-  local EXT=arpa
+# Generates the model name depending on the parameters used to create it.
+function get_model_name {
   local TOOL="$1"
-  local PARAMS="$2"
-  local MODEL="$3"-"$ORDER"."$EXT"
+  shift
+  local ESTIMATOR=mle
+  local INTERPOLATE=false
+  local CDISCOUNT=0
+  local SEOS=false
+  while [[ $# > 0 ]]; do
+    key="$1"
+    case $key in
+      # Kneser-Ney smoothing
+      -kn)
+        ESTIMATOR=kn
+        ;;
+      # Modified Kneser-Ney smoothing
+      -mkn)
+        ESTIMATOR=mkn
+        ;;
+      # interpolate
+      -i)
+        INTERPOLATE=true
+        ;;
+      # absolute discounting
+      -cdiscount)
+        CDISCOUNT="$2"
+        shift
+        ;;
+      # start-/end-of-sentence tokens
+      -seos)
+        SEOS=true
+        ;;
+    esac
+    shift
+  done
   
-  if [ ! -f "$MODEL" ]; then
-    if [ ! -z "$PARAMS" ]; then
-      "$ULMA"/ulma.sh -t "$TOOL" -n "$ORDER" $PARAMS "$CORPUS" "$MODEL"
-    else
-      "$ULMA"/ulma.sh -t "$TOOL" -n "$ORDER" "$CORPUS" "$MODEL"
-    fi
+  local FILENAME="$TOOL"_"$ESTIMATOR"
+  if $INTERPOLATE; then
+    FILENAME="$FILENAME"_interpolated
   fi
+  if [ ! "$CDISCOUNT" = "0" ]; then
+    FILENAME="$FILENAME"_cdis-"$CDISCOUNT"
+  fi
+  if $SEOS; then
+    FILENAME="$FILENAME"_seos
+  fi
+  FILENAME="$FILENAME"-"$ORDER"
+  
+  echo "$FILENAME"
+}
+
+# Adds a model to the LMOG processing queue.
+function add_model {
+  local PARAMS="$@"
+  MODELS+=( "$PARAMS" )
+}
+
+# Adds all the models to the LMOG processing queue.
+# Add new language models by adding an entry using the tool and the parameters here!
+function add_models {
+  # KenLM
+  add_model kenlm -i -mkn
+  # KyLM
+  add_model kylm -seos -i 
+  add_model kylm -seos -i -kn
+  add_model kylm -seos -i -mkn
+  # SRILM
+  ## non-seos
+  add_model srilm
+  add_model srilm -kn
+  add_model srilm -i -kn
+  add_model srilm -cdiscount 0.75 -i -kn
+  add_model srilm -i -mkn
+  ## with seos
+  add_model srilm -seos
+  add_model srilm -seos -kn
+  add_model srilm -seos -i -kn
+  add_model srilm -seos -cdiscount 0.75 -i -kn
+  add_model srilm -seos -i -mkn
 }
 
 # Creates the language models that are missing.
 function create_models {
-  # KenLM
-  local KENLM_MKN="$DIR_LM"/kenlm_mkn
-  ulma 'kenlm' '-i -mkn' "$KENLM_MKN"
-  # KyLM
-  local KYLM_MLE_SEOS="$DIR_LM"/kylm_mle_seos
-  local KYLM_KN_SEOS="$DIR_LM"/kylm_kn_seos
-  local KYLM_MKN_SEOS="$DIR_LM"/kylm_mkn_seos
-  ulma 'kylm' '-i -seos' "$KYLM_MLE_SEOS"
-  ulma 'kylm' '-i -kn -seos' "$KYLM_KN_SEOS"
-  ulma 'kylm' '-i -mkn -seos' "$KYLM_MKN_SEOS"
-  # SRILM
-  #TODO repeat with -cdiscount 0.75 -interpolate -no-sos -no-eos
-  ## non-seos
-  local SRILM_MLE="$DIR_LM"/srilm_mle
-  local SRILM_KN="$DIR_LM"/srilm_kn
-  local SRILM_KN_I="$DIR_LM"/srilm_kn_i
-  local SRILM_KN_I_CDIS_0_75="$DIR_LM"/srilm_kn_i_cdis_0_75
-  local SRILM_MKN="$DIR_LM"/srilm_mkn
-  ulma 'srilm' '' "$SRILM_MLE"
-  ulma 'srilm' '-kn' "$SRILM_KN"
-  ulma 'srilm' '-i -kn' "$SRILM_KN_I"
-  ulma 'srilm' '-cdiscount 0.75 -i -kn' "$SRILM_KN_I_CDIS_0_75"
-  ulma 'srilm' '-i -mkn' "$SRILM_MKN"
-  ## with seos
-  local SRILM_MLE_SEOS="$DIR_LM"/srilm_mle_seos
-  local SRILM_KN_SEOS="$DIR_LM"/srilm_kn_seos
-  local SRILM_KN_I_SEOS="$DIR_LM"/srilm_kn_i_seos
-  local SRILM_MKN_SEOS="$DIR_LM"/srilm_mkn_seos
-  ulma 'srilm' '' "$SRILM_MLE_SEOS"
-  ulma 'srilm' '-kn -seos' "$SRILM_KN_SEOS"
-  ulma 'srilm' '-i -kn -seos' "$SRILM_KN_I_SEOS"
-  ulma 'srilm' '-i -mkn -seos' "$SRILM_MKN_SEOS"
+  local PARAMS=
+  local MODEL=
+  for ((i = 0; i < ${#MODELS[@]}; i++)); do
+    PARAMS=${MODELS[$i]}
+    MODEL_NAME=$( get_model_name $PARAMS )
+    MODEL_PATH="$DIR_LM"/"$MODEL_NAME".arpa
+    
+    if [ ! -f "$MODEL_PATH" ]; then
+      "$ULMA"/ulma.sh -t $PARAMS "$CORPUS" "$MODEL_PATH"
+    fi
+  done
 }
 
 # Creates the query files for KenLM (mandatory as other depend on it) and SRILM.
@@ -246,52 +291,44 @@ function query_srilm {
 
 # Queries all the language models.
 function query {
-  #TODO use different query files for non-seos?
-  
-  # KenLM
-  ## generate binary file for faster queries
-  local KENLM_MKN="$DIR_LM"/kenlm_mkn-"$ORDER".arpa
-  local KENLM_MKN_BIN="$DIR_LM"/kenlm_mkn-"$ORDER".bin
-  if [ ! -f "$KENLM_MKN_BIN" ]; then
-    "$KENLM"/build_binary "$KENLM_MKN" "$KENLM_MKN_BIN"
-  fi
-  ## non-seos
-  local QRES_KENLM_MKN="$DIR_QRES"/kenlm_mkn
-  query_kenlm "$KENLM_MKN_BIN" "$QRES_KENLM_MKN"
-  ## with seos
-  local QRES_KENLM_MKN_SEOS="$DIR_QRES"/kenlm_mkn_seos
-  query_kenlm "$KENLM_MKN_BIN" "$QRES_KENLM_MKN_SEOS" seos
-  
-  # KyLM
-  #TODO
-  
-  # SRILM
-  ## non-seos
-  local SRILM_MLE="$DIR_LM"/srilm_mle
-  local QRES_SRILM_MLE="$DIR_QRES"/srilm_mle
-  query_srilm "$SRILM_MLE" "$QRES_SRILM_MLE"
-  local SRILM_KN="$DIR_LM"/srilm_kn
-  local QRES_SRILM_KN="$DIR_QRES"/srilm_kn
-  query_srilm "$SRILM_KN" "$QRES_SRILM_KN"
-  local SRILM_KN_I="$DIR_LM"/srilm_kn_i
-  local QRES_SRILM_KN_I="$DIR_QRES"/srilm_kn_i
-  query_srilm "$SRILM_KN_I" "$QRES_SRILM_KN_I"
-  local SRILM_MKN="$DIR_LM"/srilm_mkn
-  local QRES_SRILM_MKN="$DIR_QRES"/srilm_mkn
-  query_srilm "$SRILM_MKN" "$QRES_SRILM_MKN"
-  ## with seos
-  local SRILM_MLE_SEOS="$DIR_LM"/srilm_mle_seos
-  local QRES_SRILM_MLE_SEOS="$DIR_QRES"/srilm_mle_seos
-  query_srilm "$SRILM_MLE_SEOS" "$QRES_SRILM_MLE_SEOS"
-  local SRILM_KN_SEOS="$DIR_LM"/srilm_kn_seos
-  local QRES_SRILM_KN_SEOS="$DIR_QRES"/srilm_kn_seos
-  query_srilm "$SRILM_KN_SEOS" "$QRES_SRILM_KN_SEOS"
-  local SRILM_KN_I_SEOS="$DIR_LM"/srilm_kn_i_seos
-  local QRES_SRILM_KN_I_SEOS="$DIR_QRES"/srilm_kn_i_seos
-  query_srilm "$SRILM_KN_I_SEOS" "$QRES_SRILM_KN_I_SEOS"
-  local SRILM_MKN_SEOS="$DIR_LM"/srilm_mkn_seos
-  local QRES_SRILM_MKN_SEOS="$DIR_QRES"/srilm_mkn_seos
-  query_srilm "$SRILM_MKN_SEOS" "$QRES_SRILM_MKN_SEOS"
+  for ((i = 0; i < ${#MODELS[@]}; i++)); do
+    local PARAMS=${MODELS[$i]}
+    local MODEL_NAME=$( get_model_name $PARAMS )
+    local MODEL_PATH="$DIR_LM"/"$MODEL_NAME".arpa
+    local QUERY_PATH="$DIR_QRES"/"$MODEL_NAME".txt
+    
+    #TODO WTF is there a better way to access the tool name?
+    for PARAM in ${PARAMS[@]}; do
+      # skip existing query results
+      if [ -f "$QUERY_PATH" ]; then
+        break
+      fi
+      
+      if [ "$PARAM" = "srilm" ]; then
+        # SRILM
+        query_srilm "$MODEL_PATH" "$QUERY_PATH"
+      elif [ "$PARAM" = "kenlm" ]; then
+        # KenLM
+        ## generate binary file for faster queries
+        local KENLM_MODEL_PATH="$DIR_LM"/"$MODEL_NAME".bin
+        if [ ! -f "$KENLM_MODEL_PATH" ]; then
+          "$KENLM"/build_binary "$MODEL_PATH" "$KENLM_MODEL_PATH"
+        fi
+        
+        #TODO not THAT nice
+        ## non-seos
+        query_kenlm "$KENLM_MODEL_PATH" "$QUERY_PATH"
+        ## with seos
+        QUERY_PATH_SEOS="$DIR_QRES"/"$MODEL_NAME"_seos.txt
+        query_kenlm "$KENLM_MODEL_PATH" "$QUERY_PATH_SEOS" seos
+      else
+        # KyLM
+        echo 'KyLM querying is not implemented yet.'
+      fi
+      
+      break
+    done
+  done
 }
 
 # Calculates sum(p) in the SRILM query results.
@@ -384,6 +421,8 @@ fi
 if [ ! -d "$DIR_QRES" ]; then
   mkdir -p "$DIR_QRES"
 fi
+
+add_models
 
 # create vocabulary if missing
 if [ ! -f "$VOCAB_FILE" ]; then
