@@ -42,6 +42,10 @@ function lmplz {
       ;;
   esac
   
+  # discounting
+  ## absolute discounting
+  print_info 'Not implemented yet.'
+  
   # interpolation
   if [ "$SMOOTHING" != "INTERPOLATION" ]; then
     # TODO: or doesn't it support interploation?

@@ -11,6 +11,7 @@ ULMA=/glmtk/ulma
 KENLM=/glmtk/kenlm/bin
 SRILM=/glmtk/srilm-1.7.1/bin/i686-m64
 ## other directories
+OUTPUT_DIR=overview
 WORKING_DIR=/tmp
 
 # Prints the usage of the script in case of using the help command.
@@ -153,10 +154,12 @@ function create_models {
   local SRILM_MLE="$DIR_LM"/srilm_mle
   local SRILM_KN="$DIR_LM"/srilm_kn
   local SRILM_KN_I="$DIR_LM"/srilm_kn_i
+  local SRILM_KN_I_CDIS_0_75="$DIR_LM"/srilm_kn_i_cdis_0_75
   local SRILM_MKN="$DIR_LM"/srilm_mkn
   ulma 'srilm' '' "$SRILM_MLE"
   ulma 'srilm' '-kn' "$SRILM_KN"
   ulma 'srilm' '-i -kn' "$SRILM_KN_I"
+  ulma 'srilm' '-cdiscount 0.75 -i -kn' "$SRILM_KN_I_CDIS_0_75"
   ulma 'srilm' '-i -mkn' "$SRILM_MKN"
   ## with seos
   local SRILM_MLE_SEOS="$DIR_LM"/srilm_mle_seos
@@ -356,7 +359,7 @@ if [ "$SUCCESS" -ne 0 ]; then
 fi
 
 # execute main script functions
-DIR=overview/"${CORPUS##*/}"
+DIR="$OUTPUT_DIR"/"${CORPUS##*/}"
 DIR_LM="$DIR"/lm
 DIR_QREQ="$DIR"/query/request
 DIR_QRES="$DIR"/query/result

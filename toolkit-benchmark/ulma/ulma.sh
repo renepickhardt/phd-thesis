@@ -38,6 +38,7 @@ function printToolkits {
 # * OUTPUT_FILE
 function parseArguments {
   SMOOTHING=BACKOFF
+  CDISCOUNT=0
   SOS=false
   EOS=false
   SOURCED=$( [ -z $ULMA_TOOLKIT ] )
@@ -53,7 +54,7 @@ function parseArguments {
       ;;
       # toolkit
       -t|--toolkit)
-      ULMA_TOOLKIT=$2
+      ULMA_TOOLKIT="$2"
       shift
       ;;
       # ngram count (order)
@@ -69,6 +70,11 @@ function parseArguments {
       SMOOTHING_METHOD=MKN
       ;;
       # smoothing options
+      ## use an absolute discount value
+      -cdiscount)
+      CDISCOUNT="$2"
+      shift
+      ;;
       -i|--interpolation)
       ## switch from backoff to interpolation
       SMOOTHING=INTERPOLATION

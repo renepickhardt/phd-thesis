@@ -39,6 +39,10 @@ function lmplz {
       ;;
   esac
   
+  # discounting
+  ## absolute discounting
+  print_info 'Not implemented yet.'
+  
   # don't interploate unigrams (default in SRILM)
   OPT_LMPLZ="$OPT_LMPLZ"' --interpolate_unigrams 0'
   
