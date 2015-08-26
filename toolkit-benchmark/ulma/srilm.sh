@@ -40,20 +40,19 @@ function lmplz {
       OPT_NGRAM_COUNT="$OPT_NGRAM_COUNT"' -ukndiscount'
       ;;
     MKN)
-      # TODO
-      OPT_NGRAM_COUNT="$OPT_NGRAM_COUNT"' -kndiscount'
+      if [ "$CDISCOUNT" = "0" ]; then
+        # let SRILM calculate discount values
+        OPT_NGRAM_COUNT="$OPT_NGRAM_COUNT"' -kndiscount'
+      else
+        # use absolute discount values
+        OPT_NGRAM_COUNT="$OPT_NGRAM_COUNT"' -kndiscount '"$CDISCOUNT"
+      fi
       ;;
     # no / unknown smoothing method -> fallback to MLE
     *)
-      OPT_NGRAM_COUNT="$OPT_NGRAM_COUNT"' -cdiscount 0'
+      OPT_NGRAM_COUNT="$OPT_NGRAM_COUNT"' -cdiscount '"$CDISCOUNT"
       ;;
   esac
-  
-  # discounting
-  ## absolute discounting
-  if [ ! "$CDISCOUNT" = "0" ]; then
-    OPT_NGRAM_COUNT="$OPT_NGRAM_COUNT"' -cdiscount '"$CDISCOUNT"
-  fi
   
   # interpolation
   if [ "$SMOOTHING" == "INTERPOLATION" ]; then

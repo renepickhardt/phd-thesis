@@ -34,7 +34,7 @@ function lmplz {
       ;;
     # no / unknown smoothing method -> fallback to MLE
     *)
-      echo '[ERROR] KenLM only supports modified Kneser-Ney smoothing!'
+      print_error 'KenLM only supports modified Kneser-Ney smoothing!'
       exit 99
       ;;
   esac
@@ -42,7 +42,7 @@ function lmplz {
   # discounting
   ## absolute discounting
   if [ ! "$CDISCOUNT" = "0" ]; then
-    print_error 'Absolute discounting is not implemented yet.'
+    print_error 'Absolute discounting is not implemented for KenLM yet.'
     exit 100
   fi
   

@@ -45,7 +45,7 @@ function lmplz {
   # discounting
   ## absolute discounting
   if [ ! "$CDISCOUNT" = "0" ]; then
-    print_error 'Absolute discounting is not implemented yet.'
+    print_error 'Absolute discounting is not implemented for KyLM yet.'
     exit 100
   fi
   
