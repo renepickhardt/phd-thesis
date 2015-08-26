@@ -41,8 +41,10 @@ function lmplz {
   
   # discounting
   ## absolute discounting
-  print_error 'Absolute discounting is not implemented yet.'
-  exit 100
+  if [ ! "$CDISCOUNT" = "0" ]; then
+    print_error 'Absolute discounting is not implemented yet.'
+    exit 100
+  fi
   
   # don't interploate unigrams (default in SRILM)
   OPT_LMPLZ="$OPT_LMPLZ"' --interpolate_unigrams 0'

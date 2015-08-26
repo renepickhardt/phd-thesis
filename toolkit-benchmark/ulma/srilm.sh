@@ -51,7 +51,7 @@ function lmplz {
   
   # discounting
   ## absolute discounting
-  if [ "$CDISCOUNT" -ne "0" ]; then
+  if [ ! "$CDISCOUNT" = "0" ]; then
     OPT_NGRAM_COUNT="$OPT_NGRAM_COUNT"' -cdiscount '"$CDISCOUNT"
   fi
   

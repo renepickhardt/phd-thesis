@@ -190,15 +190,15 @@ function add_models {
   # SRILM
   ## non-seos
   add_model srilm
+  add_model srilm -cdiscount 0.75 -i
   add_model srilm -kn
   add_model srilm -i -kn
-  add_model srilm -cdiscount 0.75 -i -kn
   add_model srilm -i -mkn
   ## with seos
   add_model srilm -seos
+  add_model srilm -seos -cdiscount 0.75 -i
   add_model srilm -seos -kn
   add_model srilm -seos -i -kn
-  add_model srilm -seos -cdiscount 0.75 -i -kn
   add_model srilm -seos -i -mkn
 }
 
@@ -212,7 +212,7 @@ function create_models {
     MODEL_PATH="$DIR_LM"/"$MODEL_NAME".arpa
     
     if [ ! -f "$MODEL_PATH" ]; then
-      "$ULMA"/ulma.sh -t $PARAMS "$CORPUS" "$MODEL_PATH"
+      "$ULMA"/ulma.sh -t $PARAMS -n "$ORDER" "$CORPUS" "$MODEL_PATH"
     fi
   done
 }
