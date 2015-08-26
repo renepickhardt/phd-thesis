@@ -1,18 +1,13 @@
 #!/bin/bash
 
+source lmog.config
+
 # variable initialization section
 ORDER=0
 CLEAR=false
 QUERY=false
 GENERATE_TABLE=false
 MODELS=()
-## program binary directories
-ULMA=/glmtk/ulma
-KENLM=/glmtk/kenlm/bin
-SRILM=/glmtk/srilm-1.7.1/bin/i686-m64
-## other directories
-OUTPUT_DIR=overview
-WORKING_DIR=/tmp
 
 # Prints the usage of the script in case of using the help command.
 function printUsage {
