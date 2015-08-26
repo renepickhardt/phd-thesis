@@ -350,7 +350,9 @@ function srilm_ppl {
   local RESULT="$1"
   
   local PPL=$( tail -n 2 "$RESULT" | awk 'BEGIN{ORS=", "} {for (i=1;i<=NF;i++) {if ($i ~ /ppl/) {print $i$(i+1)}}}' )
-  echo "${PPL::-2}"
+  if [ "${#PPL}" -gt "2" ]; then
+    echo "${PPL::-2}"
+  fi
 }
 
 # Calculates sum(p) in the KenLM query results.
