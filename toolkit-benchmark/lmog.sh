@@ -341,7 +341,7 @@ function query {
 }
 
 # Calculates sum(p) in the SRILM query results.
-function sump_srilm {
+function srilm_sump {
   local RESULT="$1"
   local COLUMN=6
   let COLUMN=COLUMN+"$ORDER"
@@ -356,6 +356,16 @@ function srilm_ppl {
   
   local PPL=$( tail -n 2 "$RESULT" | awk 'BEGIN{ORS=", "} {for (i=1;i<=NF;i++) {if ($i ~ /ppl/) {print $i$(i+1)}}}' )
   echo "${PPL::-2}"
+}
+
+# Calculates sum(p) in the KenLM query results.
+function kenlm_sump {
+  local RESULT="$1"
+  local COLUMN=6
+  let COLUMN=COLUMN+"$ORDER"
+  
+  local SUMP=$( head -n -7 "$RESULT" | awk '{p=p+($'"$COLUMN"')} END{print p}' )
+  echo "$SUMP"
 }
 
 # Adds a markdown table line, generated from an array of columns.
@@ -407,8 +417,11 @@ function create_table {
       else
         if [ "$TOOL" = "srilm" ]; then
           # SRILM
-          p=$( sump_srilm "$QUERY_PATH" )
+          p=$( srilm_sump "$QUERY_PATH" )
           ppl=$( srilm_ppl "$QUERY_PATH" )
+        elif [ "$TOOL" = "kenlm" ]; then
+          # KenLM
+          p=$( kenlm_sump "$QUERY_PATH" )
         fi
       fi
       
