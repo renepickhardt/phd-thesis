@@ -44,7 +44,8 @@ function lmplz {
   
   # discounting
   ## absolute discounting
-  print_info 'Not implemented yet.'
+  print_error 'Absolute discounting is not implemented yet.'
+  exit 100
   
   # interpolation
   if [ "$SMOOTHING" != "INTERPOLATION" ]; then

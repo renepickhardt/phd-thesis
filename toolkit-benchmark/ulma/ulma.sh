@@ -169,6 +169,12 @@ function print_info {
   echo '[INFO] '"$1"
 }
 
+# Prints an error message to stderr.
+# http://stackoverflow.com/questions/2990414/echo-that-outputs-to-stderr
+function print_info {
+  >&2 echo '[ERROR] '"$1"
+}
+
 loadCurrentDir
 parseArguments "$@"
 ERRCODE="$?"
