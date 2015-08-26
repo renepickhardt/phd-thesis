@@ -119,6 +119,8 @@ function handleParameter {
 function create_vocab {
   #TODO remove pause tags '-pau-', disable unknown words (and seos?)
   "$SRILM"/ngram-count -order "$ORDER" -write-vocab "$VOCAB_FILE" -text "$CORPUS"
+  grep -v -e '-pau-' "$VOCAB_FILE" > "$VOCAB_FILE".tmp
+  mv "$VOCAB_FILE".tmp "$VOCAB_FILE"
 }
 
 # Generates the model name depending on the parameters used to create it.
@@ -192,12 +194,14 @@ function add_models {
   add_model srilm
   add_model srilm -cdiscount 0.75 -i
   add_model srilm -kn
+  add_model srilm -cdiscount 0.75 -kn -i
   add_model srilm -i -kn
   add_model srilm -i -mkn
   ## with seos
   add_model srilm -seos
   add_model srilm -seos -cdiscount 0.75 -i
   add_model srilm -seos -kn
+  add_model srilm -seos -cdiscount 0.75 -kn -i
   add_model srilm -seos -i -kn
   add_model srilm -seos -i -mkn
 }
@@ -339,29 +343,28 @@ function query {
 # Calculates sum(p) in the SRILM query results.
 function sump_srilm {
   local RESULT="$1"
-  
-  # skip missing query result files
-  if [ ! -f "$RESULT" ]; then
-    echo 'n/a'
-    return 0
-  fi
-  
   local COLUMN=6
   let COLUMN=COLUMN+"$ORDER"
+  
   local SUMP=$( head -n -5 "$RESULT" | awk '{p=p+($'"$COLUMN"')} END{print p}' )
   echo "$SUMP"
 }
 
-# Adds a tool's line to the table, generated from an array of probabilities.
+# Extracts the perplexity from the SRILM query results.
+function srilm_ppl {
+  local RESULT="$1"
+  
+  local PPL=$( tail -n 2 "$RESULT" | awk 'BEGIN{ORS=", "} {for (i=1;i<=NF;i++) {if ($i ~ /ppl/) {print $i$(i+1)}}}' )
+  echo "${PPL::-2}"
+}
+
+# Adds a markdown table line, generated from an array of columns.
 function add_table_line {
   local TABLE="$1"
-  local TOOL="$2"
-  # probability array: $3
-  
-  declare -a probs=("${!3}")
-  L_LINE='| '"$TOOL"' |'
-  for p in "${probs[@]}"; do
-    L_LINE="$L_LINE"' '"$p"' |'
+  declare -a cols=("${!2}")
+  local L_LINE='|'
+  for col in "${cols[@]}"; do
+    L_LINE="$L_LINE"' '"$col"' |'
   done
   echo "$L_LINE" >> "$TABLE"
 }
@@ -371,20 +374,52 @@ function create_table {
   #TODO unk
   local TABLE="$1"
   
-  # table header
-  echo '| Toolkit | MLE | MLE (seos) | KN | KN (seos) | MKN | MKN (seos) |' > "$TABLE"
-  echo '| ------- | --- | ---------- | -- | --------- | --- | ---------- |' >> "$TABLE"
-  
-  # SRILM
-  L_TOOL=SRILM
-  L_P_LINE=()
-  for estimator in "${ESTIMATORS[@]}"; do
-    L_P=$( sump_srilm "$DIR_QRES"/"${L_TOOL,,}"'_'"$estimator"'-'"$ORDER"'.txt' )
-    L_P_LINE+=( "$L_P" )
-    L_P_seos=$( sump_srilm "$DIR_QRES"/"${L_TOOL,,}"'_'"$estimator"'_seos-'"$ORDER"'.txt' )
-    L_P_LINE+=( "$L_P_seos" )
+  local LAST_TOOL=
+  for ((i = 0; i < ${#MODELS[@]}; i++)); do
+    local PARAMS=${MODELS[$i]}
+    local MODEL_NAME=$( get_model_name $PARAMS )
+    local QUERY_PATH="$DIR_QRES"/"$MODEL_NAME".txt
+    
+    #TODO WTF is there a better way to access the tool name?
+    for PARAM in ${PARAMS[@]}; do
+      local TOOL="$PARAM"
+      if [ ! "$LAST_TOOL" = "$TOOL" ]; then
+        # finish current table
+        if [ ! -z "$LAST_TOOL" ]; then
+          echo >> "$TABLE"
+        fi
+        
+        # start new table
+        echo '# '"$TOOL" >> "$TABLE"
+        echo '| Params | Sum P(w|h) | Perplexity |' >> "$TABLE"
+        echo '| ------ | ---------- | ---------- |' >> "$TABLE"
+        LAST_TOOL="$TOOL"
+      fi
+      
+      local line=()
+      local p=TODO
+      local ppl=TODO
+      
+      # skip missing query results
+      if [ ! -f "$QUERY_PATH" ]; then
+        p=n/a
+        ppl=n/a
+      else
+        if [ "$TOOL" = "srilm" ]; then
+          # SRILM
+          p=$( sump_srilm "$QUERY_PATH" )
+          ppl=$( srilm_ppl "$QUERY_PATH" )
+        fi
+      fi
+      
+      line+=("$PARAMS")
+      line+=("$p")
+      line+=("$ppl")
+      
+      add_table_line "$TABLE" line[@]
+      break
+    done
   done
-  add_table_line "$TABLE" "$L_TOOL" L_P_LINE[@]
   
   echo '' >> "$TABLE"
   echo '## Legend' >> "$TABLE"
