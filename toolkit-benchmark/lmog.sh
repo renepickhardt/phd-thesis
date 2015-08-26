@@ -268,7 +268,7 @@ function create_query_files {
 # Queries a language model using KenLM.
 function query_kenlm {
   local MODEL="$1"
-  local RESULT="$2"-"$ORDER".txt
+  local RESULT="$2"
   local SEOS=false
   if [ ! -z "$3" ]; then
     SEOS=true
@@ -283,8 +283,8 @@ function query_kenlm {
 
 # Queries a language model using SRILM.
 function query_srilm {
-  local MODEL="$1"-"$ORDER".arpa
-  local RESULT="$2"-"$ORDER".txt
+  local MODEL="$1"
+  local RESULT="$2"
   
   "$SRILM"/ngram -lm "$MODEL" -counts "$QRY_SRILM" -debug 2 > "$RESULT"
 }
@@ -301,6 +301,11 @@ function query {
     for PARAM in ${PARAMS[@]}; do
       # skip existing query results
       if [ -f "$QUERY_PATH" ]; then
+        break
+      fi
+      # skip missing models
+      if [ ! -f "$MODEL_PATH" ]; then
+        echo '[Warning] Skipping missing language model '"'$PARAMS'"'.'
         break
       fi
       
@@ -430,18 +435,24 @@ if [ ! -f "$VOCAB_FILE" ]; then
 fi
 
 # create missing language models
+echo '[PHASE] generate missing language models...'
 create_models
 
 if $QUERY; then
   # create missing query files
+  echo '[PHASE] generate missing query files...'
   create_query_files
   
   # query the language models
+  echo '[PHASE] querying language models...'
   query
 fi
 
 # generate the overview table
 if $GENERATE_TABLE; then
+  echo '[PHASE] generating overview table...'
   create_table "$TABLE_FILE"
 fi
+
+echo '[INFO] Done. You can find the generated files in the output directory '"'$OUTPUT_DIR'"'.'
 
