@@ -55,7 +55,7 @@ function setEnvVar {
 #
 # Usage: acceptLicense application license_title license_url
 function acceptLicense {
-  cmd=(dialog --title "$1"' license agreement' --no-tags --radiolist 'By selecting '"'Yes'"' you accept the license of '"$1"' ('"$2"').
+  cmd=(dialog --title "$1"' license agreement' --radiolist 'By selecting '"'Yes'"' you accept the license of '"$1"' ('"$2"').
 You can find a copy of this license at '"$3"'
 
 If you reject the license, the installation of '"$1"' will be aborted.' 22 76 16)
