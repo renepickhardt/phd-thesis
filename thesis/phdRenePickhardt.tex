@@ -6,6 +6,19 @@
 \usepackage{color}
 \usepackage{amsmath}
 \usepackage{amssymb}
+%\usepackage[colorlinks]{hyperref}
+\usepackage{glossaries}
+\makenoidxglossaries
+
+\newglossaryentry{sa}{name={$\sigma$-algebra},
+description={$S'\subset 2^\Omega$ is called $\sigma$-algebra if the axioms of definition \ref{def:sa} hold}}
+\newglossaryentry{pf}{name={probability function},
+description={$P:S\longrightarrow [0,1]$ is called P probability function if $S$ is a \gls{sa} and the axioms of definition \ref{def:pf} hold}}
+
+\newglossaryentry{lm}{name={language model},
+description={A triple $(\Omega,S,P)$ where $S$ is a \gls{sa} over $\Omega$ and $P$ is a \gls{pf} over $S$}}
+
+
 
 \begin{document}
 \maketitle
@@ -105,7 +118,7 @@ The formulas and ideas follow the standard text books and publications like \cit
 Given a finite Vocabulary $\Omega = \{w^1,\dots,w^N\}$ of $N$ words. 
 We call $\Omega^{n}$ the set of sequences of length $n$ over the vocabulary $\Omega$.
 $\Omega^{*}$ is called the set of all sequences over $\Omega$.
-\begin{definition}
+\begin{definition}\label{def:sa}
 $S$ is called a $\sigma$-algebra over $\Omega$ iff:
 
 \begin{itemize}
@@ -119,7 +132,7 @@ $S$ is called a $\sigma$-algebra over $\Omega$ iff:
 The elements of $S$ are called events.
 Obviously a $\sigma$-algebra can be defined in the same way over $\Omega^{n} \forall n$ and also over $\Omega^{*}$. 
 
-\begin{definition}We call the triple $(\Omega^{*}, S, P)$ a language model if $S$ is a $\sigma$-algebra over $\Omega^{*}$ and $P:S\longrightarrow [0,1]$ is a probability function.  
+\begin{definition}\label{def:pf}We call the triple $(\Omega^{*}, S, P)$ a language model if $S$ is a $\sigma$-algebra over $\Omega^{*}$ and $P:S\longrightarrow [0,1]$ is a probability function.  
 This means $P$ respects all the properties of the $\sigma$-algebra $S$. 
 For example $P$ is $\sigma$-additive which means: 
 For $A,B \subset S \land A\cap B = \emptyset \Rightarrow P(A\cup B) = P(A)+P(B)$. 
@@ -164,6 +177,11 @@ P(w_1^m):=\prod_{i=1}^{m-n}P_n(w_{i+n}|w_i^{i+n-1})
 \todo{Probably one can easily proof by induction and using sigma additivity that this model will always sum to one}
 
 \todo{explain where this idea of modeling comes from (chainrule + markov) and also how it has a problem with begin of sentences which can fixed ether by introducing BOS and EOS tags or by including lower order models but is in both cases not a beautiful thing}
+
+I use a \gls{pf} and a \gls{sa} to define a \gls{lm}
+
+\printnoidxglossaries
+
 \chapter{Mathematical foundations of Language Models (old!)}
 
 Within papers we frequently see something like: \textit{We are interested in the probability $P$ of a word $w$ given a history $h$ of preceding words.}
