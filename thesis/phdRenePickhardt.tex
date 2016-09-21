@@ -95,39 +95,45 @@ The core idea would be to choose an example or example setting of a person in hi
 
 \chapter{Mathematical foundations of Language Models and $n$-gram Models}
 \todo{add glossary terms: language model, n-gram Model, language model of order n, number of model parameters}
-In this chapter we will give an overview of the methods in statistical $n$-gram based language modeling and provide a mathematically rigorous and sound notation for language models.
+
+\todo{decide if $\Omega$ and $W$ should be discriminated for ease of readability}In this chapter we will give an overview of the methods of statistical $n$-gram based language modeling and provide a mathematically rigorous and sound notation for language models.
 The later is needed since nowadays the notation in most publications is mathematically not sound and often oversimplified.
 This might lead to ambiguous semantics for many of the formulas even for expert readers. 
 We strongly suggest that even the expert reader should carefully study the following section and review our notation. 
 The formulas and ideas follow the standard text books and publications like \cite{chen:goodman}, \todo{add more bibliography} but the unification and notation is our contribution and an integral part of this thesis. 
 
-Given a finite Vocabulary $\Omega = \{w_1,\dots,w_N\}$ of $N$ words. 
+Given a finite Vocabulary $\Omega = \{w^1,\dots,w^N\}$ of $N$ words. 
+We call $\Omega^{n}$ the set of sequences of length $n$ over the vocabulary $\Omega$.
+$\Omega^{*}$ is called the set of all sequences over $\Omega$.
 \begin{definition}
-$S$ is called the $\sigma$-algebra over $\Omega$ iff:
+$S$ is called a $\sigma$-algebra over $\Omega$ iff:
 
-\begin{enumerate}
+\begin{itemize}
 \item $S\subset 2^{\Omega}$ where $2^{\Omega}$ is the power set of $\Omega$  \eqnum
-\item $A_1,A_2,\dots \in S \Rightarrow \bigcup_{n\in\mathbb{N}}A_n \in S$ \eqlab{eq:closedUnion}
+\item $A_1,A_2,\dots \in S \Rightarrow \bigcup_{n\in\mathbb{N}}A_n \in S$. The same holds true for finite unions. \eqlab{eq:closedUnion}
 \item $\Omega \in S$ \eqnum
 \item $A\in S \Rightarrow \Omega\backslash A \in S$ \eqnum
-\end{enumerate}
+\end{itemize}
 
 \end{definition}
 The elements of $S$ are called events.
-We call $\Omega^{n}$ the set of sequences of length $n$ over the vocabulary $\Omega$.
-$\Omega^{*}$ is called the set of all sequences over $\Omega$.
 Obviously a $\sigma$-algebra can be defined in the same way over $\Omega^{n} \forall n$ and also over $\Omega^{*}$. 
 
 \begin{definition}We call the triple $(\Omega^{*}, S, P)$ a language model if $S$ is a $\sigma$-algebra over $\Omega^{*}$ and $P:S\longrightarrow [0,1]$ is a probability function.  
+This means $P$ respects all the properties of the $\sigma$-algebra $S$. 
+For example $P$ is $\sigma$-additive which means: 
+For $A,B \subset S \land A\cap B = \emptyset \Rightarrow P(A\cup B) = P(A)+P(B)$. 
+In particular we have $P(\emptyset)=0$ and $P(S)=1$. 
 \end{definition} 
 
-Due to \eqref{eq:closedUnion} it is sufficient to know $P$ on events containing just one element of $\Omega^{*}$ if these events generate $S$. 
-Knowing $P$ on all events which contain just one element of $\Omega^{*}$ is particularly useful since these events correspond to sequences of words in $\Omega$. 
+If the events containing just one element of $\Omega^{*}$ generate $S$ it is due to the $\sigma$-additvity sufficient to know the image of $P$ on those elements in order to know all of $P$
+Conversely, knowing $P$ on all events which contain just one element of $\Omega^{*}$ is particularly useful since these events correspond to sequences of words in $\Omega$. 
 
 \todo{emphasize somehow}The main question throughout this thesis is: 
-Given a corpus of text documents, how can we estimate or learn a Language Model $P$ over the vocabulary that arises from that corpus? 
+Given a corpus of text documents, how can we estimate or learn a language model $P$ over the vocabulary that arises from that corpus? 
 
-Since $\Omega^{*}$ is infinite even for small vocabularies it is a little bit tricky to handle so that most People will use $n$ gram models in order to estimate a language model (of order $n$).
+%Since $\Omega^{*}$ is infinite even for small vocabularies it is a little bit tricky to handle so that most People will use $n$ gram models in order to estimate a language model (of order $n$).
+Most often people use $n$-gram models, which will be defined in the next step, to construct a language model.  
 \begin{definition}We call the triple $(\Omega^{n}, S, P_n)$ an $n$-gram model if $S$ is a $\sigma$-algebra over $\Omega^{n}$ and $P_n:S\longrightarrow [0,1]$ is a probability function.  
 \end{definition}
 
@@ -138,8 +144,13 @@ Do not intermix the terms language model and $n$-gram model.
 Even though the definitions look very similar we make a clear distinction between those terms. 
 
 \begin{definition}
-The subsets $\{(w_1,\dots,w_n)\}\subset S$ of events containing just one element will be named $w_1^n$  
+Events in  $S$ containing just one element like $\{(w^1,\dots,w^n)\}\subset S$ will be named $w_1^n$. 
+In particular we have $w_i=\{w^i\}$.
 \end{definition}
+\todo{this notation depends on the $n$ over which $S$ is defined... so ether we also carry the $n$ with the $S$ or we need to adapt the notation already...}
+\begin{example}
+Let $(\Omega^3,S,P_3)$ be a $3$-gram model. 
+\end{example}
 
 \begin{example}
 Recalling that it is sufficient to estimate a language model on all events containing one element we can use $n$-gram models to construct language models in the following way. 
@@ -150,6 +161,9 @@ P(w_1^m):=\prod_{i=1}^{m-n}P_n(w_{i+n}|w_i^{i+n-1})
 \todo{improve beginning of sequence and discuss the amount of model parameters as $N^{n-1}$}
 \end{example}
 
+\todo{Probably one can easily proof by induction and using sigma additivity that this model will always sum to one}
+
+\todo{explain where this idea of modeling comes from (chainrule + markov) and also how it has a problem with begin of sentences which can fixed ether by introducing BOS and EOS tags or by including lower order models but is in both cases not a beautiful thing}
 \chapter{Mathematical foundations of Language Models (old!)}
 
 Within papers we frequently see something like: \textit{We are interested in the probability $P$ of a word $w$ given a history $h$ of preceding words.}
