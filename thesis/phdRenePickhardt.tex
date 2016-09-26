@@ -174,22 +174,22 @@ The main question throughout this thesis reads:\\
 \\
 %Since $\Omega^{*}$ is infinite even for small vocabularies it is a little bit tricky to handle so that most People will use $n$ gram models in order to estimate a language model (of order $n$).
 Obviously it is not so clear how to define a probability function that assigns a probability for every sentence over an alphabet. 
-Since the set of all sentences is infinite we cannot use the uniform distribution (assuming each sentence is equally probable) since it is undefined over infinitely large probability spaces.  
+Since the set of all sentences is infinite we cannot use the uniform distribution (assuming each sentence is equally probable) since the uniform distribution is undefined over infinitely large probability spaces.  
 One might argue that a sentence like \cexp{the the the the the the the} is not a useful sentence and can be omitted. 
 A counter argument is that the sentence just occurred in this thesis. 
 But even the maximal subset of $W^{*}$ containing only plausible sentences is infinite.\footnote{I do not have a proof for this but it seems plausible when I see that James Joyce was able to put a sentence of 4,391 words into his novel Ulysses and techniques like recursion also exist for language. You could also read \url{https://en.wikipedia.org/w/index.php?title=Longest_English_sentence&oldid=736368728} for a discussion and further thoughts on this}
-Therefor we can as well work with the general case of $W^{*}$ directly. 
+Therefor we can as well directly work with the general case of $W^{*}$.
 In order to tackle the problem people often make use of \glsplural{ngm}, which will be defined in the next step, to construct a \gls{lm}.  
 \begin{definition}We call the triple $(W^{n}, S, P_n)$ an \gls{ngm} if $S$ is a $\sigma$-algebra over $W^{n}$ and $P_n:S\longrightarrow [0,1]$ is a probability function.  
 \end{definition}
 
 \begin{example}
-Given a corpus $D$ of text documents. We will - here and in future - assume that $D$ contains of only one text without loss of generality. Let $\Omega=W$ be the set of unique words in $D$ and $N = |W|$ its cardinality and $S=2^{W}$. There are three well known ways of constructing a unigram model unigram model $(W,S,P_1)$. In all cases one uses the trick of example \ref{ex:continuation} in its construction. 
-\begin{itemize}
-\item[Uniform Model] We set $P_1^{uni}(\{w\})=\frac{1}{N}$.
-\item[Maximum likelihood Estimator]  With the help of a counting function $c_D:W\longrightarrow\mathbb{N}$ counting how often each word occurs we set $P_1^{mle}(\{w\})=\frac{c_D(w)}{\sum_{v\in W}c_D(v)}$
-\item[Continuation Count Estimator] csdf
-\end{itemize}
+Given a corpus $D$ of text documents. We will - here and in future - assume that $D$ contains of only one text without loss of generality. \todo{handle sentences} Let $\Omega=W$ be the set of unique words in $D$ and $N = |W|$ its cardinality and $S=2^{W}$. There are three well known ways of constructing a unigram model unigram model $(W,S,P_1)$. In all cases one uses the trick of example \ref{ex:continuation} in its construction. 
+\begin{description}
+\item[Uniform Model] We set $P_1^{uni}(\{w\})=\frac{1}{N}$ assigning all words an equal probability. To see that  $P_1^{uni}$ is a probability function we test: $P_1^{uni}(\Omega) = P_1^{uni}(\bigcup_{w\in\Omega}\{w\}) = \sum_{w\in\Omega}P_1^{uni}(\{w\}) = \sum_{w\in\Omega}\frac{1}{N} = \frac{N}{N} = 1 $ \todo{more space for proof and commenting steps}
+\item[Maximum Likelihood Estimator]  Let $c_D:W\longrightarrow\mathbb{N}$ be  the counting function \footnote{actually it is a random variable - isn't it?} measuring  how often each word occurs we set $P_1^{mle}(\{w\})=\frac{c_D(w)}{\sum_{v\in W}c_D(v)}$. Again we can use $\sigma$-additivity to show that this will sum to $1$. $P_1^{mle}(\Omega) = P_1^{mle}(\bigcup_{w\in\Omega}\{w\}) = \sum_{w\in\Omega}P_1^{mle}(\{w\} ) =  \sum_{w\in\Omega} \frac{c_D(w)}{\sum_{v\in W}c_D(v)} = \frac{\sum_{w\in W}c_D(w))}{\sum_{v\in W}c_D(v)} = 1$ \todo{format proof and be consistent with use of $W$ and $\Omega$}
+\item[Continuation Count Estimator] Let $W^2$ be the set of $2$-grams and $c_D^2:W\times W\longrightarrow \mathbb{N}$ the counting function measuring how often each $2$-gram occurs in $D$. We can create $cont_D:W\longrightarrow\mathbb{N}$ by mapping $w\mapsto |\{v| c_D^2(v,w) > 0\}|$. obviously we have: $cont_D(w) \leq c_D(w) \forall w\in W$. We can now set $P_1^{cont}(\{w\}) = \frac{cont_D(w)}{\sum_{v\in\Omega}cont_D(v)}$. \todo{c, cont and P have the n-gram count as sub and as super index this inconsistency should be resolved}. By the same trick as for the Uniform Model and the Maximum Likelihood Estimator we can use $\sigma$-additivity to show that $P_1^{cont}$ is a probability function. It can happen that even though $c_D(w) \neq 0$ we have $P_1^{cont}(\{w\}) = 0$ if $w$ only occurs at the beginning of documents in $D$. \todo{we have not specified the problem of sentences yet. This is particularly sad, since the entire notation makes BOS and EOS useless.}
+\end{description}
 \end{example}
 
 One major part of research in language modeling is devoted to the question how one can estimate and smooth $n$-gram models such that for any given event the probability is never zero. 
