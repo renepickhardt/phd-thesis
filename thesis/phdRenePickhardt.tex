@@ -49,6 +49,7 @@ description={A triple $(\Omega,S,P)$ where $\Omega = W^{n}$ is the set of all \g
 \newtheorem{definition}{Definition}[chapter]
 \newtheorem{theorem}{Theorem}[chapter]
 \newtheorem{example}{Example}[chapter]
+\newtheorem{remark}{Remark}[chapter]
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -180,10 +181,10 @@ A counter argument is that the sentence just occurred in this thesis.
 But even the maximal subset of $W^{*}$ containing only plausible sentences is infinite.\footnote{I do not have a proof for this but it seems plausible when I see that James Joyce was able to put a sentence of 4,391 words into his novel Ulysses and techniques like recursion also exist for language. You could also read \url{https://en.wikipedia.org/w/index.php?title=Longest_English_sentence&oldid=736368728} for a discussion and further thoughts on this}
 Therefor we can as well directly work with the general case of $W^{*}$.
 In order to tackle the problem people often make use of \glsplural{ngm}, which will be defined in the next step, to construct a \gls{lm}.  
-\begin{definition}We call the triple $(W^{n}, S, P_n)$ an \gls{ngm} if $S$ is a $\sigma$-algebra over $W^{n}$ and $P_n:S\longrightarrow [0,1]$ is a probability function.  
+\begin{definition}We call the triple $(W^{n}, S, P_n)$ an \gls{ngm} if $S$ is a $\sigma$-algebra over $W^{n}$ and $P_n:S\longrightarrow [0,1]$ is a probability function. Often in the notation we omit the Triple and will just say the \gls{ngm} $P_n$. 
 \end{definition}
 
-\begin{example}
+\begin{example}\label{ex:unigram-model}
 Given a corpus $D$ of text documents. We will - here and in future - assume that $D$ contains of only one text without loss of generality. \todo{handle sentences} Let $\Omega=W$ be the set of unique words in $D$ and $N = |W|$ its cardinality and $S=2^{W}$. There are three well known ways of constructing a unigram model unigram model $(W,S,P_1)$. In all cases one uses the trick of example \ref{ex:continuation} in its construction. 
 \begin{description}
 \item[Uniform Model] We set $P_1^{uni}(\{w\})=\frac{1}{N}$ assigning all words an equal probability. To see that  $P_1^{uni}$ is a probability function we test: $P_1^{uni}(\Omega) = P_1^{uni}(\bigcup_{w\in\Omega}\{w\}) = \sum_{w\in\Omega}P_1^{uni}(\{w\}) = \sum_{w\in\Omega}\frac{1}{N} = \frac{N}{N} = 1 $ \todo{more space for proof and commenting steps}
@@ -191,6 +192,37 @@ Given a corpus $D$ of text documents. We will - here and in future - assume that
 \item[Continuation Count Estimator] Let $W^2$ be the set of $2$-grams and $c_D^2:W\times W\longrightarrow \mathbb{N}$ the counting function measuring how often each $2$-gram occurs in $D$. We can create $cont_D:W\longrightarrow\mathbb{N}$ by mapping $w\mapsto |\{v| c_D^2(v,w) > 0\}|$. obviously we have: $cont_D(w) \leq c_D(w) \forall w\in W$. We can now set $P_1^{cont}(\{w\}) = \frac{cont_D(w)}{\sum_{v\in\Omega}cont_D(v)}$. \todo{c, cont and P have the n-gram count as sub and as super index this inconsistency should be resolved}. By the same trick as for the Uniform Model and the Maximum Likelihood Estimator we can use $\sigma$-additivity to show that $P_1^{cont}$ is a probability function. It can happen that even though $c_D(w) \neq 0$ we have $P_1^{cont}(\{w\}) = 0$ if $w$ only occurs at the beginning of documents in $D$. \todo{we have not specified the problem of sentences yet. This is particularly sad, since the entire notation makes BOS and EOS useless.}
 \end{description}
 \end{example}
+
+\begin{example}\label{ex:unigram-lm}
+Let $P_1$ be one of the unigram models defined in example \ref{ex:unigram-model} (or an arbitrary unigram model) and let $\rho \in (0,1)$.
+We can use this to construct an 'unigram'  language model $(W^{*},2^{W^{*}},P)$. 
+ 
+Before we doe so we first realize that the sets containing just $s$ with $s = w_1\dots w_m \in W^{*}$ will generate the $\sigma$-algebra $S = 2^{W^{*}}$. 
+By \ref{ex:continuation} it is enough to construct the language model on these elements of $S$.  
+
+Before we show the correct construction let us first show a construction that looks promising but will not work. We do this to illustrate the pitfalls one can run into.
+
+We set $P'(\{s\}) = \prod_{w\in s}P_1(\{w\})$ \todo{technically $w\in s$ the in-operator is not well defined!}
+
+$P'$ is not a probability distribution because $P'(\bigcup_{w\in W}\{w\})= P_1(\bigcup_{w\in W}\{w\})=\sum_{w\in W}P_1(\{w\}) = 1 \Rightarrow P'(W) = 1$. 
+On the other hand if $P'$ were a probability distribution we would have $P'(W^{*}) =1$ by definition. 
+If both was true than due to $\sigma$-additivity for every $s= \{v,w\}$ we would have $P'(\{s\})=P_1(\{v\})P_1(\{w\}) = 0 \forall v,w \in W$.
+This can only be true if $P_1(\{w\}) = 0 \forall w$.
+That is an obvious contradiction to the assumption that $P_1$ is a probability distribution. 
+Therefore we conclude that $P'$ could not be a probability distribution or a language model. 
+
+The correct construction makes use of the parameter $\rho$ by setting $P(\{s\}) = \rho\prod_{w\in s}(1-\rho)P_1(\{w\}) =  \rho(1-rho)^{m}\prod_{w\in s}P_1(\{w\})$
+We can already see that $P(W)=\rho(1-\rho) < 1$ leaving probability mass for longer sequences. 
+In a similar fashion we see $P(W^2)=\rho(1-\rho)^2$ and obviously $P(W^m)=\rho(1-\rho)^m$. 
+Now $P(W^{*}) = P(\bigcup_{i=1}^\infty W^i) = \sum_{i=1}^infty P(W^i) = \sum_{i=1}^\infty \rho(1-\rho)^i = \roh \sum_{i=1}^\infty (1-\rho)^i = \rho \frac{1}{1-(1-\rho)}  = \fraq{\rho}{\rho} = 1$. 
+We could only use the convergence formula $\sum{n=0}^infty q = \frac{1}{1-q}$ of the geometric series since $\rho$ was a value between $0$ and $1$. \todo{I need to fix the proof since in my case the sum starts with $1$ and not with $0$. This needs to fixed in the model but it is one of the typical border cases and will be easy to fix. Also the way how I encoded the length distribution as a geometric distribution is consistent with what is being done in the literature but it is not reflecting the real sentence length distributions.}
+ 
+\end{example}
+
+\begin{remark}
+the parameter $\rho$ chosen in example \ref{ex:unigram-lm} can be seen as the probability of a sentence to end and $1-rho$ can be seen as the probability of a sentence to continue. 
+With the help of this trick we did not have to extend our probability space with an begin of sentence or an end of sentence token. Although when writing software this might be very convenient from a mathematical point of view this is highly questionable because summing up to $1$ now goes over the subsets that have exactly one begin of sentence token in the beginning and and end of sentence token at the end of a sentence. 
+\end{remark}
 
 One major part of research in language modeling is devoted to the question how one can estimate and smooth $n$-gram models such that for any given event the probability is never zero. 
 Most of this chapter will discuss and review methods to estimate and smooth $n$-gram models. 
