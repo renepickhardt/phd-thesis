@@ -138,14 +138,20 @@ Let $\Omega$ be a \gls{ps}.
 E.g. $\Omega=W$.
 $S$ is called a $\sigma$-algebra over $\Omega$ iff:
 
-\begin{itemize}
-\item $S\subset 2^{\Omega}$ where $2^{\Omega}$ is the power set of $\Omega$  \eqnum
-\item $A_1,A_2,\dots \in S \Rightarrow \bigcup_{n\in\mathbb{N}}A_n \in S$. The same holds true for finite unions. \eqlab{eq:closedUnion}
-\item $\Omega \in S$ \eqnum
-\item $A\in S \Rightarrow \Omega\backslash A \in S$ \eqnum
-\end{itemize}
-
+\begin{description}
+\item[Subset of Power set] 
+\begin{align}
+S\subset 2^{\Omega} \text{ where } 2^{\Omega} \text{ is the power set of } \Omega
+\end{align} 
+\item[Closed under countable unions] 
+\begin{align}
+A_1,A_2,\dots \in S \Rightarrow \bigcup_{n\in\mathbb{N}}A_n \in S \label{eq:closedUnion}
+\end{align}. The same holds true for finite unions.
+\item[Universal set] \begin{align}\Omega \in S \end{align}
+\item[Closed under complementation] \begin{align} A\in S \Rightarrow \Omega\backslash A \in S \end{align}
+\end{description}
 \end{definition}
+\todo{formatting!!!}
 The elements of $S$ are called \glsplural{event}.
 
 \begin{definition}\label{def:pf}
@@ -187,13 +193,54 @@ Therefor we can as well directly work with the general case of $W^{*}$.
 In order to tackle the problem people often make use of \glsplural{ngm}, which will be defined in the next step, to construct a \gls{lm}.  
 \begin{definition}We call the triple $(W^{n}, S, P_n)$ an \gls{ngm} if $S$ is a $\sigma$-algebra over $W^{n}$ and $P_n:S\longrightarrow [0,1]$ is a probability function. Often in the notation we omit the Triple and will just say the \gls{ngm} $P_n$. 
 \end{definition}
+\todo{discriminate against the classical known $n$-gram models which look rather like $P(w_n|w_1^{n-1})$}
 
 \begin{example}\label{ex:unigram-model}
 Given a corpus $D$ of text documents. We will - here and in future - assume that $D$ contains of only one text without loss of generality. \todo{handle sentences} Let $\Omega=W$ be the set of unique words in $D$ and $N = |W|$ its cardinality and $S=2^{W}$. There are three well known ways of constructing a unigram model unigram model $(W,S,P_1)$. In all cases one uses the trick of example \ref{ex:continuation} in its construction. 
 \begin{description}
-\item[Uniform Model] We set $P_1^{uni}(\{w\})=\frac{1}{N}$ assigning all words an equal probability. To see that  $P_1^{uni}$ is a probability function we test: $P_1^{uni}(\Omega) = P_1^{uni}(\bigcup_{w\in\Omega}\{w\}) = \sum_{w\in\Omega}P_1^{uni}(\{w\}) = \sum_{w\in\Omega}\frac{1}{N} = \frac{N}{N} = 1 $ \todo{more space for proof and commenting steps}
-\item[Maximum Likelihood Estimator]  Let $c_D:W\longrightarrow\mathbb{N}$ be  the counting function \footnote{actually it is a random variable - isn't it?} measuring  how often each word occurs we set $P_1^{mle}(\{w\})=\frac{c_D(w)}{\sum_{v\in W}c_D(v)}$. Again we can use $\sigma$-additivity to show that this will sum to $1$. $P_1^{mle}(\Omega) = P_1^{mle}(\bigcup_{w\in\Omega}\{w\}) = \sum_{w\in\Omega}P_1^{mle}(\{w\} ) =  \sum_{w\in\Omega} \frac{c_D(w)}{\sum_{v\in W}c_D(v)} = \frac{\sum_{w\in W}c_D(w))}{\sum_{v\in W}c_D(v)} = 1$ \todo{format proof and be consistent with use of $W$ and $\Omega$}
-\item[Continuation Count Estimator] Let $W^2$ be the set of $2$-grams and $c_D^2:W\times W\longrightarrow \mathbb{N}$ the counting function measuring how often each $2$-gram occurs in $D$. We can create $cont_D:W\longrightarrow\mathbb{N}$ by mapping $w\mapsto |\{v| c_D^2(v,w) > 0\}|$. obviously we have: $cont_D(w) \leq c_D(w) \forall w\in W$. We can now set $P_1^{cont}(\{w\}) = \frac{cont_D(w)}{\sum_{v\in\Omega}cont_D(v)}$. \todo{c, cont and P have the n-gram count as sub and as super index this inconsistency should be resolved}. By the same trick as for the Uniform Model and the Maximum Likelihood Estimator we can use $\sigma$-additivity to show that $P_1^{cont}$ is a probability function. It can happen that even though $c_D(w) \neq 0$ we have $P_1^{cont}(\{w\}) = 0$ if $w$ only occurs at the beginning of documents in $D$. \todo{we have not specified the problem of sentences yet. This is particularly sad, since the entire notation makes BOS and EOS useless.}
+\item[Uniform Model] We set $P_1^{uni}(\{w\})=\frac{1}{N}$ assigning all words an equal probability.  $P_1^{uni}$ is a probability function. 
+\begin{proof}
+\begin{align}
+P_1^{uni}(\Omega) & = P_1^{uni}(\bigcup_{w\in\Omega}\{w\}) = \sum_{w\in\Omega}P_1^{uni}(\{w\}) \label{eq:uniform-model}\\
+ &  = \sum_{w\in\Omega}\frac{1}{N}  =  \frac{1}{N} \sum_{w\in\Omega}1= \frac{N}{N} = 1 
+\end{align}
+In \ref{eq:uniform-model} we used the $\sigma$-additivity which $P_1^{uni}$ should have by definition. 
+\end{proof}
+\item[Maximum Likelihood Estimator]  Let $c_D:W\longrightarrow\mathbb{N}$ be  the counting function \footnote{actually it is a random variable - isn't it?} measuring  how often each word occurs we set: 
+\begin{align}
+P_1^{mle}(\{w\})=\frac{c_D(w)}{\sum_{v\in W}c_D(v)}
+\end{align}. 
+$P_1^{mle}$ is a probability function:
+\begin{proof}
+Again we can use $\sigma$-additivity to show that this will sum to $1$. 
+\begin{align}
+P_1^{mle}(\Omega) & = P_1^{mle}(\bigcup_{w\in\Omega}\{w\}) = \sum_{w\in\Omega}P_1^{mle}(\{w\} )  \\
+& =  \sum_{w\in\Omega} \frac{c_D(w)}{\sum_{v\in W}c_D(v)} = \frac{\sum_{w\in \Omega}c_D(w))}{\sum_{v\in W}c_D(v)} = 1
+\end{align}
+\todo{be consistent with use of $W$ and $\Omega$}
+\todo{c, cont and P have the n-gram count as sub and as super index this inconsistency should be resolved}.
+\end{proof}
+\item[Continuation Count Estimator] Let $W^2$ be the set of $2$-grams. 
+Further the counting function $c_D^2:W^2\longrightarrow \mathbb{N}$ measures how often each $2$-gram occurs in $D$. 
+We can create 
+\begin{align}
+cont_D:  W & \rightarrow\mathbb{N} \\
+w  & \mapsto |\{v| c_D^2(v,w) > 0\}|
+\end{align}
+We can now set 
+\begin{align}
+P_1^{cont}(\{w\}) = \frac{cont_D(w)}{\sum_{v\in\Omega}cont_D(v)}
+\end{align}
+$P_1^{cont}$ is a probability function:
+\begin{proof}
+Again we use $\sigma$-additivity.
+\begin{align}
+P_1^{cont}(\Omega) & = P_1^{cont}(\bigcup_{w\in\Omega}\{w\}) = \sum_{w\in\Omega}P_1^{cont}(\{w\} )  \\
+& =  \sum_{w\in\Omega} \frac{cont_D(w)}{\sum_{v\in W}cont_D(v)} = \frac{\sum_{w\in \Omega}cont_D(w))}{\sum_{v\in W}cont_D(v)} = 1
+\end{align} 
+\end{proof}
+Obviously we have: $cont_D(w) \leq c_D(w) \forall w\in W$. Therefore it can happen that even though $c_D(w) \neq 0$ we have $P_1^{cont}(\{w\}) = 0$. This will be the case if $w$ only occurs at the beginning of documents in $D$.
+ \todo{we have not specified the problem of sentences yet. This is particularly sad, since the entire notation makes BOS and EOS useless.}
 \end{description}
 \end{example}
 
@@ -252,11 +299,11 @@ P(W^{*}) & = P(\bigcup_{n=1}^\infty W^n) = \sum_{n=1}^\infty P(W^n) = \sum_{n=1}
  & =  \rho \sum_{n=1}^\infty(1-\rho)^{n-1} = \rho \sum_{n=0}^\infty(1-\rho)^{n} \label{eq:geometricSeriesLHS} \\
  &  = \rho \frac{1}{1-(1-\rho)} = \frac{\rho}{\rho} = 1 \label{eq:geometricSeriesRHS}
 \end{align}
-We could got from \ref{eq:geometricSeriesLHS} to \ref{eq:geometricSeriesRHS} because we made use of the formula of the geometric series \footnote{c.f. the Wikipedia Article on the Geometric Series \url{https://en.wikipedia.org/w/index.php?title=Geometric_series&oldid=738893754} to see a proof. } and since $\rho$ was between $0$ and $1$
+We could got from \ref{eq:geometricSeriesLHS} to \ref{eq:geometricSeriesRHS} because we made use of the formula of the geometric series \footnote{c.f. the Wikipedia Article on the Geometric Series \url{https://en.wikipedia.org/w/index.php?title=Geometric_series&oldid=738893754} to see a proof. } and since $\rho$ was between $0$ and $1$.
 \end{description} 
 \end{proof}
 \end{theorem}
-
+\todo{This is basically also what in the literature is being done with markov and chainrule. the factors in the product are just various unigram models parameterize by the last $n$ words and often written as $P(w_n|w_1^{n=1})$ these 'conditional' probabilities are constructed with the help on $n$-grams but can be seen as unigram models $P_1^{w_1^{n-1}}(\{w_n\})$}
 \begin{remark}
 The parameter $\rho$ is crucial for our proof to conclude.
 If we had set $P'(\{s\}) = \prod_{w\in s}P_1(\{w\})$ we would not have been able to show that $P'(W^{*})=1$. 
