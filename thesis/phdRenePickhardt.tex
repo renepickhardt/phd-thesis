@@ -4,7 +4,10 @@
 \date{\today}
 \usepackage{color}
 \usepackage{amsmath}
+\usepackage{amsthm}
 \usepackage{amssymb}
+\usepackage{eqnarray}
+\usepackage{mathtools}
 % via: http://tug.ctan.org/macros/latex/contrib/glossaries/glossariesbegin.pdf
 \usepackage[colorlinks]{hyperref}
 \usepackage{glossaries}
@@ -50,6 +53,7 @@ description={A triple $(\Omega,S,P)$ where $\Omega = W^{n}$ is the set of all \g
 \newtheorem{theorem}{Theorem}[chapter]
 \newtheorem{example}{Example}[chapter]
 \newtheorem{remark}{Remark}[chapter]
+\newtheorem{lemma}{Lemma}[chapter]
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -193,36 +197,100 @@ Given a corpus $D$ of text documents. We will - here and in future - assume that
 \end{description}
 \end{example}
 
-\begin{example}\label{ex:unigram-lm}
+We continue by proofing a useful lemma for the construction of language models. 
+
+\begin{lemma}\label{lem:sumProductProbabilitySpace}
+Let $P_1$ be a unigram model over a vocabulary $W$. Then for all $n$ we have:
+\[
+\sum_{s\in W^n}\prod_{w\in s}P_1(\{w\}) =1
+\]
+\end{lemma}
+\begin{proof}
+We proof this by induction.
+\begin{description}
+\item[Basis:] For $n=1$ the product term contains only one term. So we have:
+\[
+\sum_{s\in W^n}\prod_{w\in s}P_1(\{w\}) = \sum_{w\in W}P_1(\{w\}) = P_1(\bigcup_{w\in W}\{w\}) = P(W) =  1
+\]
+
+\item[inductive step:] Let us assume the lemma already holds for $m$. Let us see how we could make use for this in the case of $m+1$:
+% \stackrel{\mathmakebox[\widthof{=}]\text{distributive law}}{=} http://tex.stackexchange.com/questions/217497/aligning-stackrel-signs-beneath-each-other-using-split
+\begin{align}
+ \sum_{s\in W^{m+1}}\prod_{w\in s}P_1(\{w\}) & = \sum_{w\in W}\left(P(\{w\})\underbrace{ \sum_{s\in W^m}\prod_{w\in s}P_1(\{w\}) } _{\text{=1 by assumption}}\right) \label{eq:lemSumProductProbabilitySpace}  \\
+ &= \sum_{w\in W}P_1(\{w\}) = 1
+\end{align}
+Equation \ref{eq:lemSumProductProbabilitySpace} is true because of the distributive law.
+The last step is true for the same reason as in the last steps of the basis.
+Since the lemma is true for $n=1$ and we can deduce from $m$ to $m+1$ we can conclude the lemma it is true for all $n$.
+\end{description}
+\end{proof}
+
+We can now proceed by constructing a language model.
+
+\begin{theorem}\label{thm:unigram-lm}
 Let $P_1$ be one of the unigram models defined in example \ref{ex:unigram-model} (or an arbitrary unigram model) and let $\rho \in (0,1)$.
-We can use this to construct an 'unigram'  language model $(W^{*},2^{W^{*}},P)$. 
- 
-Before we doe so we first realize that the sets containing just $s$ with $s = w_1\dots w_m \in W^{*}$ will generate the $\sigma$-algebra $S = 2^{W^{*}}$. 
-By \ref{ex:continuation} it is enough to construct the language model on these elements of $S$.  
+For $s\in W^{*}$ with $s$ consisting of $m$ words and $m\geq 1$ we set
+\begin{equation}
+P(\{s\}) = \frac{\rho}{1-\rho}\prod_{w\in s}(1-\rho)P_1(\{w\}) =  \rho(1-\rho)^{m-1}\prod_{w\in s}P_1(\{w\})
+\end{equation}
+$P$ is a (unigram) language model over $W^{*}$.
+\begin{proof}
+Since the sets $\{s\}$ for $s\in W^{*}$ generate our $\sigma$-algebra $2^{W^{*}}$ and are pairwise disjoint we need to show that $P(W^{*})=1$ to check weather $P$ is a probability function and to conclude the proof.
 
-Before we show the correct construction let us first show a construction that looks promising but will not work. We do this to illustrate the pitfalls one can run into.
+\begin{description}
+\item[First step] 
+\begin{align}
+P(W^n) & = P(\bigcup_{s\in W_n} \{s\}) = \sum_{s\in W^n}P_1(\{s\}) \\
+ & = \sum_{s\in W^n}\rho(1-\rho)^{n-1}\prod_{w\in s}P_1(\{w\}) \\
+ & = \rho(1-\rho)^{n-1} \underbrace{\sum_{s\in W^n}\prod_{w\in s}P_1(\{w\})}_{\text{ = 1 according to lemma \ref{lem:sumProductProbabilitySpace}}} \\
+ & = \rho(1-\rho)^{n-1}
+\end{align}
 
-We set $P'(\{s\}) = \prod_{w\in s}P_1(\{w\})$ \todo{technically $w\in s$ the in-operator is not well defined!}
-
-$P'$ is not a probability distribution because $P'(\bigcup_{w\in W}\{w\})= P_1(\bigcup_{w\in W}\{w\})=\sum_{w\in W}P_1(\{w\}) = 1 \Rightarrow P'(W) = 1$. 
-On the other hand if $P'$ were a probability distribution we would have $P'(W^{*}) =1$ by definition. 
-If both was true than due to $\sigma$-additivity for every $s= \{v,w\}$ we would have $P'(\{s\})=P_1(\{v\})P_1(\{w\}) = 0 \forall v,w \in W$.
-This can only be true if $P_1(\{w\}) = 0 \forall w$.
-That is an obvious contradiction to the assumption that $P_1$ is a probability distribution. 
-Therefore we conclude that $P'$ could not be a probability distribution or a language model. 
-
-The correct construction makes use of the parameter $\rho$ by setting $P(\{s\}) = \rho\prod_{w\in s}(1-\rho)P_1(\{w\}) =  \rho(1-rho)^{m}\prod_{w\in s}P_1(\{w\})$
-We can already see that $P(W)=\rho(1-\rho) < 1$ leaving probability mass for longer sequences. 
-In a similar fashion we see $P(W^2)=\rho(1-\rho)^2$ and obviously $P(W^m)=\rho(1-\rho)^m$. 
-Now $P(W^{*}) = P(\bigcup_{i=1}^\infty W^i) = \sum_{i=1}^infty P(W^i) = \sum_{i=1}^\infty \rho(1-\rho)^i = \roh \sum_{i=1}^\infty (1-\rho)^i = \rho \frac{1}{1-(1-\rho)}  = \fraq{\rho}{\rho} = 1$. 
-We could only use the convergence formula $\sum{n=0}^infty q = \frac{1}{1-q}$ of the geometric series since $\rho$ was a value between $0$ and $1$. \todo{I need to fix the proof since in my case the sum starts with $1$ and not with $0$. This needs to fixed in the model but it is one of the typical border cases and will be easy to fix. Also the way how I encoded the length distribution as a geometric distribution is consistent with what is being done in the literature but it is not reflecting the real sentence length distributions.}
- 
-\end{example}
+\item[Second step] Since we can decompose $W^{*}$ into pairwise disjoint sets of sequences of fixed length we can make use of $\sigma$-additivity and thus have: 
+\begin{align}
+P(W^{*}) & = P(\bigcup_{n=1}^\infty W^n) = \sum_{n=1}^\infty P(W^n) = \sum_{n=1}^\infty \rho(1-\rho)^{n-1} \\
+ & =  \rho \sum_{n=1}^\infty(1-\rho)^{n-1} = \rho \sum_{n=0}^\infty(1-\rho)^{n} \label{eq:geometricSeriesLHS} \\
+ &  = \rho \frac{1}{1-(1-\rho)} = \frac{\rho}{\rho} = 1 \label{eq:geometricSeriesRHS}
+\end{align}
+We could got from \ref{eq:geometricSeriesLHS} to \ref{eq:geometricSeriesRHS} because we made use of the formula of the geometric series \footnote{c.f. the Wikipedia Article on the Geometric Series \url{https://en.wikipedia.org/w/index.php?title=Geometric_series&oldid=738893754} to see a proof. } and since $\rho$ was between $0$ and $1$
+\end{description} 
+\end{proof}
+\end{theorem}
 
 \begin{remark}
-the parameter $\rho$ chosen in example \ref{ex:unigram-lm} can be seen as the probability of a sentence to end and $1-rho$ can be seen as the probability of a sentence to continue. 
-With the help of this trick we did not have to extend our probability space with an begin of sentence or an end of sentence token. Although when writing software this might be very convenient from a mathematical point of view this is highly questionable because summing up to $1$ now goes over the subsets that have exactly one begin of sentence token in the beginning and and end of sentence token at the end of a sentence. 
+The parameter $\rho$ is crucial for our proof to conclude.
+If we had set $P'(\{s\}) = \prod_{w\in s}P_1(\{w\})$ we would not have been able to show that $P'(W^{*})=1$. 
+In fact we would have had:
+\begin{align}
+P'(W^{*})= P(\bigcup_{i=1}^\infty W^n) = \sum_{i=1}^\infty P(W^n) = \sum_{i=1}^\infty 1
+\end{align}
+Since the result is not finite we would not have had the chance to take its inverse as a normalizing factor. 
+There is also a nice proof by contradiction that $P'$ cannot be a language model which can be found in the appendix \todo{create appendix, move and reference the following: $P'$ is not a probability distribution because $P'(\bigcup_{w\in W}\{w\})= P_1(\bigcup_{w\in W}\{w\})=\sum_{w\in W}P_1(\{w\}) = 1 \Rightarrow P'(W) = 1$. On the other hand if $P'$ were a probability distribution we would have $P'(W^{*}) =1$ by definition. 
+If both was true than due to $\sigma$-additivity for every $s= \{v,w\}$ we would have $P'(\{s\})=P_1(\{v\})P_1(\{w\}) = 0 \forall v,w \in W$.
+This can only be true if $P_1(\{w\}) = 0 \forall w$. That is an obvious contradiction to the assumption that $P_1$ is a probability distribution. Therefore we conclude that $P'$ could not be a probability distribution or a language model. }
+
+The parameter $\rho$ can be understood as the probability for a sentence to stop. 
+It is thus an elegant way of expressing what the common literature is doing with begin of sentence tags and end of sentence tags.
+In the standard literature having formulas like $P(<BOS>)=P(<s>)$ or $P(<EOS>)=P(</s>)$ lets one wonder why it is just forbidden to ask for $P(</s><s>)$ which in the semantics of modeling language might not make sense but within the semantics of pure mathematics is a perfectly reasonable formula.
+While these tokens might be a reasonable trick when implementing language models in software from a mathematical point of view they are disturbing.
+In particular one does not need to add another token to the probability space in question - which again would results in strange behavior.   
+
+The way $\rho$ was used to encode the length distribution as a geometric distribution is consistent with what is being done in the literature (despite the fact that tokens like $<s>$ and $</s>$ are being used). This is in fact an oversimplification but it is not reflecting empirical evidence that the sentence length distribution is not a geometric distribution but rather a hypergeometric poisson distribution \footnote{c.f. \url{https://de.wikipedia.org/w/index.php?title=Gesetz_der_Verteilung_von_Satzl\%C3\%A4ngen&oldid=150830900}\todo{create some empirical plots on this}}.
+
 \end{remark}
+\todo{technically $w\in s$ the in-operator is not well defined!}
+
+
+\subsection{Roadmap:}
+\begin{itemize}
+\item standard literature now uses conditional probabilities, the markov assumption and $n$-gram models (which are not the same as we defined) and extend the construction from theorem \ref{thm:unigram-lm}. This again is pretty ugly since we always need to switch cases of which models we use around begin and end of sentences. We would like to demonstrate this.
+\item Show how one can exchange the conditional probabilities and use the $n$-gram models that we have defined instead
+\item discuss smoothing problems in both cases.
+\item in particular discuss notion of chainrule and conditional probabilities
+\item introduce shorter notation for sequences like $w_1^n$
+\item resolve slight notation inconsistencies from above. 
+\item recall my contributions to heinrichs git repository where I discussed how one could increase and decrease the order of $n$-gram models with the help of pullbacks on projection operators. 
+\end{itemize}
 
 One major part of research in language modeling is devoted to the question how one can estimate and smooth $n$-gram models such that for any given event the probability is never zero. 
 Most of this chapter will discuss and review methods to estimate and smooth $n$-gram models. 
