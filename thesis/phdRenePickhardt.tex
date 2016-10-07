@@ -129,6 +129,8 @@ This might lead to ambiguous semantics for many of the formulas even for expert 
 We strongly suggest that even the expert reader should carefully study the following section and review our notation. 
 The formulas and ideas follow the standard text books and publications like \cite{chen:goodman}, \todo{add more bibliography} but the unification and notation is our contribution and an integral part of this thesis. 
 
+
+\section{Formal Definition and Construction of Language Models and $n$-gram models}
 Given a finite Vocabulary $W = \{w^1,\dots,w^N\}$ of $N$ words. 
 We call $W^{n}$ the set of sequences of length $n$ over the vocabulary $W$ or the set of \glsplural{ngram} over $W$.
 $W^{*}$ is called the set of all sequences over $W$ or the set of \glsplural{sentence} over $W$.
@@ -287,7 +289,7 @@ Since the sets $\{s\}$ for $s\in W^{*}$ generate our $\sigma$-algebra $2^{W^{*}}
 \begin{description}
 \item[First step] 
 \begin{align}
-P(W^n) & = P(\bigcup_{s\in W_n} \{s\}) = \sum_{s\in W^n}P_1(\{s\}) \\
+P(W^n) & = P(\bigcup_{s\in W_n} \{s\}) = \sum_{s\in W^n}P(\{s\}) \\
  & = \sum_{s\in W^n}\rho(1-\rho)^{n-1}\prod_{w\in s}P_1(\{w\}) \\
  & = \rho(1-\rho)^{n-1} \underbrace{\sum_{s\in W^n}\prod_{w\in s}P_1(\{w\})}_{\text{ = 1 according to lemma \ref{lem:sumProductProbabilitySpace}}} \\
  & = \rho(1-\rho)^{n-1}
@@ -327,6 +329,124 @@ The way $\rho$ was used to encode the length distribution as a geometric distrib
 \end{remark}
 \todo{technically $w\in s$ the in-operator is not well defined!}
 
+The just proofed theorem \ref{thm:unigram-lm} is a special case of the following more general theorem. 
+Despite the fact that the proof follows exactly the same train of thoughts we followed it through once more since the argument is so central to this thesis..
+\begin{theorem}
+Let $\lambda:\mathbb{N}\longrightarrow [0,1]$ be a function such that $\sum_{n=1}^\infty \lambda(n) = 1$ then for $s\in W^{*}$ with $s$ consisting of $m$ words and $m\geq 1$ we set
+\begin{equation}
+P(\{s\}) = \lambda(m)\prod_{w\in s}P_1(\{w\})
+\end{equation}
+$P$ is a (unigram) language model over $W^{*}$.
+\begin{proof}
+\begin{description}
+\item[First step] 
+\begin{align}
+P(W^n) & = P(\bigcup_{s\in W_n} \{s\}) = \sum_{s\in W^n}P(\{s\}) \\
+ & = \sum_{s\in W^n}\lambda(n)\prod_{w\in s}P_1(\{w\}) \\
+ & = \lambda(n)\underbrace{\sum_{s\in W^n}\prod_{w\in s}P_1(\{w\})}_{\text{ = 1 according to lemma \ref{lem:sumProductProbabilitySpace}}} \\
+ & = \lambda(n)
+\end{align}
+
+\item[Second step] Since we can decompose $W^{*}$ into pairwise disjoint sets of sequences of fixed length we can make use of $\sigma$-additivity and thus have: 
+\begin{align}
+P(W^{*}) & = P(\bigcup_{n=1}^\infty W^n) = \sum_{n=1}^\infty P(W^n) = \sum_{n=1}^\infty \lambda(n) = 1 \\
+\end{align} 
+\end{description}
+\end{proof}
+\end{theorem}  
+
+\begin{remark}
+$\lambda$ can be seen as the sentence length distribution and should be learned from the empirical data.
+
+In theorem \ref{thm:unigram-lm} it was set to $\lambda(n) = \rho(1-\rho)^{n-1}$ following a geometric distribution. 
+This situation is what seems to be implemented in most software toolkits and papers. \todo{double check and reference this}
+\end{remark}
+
+\section{Semantics of Conditional Probabilities, Markov Assumption and number of model parameters}
+The careful reader will have realized that our definition of an $n$-gram model as a triple $(W^n,S,P_n)$ over a vocabulary $W$ is different - and purposely meant to be different - to the definition from the standard literature.
+In the following we want to explore the differences and thereby defend the rational for our naming convention. 
+
+\subsection{Status quo}
+Within papers we frequently see something like: \textit{We are interested in the probability $P$ of a word $w$ given a history $h$ of preceding words.}\todo{in the best case find a quote}
+This is often stated as $P(w|h)$ or in our more concrete setting as $P(\texttt{Model}|\texttt{This is a Language})$. 
+While most readers will have an intuition what is meant with this conditional probability from a mathematical point of view the semantics of the above formulas are not clear.
+Not only is in the Papers omitted if $\Omega$ is chosen to be $W, W^n$ or $W^{*}$ but more important the notation of conditional probability is abused.
+To illustrate this we recall the mathematical definition of a conditional probability.
+\begin{definition}
+Let $P$ be a probability function and $A,B$ to events such that $P(B)>0$.
+\begin{align}
+P(A|B):=\frac{P(A\cap B)}{P(B)}
+\end{align}
+is called the conditional probability of $P$
+\end{definition}
+
+Turning back to our example we see the resulting trouble right away. 
+We have: 
+\begin{align}
+P(\texttt{Model}|\texttt{This is a Language}) = \frac{P(\texttt{Model}\cap\texttt{This is a Language})}{P(\texttt{This is a Language})}
+\end{align}
+This leaves one wondering what is meant by the intersection of a word and a sequence of words?
+Even when assuming that the above formula should have looked like this
+\begin{align}
+P(\{\texttt{Model}\}|\{\texttt{This is a Language}\}) = \frac{P(\{\texttt{Model}\}\cap\{\texttt{This is a Language}\})}{P(\{\texttt{This is a Language}\})}
+\end{align}
+one realizes that the fraction only has a non empty intersection if $w$ is a subset of $h$ which is most certainly not the semantics that computer scientists wanted to express. 
+
+\subsection{Markov Assumption}
+We suggest in the case of words and language modeling to give another mathematical semantics to formulas looking like $P(w|h)$ which is reflecting the wish of computer scientists to express the probability of a word $w$ given the fact that it follows a history\todo{add to glossary} of words $h$. 
+
+\begin{definition}
+Let $S$ be a $\sigma$-algebra over $W$.
+We call
+\begin{align}
+P_1^n(\cdot ; \cdot): S\times W^{n}:\longrightarrow [0,1]
+\end{align}
+a family of conditioned \todo{omit conditioned in the name?} unigram models of order $n$ if $\forall h\in W^n$ the associated function $P_1^n(\cdot ; h):S\longrightarrow [0,1]$ is a unigram model over $W$. \todo{make sure index shifts are sensefull. it could also be $n-1$ or $n+1$}
+\end{definition}
+\begin{remark}
+\begin{description}
+\item[Markov Assumption] \todo{glossary AND leaving in remark?} Having a family of conditioned unigram models of order $n$ means that we have a Markov assumption of order $n$ since we can interpret the outcome of each unigram model for each combination $h$ of $n$ words as the probability distrubtion of a word following $h$. Thus the word $w$ is depending on the last $n$ words $h$
+\item[Number of model parameters] Assuming a vocabulary with  $|W| = 100k = 10^5$ words. one sees that for $n=3$ one already has $10^{15}$ amount of word triples. \todo{relate to petabytes or the number of words in the world wide web} 
+For each of those a different unigram model has to be learnt.
+We see that this task might be quite difficult. This is true in particular because of the following.  
+\item[Sparsity] With this huge amount of modeling parameters it is quite clear that even when taking a web corpus as our training data and when increasing the order of our Markov Assumption to $3$ or higher more than half of all possible combinations for our parameters might not have seen in the training data.
+This makes it impossible to learn a unigram distribution for such model parameter combinations ins an obvious way without introducing techniques like smoothing which will be explained in a later chapter.
+\end{description}
+\end{remark}
+\begin{example}
+Transfere the stuff from the previous section (uniform, MLE and contcounter to markov assumption (at least with order $1$ it should be possible.) Also discuss zero probabilities problem and well defined problem in this or in order $2$ setting. 
+\end{example}
+Despite the sparsity problems which will be fixed soon we can use families of conditioned unigram models of order $n$ or the markov assumption of order $n$ to construct another class of language models.  
+
+\begin{lemma}
+Let $P_1^n$ be a family of markov models \todo{maybe this is a better name?} of order $n$. We can decrease the order by $1$ via the following process. 
+For each $h=w_1\dots w_n\in W^n$ 
+\begin{align}
+P_1^{n-1}:(w;w_2\dots w_n):=\frac{1}{|W|}\sum{v\in W}P(w;v w_2\dots w_n)$
+\end{align}
+is a markov model or oder $n-1$
+\begin{proof}
+Trivial! \todo{do it} Average of probability functions is a probability function. we just ddecreased the order by averaging over the first word (btw. there could have been other positions to average over and we arrive ad skip models. )
+\end{proof}
+\end{lemma}
+
+\begin{theorem}
+like the unigram language model was constructed we can now construct a markov language model of order $n$ with the help of the lemma and we include the length distribution of sentences and copy the proof from above.
+\end{theorem}
+\todo{the interesting part is. All this is possible without smoothing and so on.}
+
+
+\section{Our approach of constructing higher order language models}
+
+
+\section{conclusion}
+We have seen three different kind of language models
+\begin{itemize}
+\item the unigram model (which actually is a special case of the folllowing two)
+\item  the markov language model of order $n$
+\item the $n$ -gram  model \todo{stupid name! need a better one for our own method}
+\end{itemize}
+
 
 \subsection{Roadmap:}
 \begin{itemize}
@@ -338,6 +458,24 @@ The way $\rho$ was used to encode the length distribution as a geometric distrib
 \item resolve slight notation inconsistencies from above. 
 \item recall my contributions to heinrichs git repository where I discussed how one could increase and decrease the order of $n$-gram models with the help of pullbacks on projection operators. 
 \end{itemize}
+
+\chapter{Smoothing}
+following the structure from the last chapter we can smooth $n$-gram models, markov families of order $n$ and any language model (most likely be smoothing the models which have been used to construct them. 
+
+\chapter{Emperically evaluating the quality of a language model}
+Thoughts on perplexity, entropy, relative entropy, keystroke savings, next word predictions, etc... (other applications like IR, ASR, MT, SPELL CHECKING,) 
+
+\chapter{empirical study, datasets, software toolkits, experiments.} 
+
+
+We quickly see that there are several reasonable choices for $\Omega$ and with each choice the word $w$ or the fragment of a sentence (history) $h$ would represent a certain set for the intersection to make sense.
+While this problem might seam artificial for this easy example we recall that learning a language Model even nowadays with corpora as big as the World Wide Web yields a data sparsity problem so that the Models have to be smoothed. 
+One important smoothing technique is that of backing off (c.f. \cite{katz}\cite{kneser:ney:1994}). \footnote{\cite{chen:goodman} state that backoff methods generally perform worse than interpolated methods a result that will be questioned within this thesis.}
+In short the idea is to replace the probability function $P$ with another function for unseen events. 
+In practice the history is shortend by the first word. 
+Now we can ask again: Is the backoffed function defined on the same $\Omega$ or do we just look at different eventclasses?
+
+
 
 One major part of research in language modeling is devoted to the question how one can estimate and smooth $n$-gram models such that for any given event the probability is never zero. 
 Most of this chapter will discuss and review methods to estimate and smooth $n$-gram models. 
