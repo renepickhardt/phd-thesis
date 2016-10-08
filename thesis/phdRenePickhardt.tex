@@ -90,14 +90,16 @@ The core idea would be to choose an example or example setting of a person in hi
 
 \section{Acknowledgements (1)}
 \begin{itemize}
-\item The community of the web providing this large mine of information. Especially the developers and everyone who publishes under an open licence and provides services. In particular the Wikimedia foundation and Stack Exchange. 
-\item My students from whom I learnt most.
+\item The community of creators on the web providing this large mine of information. Especially the developers and everyone who publishes under an open licence and provides services. In particular the Wikimedia foundation and Stack Exchange. 
+\item My students from whom I learnt most. (Lukas, Sebastian, Michael, Carina, Web Science students)
 \item Steffen and Institute for creating and providing such a good environment
 \item advisor Steffen, Thomas, Gerd.
 \item Co authors for great discussion and good spirit (Thomas, Jonas, Till, Paul, Heinrich, Martin,)
 \item readers of my blog (reading club, neo4j community, graph devroom)
 \item External researchers from various conferences.\item friends
 \item family and girlfriend
+\item In particular the tax payer of Germany who have founded my education as well as my research.
+\item Klaus Dieter Schulz and friends
 
 \end{itemize}
 
@@ -130,7 +132,7 @@ We strongly suggest that even the expert reader should carefully study the follo
 The formulas and ideas follow the standard text books and publications like \cite{chen:goodman}, \todo{add more bibliography} but the unification and notation is our contribution and an integral part of this thesis. 
 
 
-\section{Formal Definition and Construction of Language Models and $n$-gram models}
+\section{Formal Definition and Construction of Language Models and $n$-gram models}\label{sec:basicDefinitions}
 Given a finite Vocabulary $W = \{w^1,\dots,w^N\}$ of $N$ words. 
 We call $W^{n}$ the set of sequences of length $n$ over the vocabulary $W$ or the set of \glsplural{ngram} over $W$.
 $W^{*}$ is called the set of all sequences over $W$ or the set of \glsplural{sentence} over $W$.
@@ -193,7 +195,8 @@ A counter argument is that the sentence just occurred in this thesis.
 But even the maximal subset of $W^{*}$ containing only plausible sentences is infinite.\footnote{I do not have a proof for this but it seems plausible when I see that James Joyce was able to put a sentence of 4,391 words into his novel Ulysses and techniques like recursion also exist for language. You could also read \url{https://en.wikipedia.org/w/index.php?title=Longest_English_sentence&oldid=736368728} for a discussion and further thoughts on this}
 Therefor we can as well directly work with the general case of $W^{*}$.
 In order to tackle the problem people often make use of \glsplural{ngm}, which will be defined in the next step, to construct a \gls{lm}.  
-\begin{definition}We call the triple $(W^{n}, S, P_n)$ an \gls{ngm} if $S$ is a $\sigma$-algebra over $W^{n}$ and $P_n:S\longrightarrow [0,1]$ is a probability function. Often in the notation we omit the Triple and will just say the \gls{ngm} $P_n$. 
+
+\begin{definition}\label{def:ngram-model}We call the triple $(W^{n}, S, P_n)$ an \gls{ngm} if $S$ is a $\sigma$-algebra over $W^{n}$ and $P_n:S\longrightarrow [0,1]$ is a probability function. Often in the notation we omit the Triple and will just say the \gls{ngm} $P_n$. 
 \end{definition}
 \todo{discriminate against the classical known $n$-gram models which look rather like $P(w_n|w_1^{n-1})$}
 
@@ -331,7 +334,7 @@ The way $\rho$ was used to encode the length distribution as a geometric distrib
 
 The just proofed theorem \ref{thm:unigram-lm} is a special case of the following more general theorem. 
 Despite the fact that the proof follows exactly the same train of thoughts we followed it through once more since the argument is so central to this thesis..
-\begin{theorem}
+\begin{theorem}\label{thm:unigramLMPlusSentenceLength}
 Let $\lambda:\mathbb{N}\longrightarrow [0,1]$ be a function such that $\sum_{n=1}^\infty \lambda(n) = 1$ then for $s\in W^{*}$ with $s$ consisting of $m$ words and $m\geq 1$ we set
 \begin{equation}
 P(\{s\}) = \lambda(m)\prod_{w\in s}P_1(\{w\})
@@ -418,26 +421,54 @@ Transfere the stuff from the previous section (uniform, MLE and contcounter to m
 \end{example}
 Despite the sparsity problems which will be fixed soon we can use families of conditioned unigram models of order $n$ or the markov assumption of order $n$ to construct another class of language models.  
 
-\begin{lemma}
+\begin{lemma}\label{lem:constructLowerOrderMarkovFamilies}
 Let $P_1^n$ be a family of markov models \todo{maybe this is a better name?} of order $n$. We can decrease the order by $1$ via the following process. 
 For each $h=w_1\dots w_n\in W^n$ 
 \begin{align}
-P_1^{n-1}:(w;w_2\dots w_n):=\frac{1}{|W|}\sum{v\in W}P(w;v w_2\dots w_n)$
+P_1^{n-1}:(w;w_2\dots w_n):=\frac{1}{|W|}\sum_{v\in W}P_1^n(w;v w_2\dots w_n)
 \end{align}
-is a markov model or oder $n-1$
+is a markov model or oder $n-1$ \todo{conflict how this process will not reflect BOS well which is why we need this process...}
 \begin{proof}
 Trivial! \todo{do it} Average of probability functions is a probability function. we just ddecreased the order by averaging over the first word (btw. there could have been other positions to average over and we arrive ad skip models. )
 \end{proof}
 \end{lemma}
 
+like the unigram language model was constructed we can now construct a markov language model of order $n$ with the help of the lemma and we include the length distribution of sentences and copy the proof from above. \todo{rephrase sentence}
 \begin{theorem}
-like the unigram language model was constructed we can now construct a markov language model of order $n$ with the help of the lemma and we include the length distribution of sentences and copy the proof from above.
+Let $P_1$ be a unigram Model, $P_1^1,\dots,P_1^n$ be $n$ families of of Markov Models of order $1$ to $n$ and $\lambda:\mathbb{N}\longrightarrow [0,1]$ a function such that $\sum_{i=1}^\infty\lambda(i) = 1$. For every $s\in W^{*}$ consisting of $m$ words such that $s=w_1^m$ \todo{introduce notation} and $m\geq 1$ we set
+\begin{align}
+P(\{s\})=\lambda(m)\prod_{i=n+1}^mP_1^n(w_i;w_{i-n}^{i-1})\prod_{j=1}^nP_1^{j}(w_j;w_1^{j-1})\label{formula:MarkovLMOrderN}
+\end{align}
+$P$ is a (Markov) Langauge model of order $n$.
+\begin{proof}
+The proof works exactly like theorem \ref{thm:unigram-lm} and \ref{thm:unigramLMPlusSentenceLength} using $\sigma$-additivity and the distributive law and is thus omitted. 
+\end{proof}
 \end{theorem}
+
+\begin{remark}
+The Language Models in the literature are exactly of this form.
+However in the literature the motivation is completely different. 
+It starts with conditional probabilities and the chain rule of total probability and then making a Markov assumption as well as incorporating begin of sentence and end of sentence tags. 
+
+The second part of formula \ref{formula:MarkovLMOrderN} can be seen as the beginning of a sentence where one obviously doesn't have the preceeding $n$ words that would be needed to work with the Markov Model of order $n$. 
+
+Though it is sufficient to have learnt / trained \todo{do I already want to use that terminology} one family of Markov Models of order $n$. 
+The lower order families can be constructed with the help of lemma \ref{lem:constructLowerOrderMarkovFamilies}. 
+It will be more accurate however - an most certainly lead to better results \footnote{we did not check this hypothesis} - if separate families are learnt just on the first $j$ words of the sentences in the corpora.  
+
+
+\end{remark}
+
 \todo{the interesting part is. All this is possible without smoothing and so on.}
+
+\todo{emperical evaluation how a unigram model over all words is different to a unigram model which is only learnt on first words of a sentence}
 
 
 \section{Our approach of constructing higher order language models}
-
+Having introduced rigorous notation and having reviewed the well known techniques for constructing language models it is quite obvious that there is yet another way of constructing language models. 
+This time we use $n$-gram models as defined in definition \ref{def:ngram-model} in section \ref{sec:basicDefinitions}. 
+Though at a first glimpse one might think that the construction we propose es the same as the one known from the literature what we call Markov language models of order $n$. 
+We will give an example though that illustrates the differences and supports the novelty of the construction that we now present.
 
 \section{conclusion}
 We have seen three different kind of language models
@@ -464,6 +495,12 @@ following the structure from the last chapter we can smooth $n$-gram models, mar
 
 \chapter{Emperically evaluating the quality of a language model}
 Thoughts on perplexity, entropy, relative entropy, keystroke savings, next word predictions, etc... (other applications like IR, ASR, MT, SPELL CHECKING,) 
+
+\section{Relative Entropy}
+Perplexity and entropy values can not be compared directly since the maximal possible value depends on the number of elements in the probability space.
+The highest value for entropy occurs with the uniform distribution. with $H(P^{uniform})=log(N)$ where $N = |\Omega|$. 
+We therefor suggest to normalize all entropy values by dividing through the maximum entropy possible for probability space in question. 
+\todo{the problem is on $W^{*}$ this is impossible. since the uniform distribution will not exist. However we can construct the relative entropy for unigram and $n$-gram models. Maybe we find a away how to use the values to know the relative entropy of our constructed lms...}
 
 \chapter{empirical study, datasets, software toolkits, experiments.} 
 
