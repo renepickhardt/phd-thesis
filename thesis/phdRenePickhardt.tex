@@ -528,8 +528,12 @@ This demonstrates the novelty of our construction of a language model.
 \begin{description}
 \item[Sparcity and Choices] \todo{move thoughts that are within the example to here}
 \item[Relation of Markov Models and Conditional Probabilities] conditional probabilities of $n$-gram models will be calculated exactly in the way how the markov models of order $n-1$ are defined. \todo{do an example but put this maybe to another position.}
+\item[Dependence of Context] not only the markov models but also our higher order models depend on the last couple words and introduce this kind of dependency. \todo{discuss this further}
 \end{description}
 \end{remark}
+
+\todo{maybe the above example would have already worked with uniform distributions for all choices leaving different results. though I guess that the results would be the same for uniform distributions since uniform distributions will not depend on the last $n$ words making the markov models obsolete.}
+\todo{maybe emperically or theoretically show which model yields more data sparsity given the same amount of model parameters... this question is more of theoretical nature}
 
 \begin{itemize}
 \item Show how one can exchange the conditional probabilities and use the $n$-gram models that we have defined instead
