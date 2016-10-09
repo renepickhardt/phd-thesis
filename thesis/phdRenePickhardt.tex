@@ -434,7 +434,7 @@ Trivial! \todo{do it} Average of probability functions is a probability function
 \end{lemma}
 
 like the unigram language model was constructed we can now construct a markov language model of order $n$ with the help of the lemma and we include the length distribution of sentences and copy the proof from above. \todo{rephrase sentence}
-\begin{theorem}
+\begin{theorem}\label{thm:markovModelOrderN}
 Let $P_1$ be a unigram Model, $P_1^1,\dots,P_1^n$ be $n$ families of of Markov Models of order $1$ to $n$ and $\lambda:\mathbb{N}\longrightarrow [0,1]$ a function such that $\sum_{i=1}^\infty\lambda(i) = 1$. For every $s\in W^{*}$ consisting of $m$ words such that $s=w_1^m$ \todo{introduce notation} and $m\geq 1$ we set
 \begin{align}
 P(\{s\})=\lambda(m)\prod_{i=n+1}^mP_1^n(w_i;w_{i-n}^{i-1})\prod_{j=1}^nP_1^{j}(w_j;w_1^{j-1})\label{formula:MarkovLMOrderN}
@@ -464,34 +464,67 @@ It will be more accurate however - an most certainly lead to better results \foo
 \todo{emperical evaluation how a unigram model over all words is different to a unigram model which is only learnt on first words of a sentence}
 
 
-\section{Our approach of constructing higher order language models}
-Having introduced rigorous notation and having reviewed the well known techniques for constructing language models it is quite obvious that there is yet another way of constructing language models. 
-This time we use $n$-gram models as defined in definition \ref{def:ngram-model} in section \ref{sec:basicDefinitions}. 
-Though at a first glimpse one might think that the construction we propose es the same as the one known from the literature what we call Markov language models of order $n$. 
-We will give an example though that illustrates the differences and supports the novelty of the construction that we now present.
-
-\section{conclusion}
-We have seen three different kind of language models
 \begin{itemize}
-\item the unigram model (which actually is a special case of the folllowing two)
-\item  the markov language model of order $n$
-\item the $n$ -gram  model \todo{stupid name! need a better one for our own method}
+\item standard literature now uses conditional probabilities, the markov assumption and $n$-gram models (which are not the same as we defined) and extend the construction from theorem \ref{thm:unigram-lm}. This again is pretty ugly since we always need to switch cases of which models we use around begin and end of sentences. We would like to demonstrate this.
+\item in particular discuss notion of chainrule and conditional probabilities
 \end{itemize}
+
+\section{Our approach of constructing higher order language models}
+Having introduced the rigorous notation and having reviewed the well known techniques for constructing language models it is quite obvious that there is yet another way of constructing language models. 
+This time we use $n$-gram models as defined in definition \ref{def:ngram-model} in section \ref{sec:basicDefinitions}. 
+At a first glimpse the construction which we propose in this section seems to resemble the construction of Markov language models of order $n$. 
+However we will give an example that illustrates the differences and supports the novelty of the following construction. \footnote{This construction was developed in May 2014 while having discussions with Heinrich Hartman in which we tried to give proper semantics to the notion of language models from the literature. A preliminary version of the discussion can be found in his git repository to which we both contributed at that time \todo{find link}}
+\begin{theorem}\label{thm:higherOrderLM}
+Let $\lambda:\mathbb{N}\longrightarrow [0,1]$ be a function such that $\sum_{i=1}^\infty\lambda(i) = 1$. 
+For each $n\in\mathbb{N}$ let $P_n$ be an $n$-gram model as in definition \ref{def:ngram-model}. 
+For every $s \in W^{*}$ with $s$ so consisting of $m$ words and $m\geq 1$ we set:
+\begin{align}
+P(\{s\}) = \lambda(m)P_m({s})
+\end{align}
+$P$ is a (higher order) language model \todo{I need better names for the P's that arise from the three constructions}
+\begin{proof}
+As before we decompose $W^{*}$ into $\bigcup_{i=1}^\infty W^{i}$ so that we have:
+\begin{align}
+P(W^{*}) & = P(\bigcup_{i=1}^\infty W^{i}) =\sum_{i=1}^\infty P(W^{i})  \\
+& =  \sum_{i=1}^\infty \lambda(i)\underbrace{P_i(W^{i})}_{\text{equal to 1}} = \sum_{i=1}^\infty \lambda(i) = 1
+\end{align} 
+\end{proof}
+\end{theorem}
+
+
+
+\begin{itemize}
+\item Show how one can exchange the conditional probabilities and use the $n$-gram models that we have defined instead
+\item recall my contributions to heinrichs git repository where I discussed how one could increase and decrease the order of $n$-gram models with the help of pullbacks on projection operators. 
+\end{itemize}
+
+\section{Conclusion and open questions}
+We have seen three different constructions of language models the Unigram model as constructed in theorem \ref{thm:unigram-lm} and \ref{thm:unigramLMPlusSentenceLength}, the well known Markov language model of order $n$ as introduced in theorem \ref{thm:markovModelOrderN}, and our novel higher order language models as constructed in theorem \ref{thm:higherOrderLM}.
+To be precise the Unigram Model can be seen as a Markov Model of order $0$.
+Therefore we have two substantially different constructions of Language Models which naturally leads to the following questions: 
+\begin{enumerate}
+\item Which of the two constructions is more accurate and yields better results in terms of perplexity but also in terms of applications?
+\item Can the well known smoothing techniques for Markov models be transferred to our novel higher order Language Models (n-gram models)?
+\item what are good methods of learning $n$-gram models?
+\end{enumerate}
+\todo{Actually we have Markov models and $n$-gram models. both can via a similar construction with the help of a sentence length distribution be used to construct a language model. We need good naming conventions for the components (Markov models and $n$-gram models, the families of those and the constructed Language models...)}
+
+\end{itemize}
+
 
 
 \subsection{Roadmap:}
 \begin{itemize}
-\item standard literature now uses conditional probabilities, the markov assumption and $n$-gram models (which are not the same as we defined) and extend the construction from theorem \ref{thm:unigram-lm}. This again is pretty ugly since we always need to switch cases of which models we use around begin and end of sentences. We would like to demonstrate this.
-\item Show how one can exchange the conditional probabilities and use the $n$-gram models that we have defined instead
-\item discuss smoothing problems in both cases.
-\item in particular discuss notion of chainrule and conditional probabilities
 \item introduce shorter notation for sequences like $w_1^n$
 \item resolve slight notation inconsistencies from above. 
-\item recall my contributions to heinrichs git repository where I discussed how one could increase and decrease the order of $n$-gram models with the help of pullbacks on projection operators. 
 \end{itemize}
 
 \chapter{Smoothing}
 following the structure from the last chapter we can smooth $n$-gram models, markov families of order $n$ and any language model (most likely be smoothing the models which have been used to construct them. 
+
+\begin{itemize}
+\item discuss smoothing problems in all three cases.
+\end{itemize}
 
 \chapter{Emperically evaluating the quality of a language model}
 Thoughts on perplexity, entropy, relative entropy, keystroke savings, next word predictions, etc... (other applications like IR, ASR, MT, SPELL CHECKING,) 
