@@ -491,7 +491,45 @@ P(W^{*}) & = P(\bigcup_{i=1}^\infty W^{i}) =\sum_{i=1}^\infty P(W^{i})  \\
 \end{proof}
 \end{theorem}
 
+\begin{example}
+Let $D$ be a corpus consisting of one sentence \texttt{a b a a b} over a vocabulary $W=\{\texttt{a},\texttt{b}\}$ consisting of two words.
+Let $\lambda(n)=\rho(1-\rho)^{n-1}$ be a function used to construct the higher order language model and the Markov Model with $\rho \in (0,1)$. 
+Let $c_n^D:W^n\longrightarrow \mathbb{N}_0$ be the counting function counting how often a certain $n$-gram occurs in our corpus $D$.
+We can construct $n$-gram models in the following way:
+\begin{align}
+P_n(\{s\})=\frac{c_n^D(s)}{\sum_{\omega\in W^n}c_n^D(\omega)}
+\end{align}
+The $P_n$ give rise to a higher order language model $P$ as in theorem \ref{thm:higherOrderLM}.
+For example we have $P(\{ab\})= \rho(1-\rho)\frac{2}{4}$ 
 
+On the other hand we can construct families of Markov models of order $n$ by setting:
+\begin{align}
+P_1^n(w;w_1\dots w_n) = \frac{c_{n+1}^D(w_1\dots w_nw)}{\sum_{v\in W}c_{n+1}^D(w_1\dots w_nv)}
+\end{align}
+We emphasize here that one can already see a major drawback with the approach of Markov Models once a sequence $w_1\dots w_n$ was not seen in our corpus $D$ we have no unigram distribution for this combination of model parameters. \todo{somewhere discuss that higher order n-gram models also have many sparsities and at some point will also be undefined if $n$ is longer than the longest sentence in our corpus.}
+Obviously smoothing or just selecting another distribution can help here but it must be done explicitly.
+In particular there is a modeling choice to be made. 
+Our example is chosen in a way such that we do not run into this problem. 
+
+With the family of Markov Models we can construct Markov Language Models of order $n$ $P_n^{Markov}$ in the way as shown by theorem \ref{thm:markovModelOrderN}. 
+In Particular we have a Markov Model of order $1$ which would be called a two-gram model in the common literature. 
+We count:
+\begin{align}
+P_1^{Markov}(\{ab\}) & = \rho(1-\rho) P_1^1(\{b\};\{a\})P_1(\{b\}) = \rho(1-\rho) \frac{2}{3}\cdot\frac{2}{5} \\
+ & = \rho(1-\rho)\frac{4}{15} \\
+ & \neq  \underbrace{\rho(1-\rho) \frac{1}{2}}_{= P(\{ab\})}
+\end{align}
+\end{example}
+
+The example shows that even when the same $\lambda$ was chosen and maximum likelihood estimators on $n$ grams the higher order language model and the Markov model would not coincide. 
+This demonstrates the novelty of our construction of a language model. 
+
+\begin{remark}
+\begin{description}
+\item[Sparcity and Choices] \todo{move thoughts that are within the example to here}
+\item[Relation of Markov Models and Conditional Probabilities] conditional probabilities of $n$-gram models will be calculated exactly in the way how the markov models of order $n-1$ are defined. \todo{do an example but put this maybe to another position.}
+\end{description}
+\end{remark}
 
 \begin{itemize}
 \item Show how one can exchange the conditional probabilities and use the $n$-gram models that we have defined instead
@@ -509,7 +547,6 @@ Therefore we have two substantially different constructions of Language Models w
 \end{enumerate}
 \todo{Actually we have Markov models and $n$-gram models. both can via a similar construction with the help of a sentence length distribution be used to construct a language model. We need good naming conventions for the components (Markov models and $n$-gram models, the families of those and the constructed Language models...)}
 
-\end{itemize}
 
 
 
