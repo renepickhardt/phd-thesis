@@ -1,0 +1,374 @@
+
+\chapter{Mathematical foundations of Language Models (old!)}
+
+Within papers we frequently see something like: \textit{We are interested in the probability $P$ of a word $w$ given a history $h$ of preceding words.}
+This is often stated as $P(w|h)$ or in a more concrete setting $P(\texttt{Model}|\texttt{This is a Language})$. 
+While most readers will have an intuition what is meant with this conditional probability from a mathematical point of view the semantics of the above formulars are not clear.
+Let $P:\Omega \rightarrow [0,1]$ be a probability function then for $A,B \subset \Omega$ with $P(B)>0$ we have: $P(A|B)=\frac{P(A\cap B)}{P(B)}$.
+Turning back to our example we have $P(\texttt{Model}|\texttt{This is a Language}) = \frac{P(\texttt{Model}\cap\texttt{This is a Language})}{P(\textit{This is a Language})}$.
+We quickly see that there are several reasonable choices for $\Omega$ and with each choice the word $w$ or the fragment of a sentence (history) $h$ would represent a certain set for the intersection to make sense.
+While this problem might seam artificial for this easy example we recall that learning a language Model even nowadays with corpora as big as the World Wide Web yields a data sparsity problem so that the Models have to be smoothed. 
+One important smoothing technique is that of backing off (c.f. \cite{katz}\cite{kneser:ney:1994}). \footnote{\cite{chen:goodman} state that backoff methods generally perform worse than interpolated methods a result that will be questioned within this thesis.}
+In short the idea is to replace the probability function $P$ with another function for unseen events. 
+In practice the history is shortend by the first word. 
+Now we can ask again: Is the backoffed function defined on the same $\Omega$ or do we just look at different eventclasses?
+
+The following text will introduce some basic notation for natural language processing. 
+In particular we will review some mathematical background and the standard notation that is currently being used.
+Since we discuss ambigious ways of interpreting the standard notation with respect to a rigour mathematical interpretation  we strongly recommend even the experienced reader to walk carefully through this chapter. 
+\section{computer scientists vs mathematicians formalism}
+Let $\Omega=\{w_1,...w_N\}$ be the set of all words in a language and $\Sigma$ be the $\sigma$-algebra of $\Omega$.
+A probability function $P:\Sigma \to [0,1]$ is a function such that.
+\begin{enumerate}
+  \item $P(\Omega) = 1$
+  \item $P(\emptyset) = 0$
+  \item $P(A_1 \union \ldots \union A_n) = P(A_1) + \ldots + P(A_n)$ \\
+with $A_i\in\Sigma,$ $A_i \intersection A_j = \emptyset$ $\forall i,j \leq n, n < \infty$
+\end{enumerate}
+We call the triple $(\Omega, \Sigma, P)$ a probability space $\Omega$ with probability function $P$.
+The elements of $\Sigma$ --- which are subsets of $\Omega$ ---  will be called events. 
+Often we will take $\Omega = W := \{\texttt{Words within a fixed natural language}\}.$
+Or we will take $\Omega = W^n :=\underbrace{W\times\dots\times W}_{n-times}$ the set of $n$-tuples or sequences of $n$ words over a given natural language. 
+In the case of finite $\Omega$ --- which is almost always our case --- the $\sigma$-algebra can and will be the power set $\pow{\Omega}$.
+So most of the time $\Sigma$ will not be named explicitly.  
+\todo{maybe already do one or 2 examples including natural language here. maybe switch around with the computer scientist. do computer scientist notation first. since it might be easier to read}
+
+Let us now consider the computer scientist point of view together with a first example:
+Let $w_1^n:=w_1\dots w_n$ be a sequence of $n$ words and $c(w_1^n)$ the frequency of the sequence in a given training corpus we can define $P(w_1^n):=\frac{c(w_1^n)}{N_n}$ where $N_n:=\sum_{w_1^n}c(w_1^n)$ is the amount of seen sequences of length $n$.
+It is commonly accepted that the above definition of $P$ is the maximum likelihood probability for an $n$-gram to occur in some training data.
+While this definition seems to be clear and is much shorter than all the technical details needed for the mathematicians formulation we will quickly see that there is much trouble with definitions like this.
+For example it is not clear if $P$ is a probability function and what its probability space is.
+Is the probability space the space of $n$-tuples or is it the space of sequences?
+Though in this simple case the following discussion might seem artificial we will quickly see how important it is to ask these kind of questions.
+One way to work this out\footnote{one could also try to create a real language model on $\Omega=W^*$ which --- starting from the formula --- would be rather complex but possible to sum to $1$. The important point to note is that already with the most basic definition we see that there is some choice how we interpret the formula.} is to say that the above formula defined not one probability function but a family $\{P_n\}_{n\in IN}$\todo{fix IN} of probability functions. 
+This means for every $n$ we define a probability function $P_n:\pow{W^n}\to[0,1]$.
+Note that for each $P_n$ we had to define a different $\sigma$-algebra coming from a different $\Omega=W^n$. 
+Explicitly this means that for every $n$ we will have $P_n(\{(w_1,\dots,w_n)\}):=\frac{c_n((w_1,\dots,w_n))}{N_n}$ where $c_n:W^n\to IN$ is the counting function saying how often the $n$-gram occured in the training data and $N_n$ is defined as above.
+To be precise we note that that $P_n$ is well defined. Let $\Sigma$ be the $\sigma$-algebra of $W^n$. 
+The above formula defined $P_n$ only on $\Sigma_1=\{A\in\Sigma|$ $|A| = 1\}\subset \Sigma$ which are the events of $\Sigma$ that contain only one element.
+$P_n$ is well defined since we made the assumption that $\Omega$ is finite. 
+Therefor we can use the third axiom for a probability function whih states that finite unions behave additive. 
+This means for any $A\in\Sigma$ we will find $A_j,\dots,A_k\in\Sigma_1$ such that $A=\union_{i=1\dots j}A_i$ and we thus have $P_n(A)=P_n(A_1 \union \ldots \union A_j) = P_n(A_1) + \ldots + P_n(A_j)$ defining $P_n$ uniquely for every element of $\Sigma$.
+\todo{not clear of the following should be mentioned. We could define injections and projections as well as bijections on Simga1} In particular we implicitly used a projection function $\pi:\Sigma_1\to W^n$  which maps the elements of $\Sigma$ which as subsets of $\Omega$ contained only one element to this particular element.
+
+\section{Useful shortcuts in notation}
+\todo{Reformulate the following section paragraphs}
+In the last section we have seen that it makes sense to cary the $n$ of the $n$-gram length in the name of the probability function to make clear on which space it is defined.
+Let us now see what happens if we did not do this. 
+Computer scientists often are interested in the probability of a sequence of words e.g. $w_1w_2 $ occuring.
+They will thus say the probability is $P(w_1w_2)$. 
+As we have seen $P$ is defined on some $\sigma$-algebra and thus should have a set as an argument. 
+We could say that the computer scientist means $P(\{w_1,w_2\})$. 
+This could be seen as $P(\{w_1\}\union \{w_2\}) = P(\{w_1\}) + P(\{w_2\})$. 
+In particular this would mean that $P$ is just defined on $\Sigma=\pow{W}$ which is most certainly not what the computer scientist meant \todo{spelling}to say.
+The computer scientist would probably rather interpret $P(w_1w_2)$ as $P(\{(w_1,w_2)\})$ which is defined on $\Sigma=\pow{W^2}$.
+This is another reason why it makes sense to carry the $n$ as a subset of the name of the probability function.
+
+Even though we used the term $n$-gram before it is now time to define what a $n$-gram model is.\footnote{this is not a language model yet. In fact we will most certainly do all our work on n-gram models. Since they are defined on finite spaces everything becomes more easily to handle.}
+\textbf{Definition:} A $n$-gram language model or just in short $n$-gram model is a probability function $P_n:\pow{W_n}\to [0,1]$ where $W$ is a \textbf{finite} set of Words\footnote{obviously it is not even easy to define what a word ist. Should "New York" be one word or two words? In the following we will assume that words are seperated by a space.} of a natural language. 
+Obviously fixing ourselves to the case of words of a natural language is an arbitrary choice.
+The entire theory will work on any finite alphabet.
+In particular a unigram model is $P_1:\pow{W}to [0,1]$.
+\todo{stoped here: roadmap introduce shorter notation without set notation and also accept the computer scientists notation $w_1^n$. then go over to conditional probabilities stay with computer scientists state problems of how this should be defined. afterwards name the problem of NOT naming the which n-gram model the probability function is id est saying $P$ instead of $P_n$}
+
+\todo{Think about the following statement: In future we will only have finit $\Omega$ and often fix $\Omega$ and $\Sigma$ but we will play around with $P$. }
+
+\todo{probably remove the rest of the paragraph as this is already mentioned.}
+Sometimes we will also implicitly play around with $\Omega$ and $\Sigma$ without explicitly saying so and with similar looking formulars of $P$.
+One of the resulting subtleties is pointed out in the following.
+As all computer scientists when being in the natural language setting we will write by abuse of notation $P(w_i)$ when we mean $P(\{w_i\})$ where $P:2^W \to [0,1]$ is a probability measure $(W, 2^W, P)$. 
+We \textbf{must not confuse} $P(w_1 \union w_2) = P(\{w_1,w_2\})=P(\{w_1\}) + P(\{w_2\})$ with $P_2(w_1w_2):=P(\{(w_1,w_2)\})$ where $P_2: 2^{W^2} \to [0,1]$. 
+As one can see $P_2$ is defined on the $\sigma$-algebra of $W^2$ and $P$ is defined on the $\sigma$-algebra of $W$.
+
+\todo{state somewhere that will also use some abbrevations like $P(w_1^n)$ in the following}
+
+\section{Conditional Probabilities and Chain rule of probability}
+For a given probability space with probability function $P$ we define the conditional probability of an event $A$ given the event $B$ to be $\frac{P(A\intersection B)}{P(B)}=:P(A|B)$. 
+This definition can only hold if $P(B) > 0$. \todo{ask what happens once I go to unseen words or empty set and an empty intersection but also $P(B) = 0$}
+\todo{here is one of the biggest problems. with the semantics computer scientists would like to give to this formula we will often have $P(B)=0$ in these cases computer scientists go to a super set of $B$ by a method they call backoff\footnote{note that the term backoff in language modelling has actually two different meanings. A backoff smoothing model where exactly in this case we are allowed to exchange the probability function and the just mentioned backoff.} hard todo: restructure and emphesize these points}
+
+The key question for us is how will this definition of conditional probabilities transfer to the setting of natural language processing and $n$-gram language models?
+We will switch again to the notation that is pretty standard in computer science  where we will see something like: $P(w_2|w_1)$.
+Though it is pretty clear what the non mathematical semantics should be --- e.g. the probability of a word $w_2$ occuring after $w_1$ has been seen\footnote{interestingly this formula does not even say anything about $w_2$ occuring directly after $w_1$. It could also read the probability of $w_2$ to occur in a text knowing that $w_1$ already had occured before. This bag of word approach is actually conceptually a step towards the direction of the generalized language model case where the key idea is to soften the riged structure of word sequences} --- it is due to the underspecifications in notation not quite clear how to give a mathematically proper semantics to the formula.
+In order to do so we must decide on which probability space $P$ should be defined to start using the formalism of conditional probabilities.
+There are only two choices for $\Omega$ that seem reasonable. We will discuss both
+\begin{enumerate}
+\item Let $\Omega=W$ 
+\item Let $\Omega=W^2$
+\end{enumerate}
+
+\todo{stopped here for restructruring the text. use the following text to more clearly walk through these two examples.}
+
+Another example where abuse of notation leads to subtleties on $W^2$ is the following: 
+We will often see something like $P_2(w_2|w_1)$. We note that in most papers we will never see an explicit statement on which space the probability function is define
+Natural language experts wish to interpret this formula as the conditional probability of a word $w_2$ occuring after a word $w_1$ has been seen.
+For the sake of rigour we will once carry out the full argument of how this formula should be interpreted.
+In future stick to the abuse of notation and leave it to the reader to make sure to know on what spaces the functions are defined. 
+The following will also help to demonstrate the though process which can be used to decide how $P_2(w_2|w_1)$ should be interpreted.
+After the above discussion one might think that $P_2(w_2|w_1)$ should read $P_2(\{w_2\}|\{w_1\})$ which by definition of conditional probabilities is given by $\frac{P_2(\{w_2\}\intersection \{w_1\})}{P_2(\{w_1\})}$.
+As we can see this does not make sense for the following two reasons.
+First the result would always have to be $0$ as $P_2(\{w_2\}\intersection \{w_1\}) = P_2(\emptyset) = 0$ as long as $w_1\neq w_2$.
+Second $\{w_1\}$ and $\{w_2\}$ are not subsets of $W^2$ and thus not elements of the $\sigma$-algebra of $W^2$ which means that $P_2$ is not defined for the arguments we have been trying to pass to it so the expression does not carry any proper semantics if interpreted as above. 
+As stated often it is not as clear as in our setting that $P_2$ is defined on $2^{W^2}$.
+
+A better interpretation is the following $P_2(w_2|w_1):=\frac{P(w_1\skp \intersection \skp w_2)}{P_2(w_1\skp)}$. 
+In this case we define $w_1 \skp := \{(w_1,x)|x\in W\}\subset W^2$ and $\skp w_2 := \{(y,w_2)|y \in W\}\subset W^2$.
+The probability of the intersection will be $P(w_1\skp \intersection \skp w_2) = P(\{(w_1,w_2)\})$ which is well defined.
+Again we often see $P(\{(w_1,w_2)\}) = P(w_1w_2)$ by abuse of notation. \todo{already walk through the chain rule of probability.}
+Also the probabilities $w_1 \skp$ and $\skp w_2$ are well defined since $W$ was assumed to be finite and we can created a disjoint union \todo{look up disjoint union tex command} as we can see for $P(w_1 \skp) = P(\cup_{y\in W}\{(w_1,y)\}) = \sum_{y\in W}P(\{(w_1, y)\})$. $P(\skp w_2)$ will be calculated in an analogue way.
+
+One thing we see very frequently is the chain rule of probability which for natural language processing and a bi-gram is written as $P(w_1w_2)=P(w_2|w_1)P(w_1)$.
+Let us again walk through the formulas and give them a proper semantic.
+We have seen that the left hand side of the equation should read $P(\{(w_1,w_2)\})$ on the right hand we can substitude the conditional probability with $\frac{P(w_1\skp \intersection \skp w_2)}{P_2(w_1\skp)}$. 
+Since the numerator is exactly the left hand side we can divide and imply \todo{look up how to make and ! over an equal sign}$1=\frac{P(w_1)}{P(w_1\skp)}$. 
+This equation can only hold if numerator and denominator are equal leading to $P(\{w_1\})=P(w_1):=P(w_1\skp)$.
+This formular is particularly difficult because we had to know that we are in a bi-gram setting which means that the set of events was $W^2$.
+\todo{introduce marginals here and show that there is another way to interpret this formula which is a little bit more tricky because it is harder to define but also has some nice advantages}
+\todo{discuss the case of an "empty" or unseen condition which is at the moment not clear to me how to define}
+
+The above example can be expressed without skips. What is cruicial to understand that we have been moving around in the space of tuples. 
+This is what we have to keep in mind when interpreting the formula $P(w_2|w_1)$. 
+We can now also ask ourselves how this formula has to be interpreted if we are talking about so called $3$-gram model. \todo{bad here I talk about something I did not properly define}
+
+\textbf{Example:} Often we will see something like $P(w_n|w_1^{n-1})=\frac{c(w_1^{n-1})}{c(w_1^n)}$.
+Even though we just see one formular in this case we really defined an infinite but countable amount of probability functions which all live on different spaces. 
+\todo{do I really want to bring an example here? this is really a complex question since I am missing much notation (which I do not really whish to introduce at this point.) On the other hand I need to make clear that there is stuff going on. Even worse it is not even clear if we just wrote down conditionals on different spaces or marginals with different parameter spaces all on the same space.}
+
+
+\section{Definition of a Language Model}
+\section{Definition of an $n$-gram Model}
+\section{The Chain rule of Probability for Marginal Probabilities}
+\section{The Chain rule of Probability for Conditional Probabilties}
+\section{Introduction of Maximum likelihood $n$-gram models}
+\section{Messuring the quality of a language model}
+
+\chapter{Mathematical foundations of Smoothing Methods (20 pages)}
+\section{Why smoothing Language Models?}
+\section{Averaging probability distributions}
+\section{Laplace Smoothing}
+\section{Absolute discounting}
+\section{Backoff methods}
+\section{Interpolated methods}
+\section{Kneser Ney Smoothing}
+
+\chapter{Problems with implementations of current methods (20 pages)}
+As it turns out many of the above mentioned algorithms have been implemented incorrectly. 
+A lot of the time the reason is improper notation which for example leads to the fact that marginal probabilities are used like conditional probabilities and vice verca. 
+
+\section{Test of correctness}
+All methods from the last chapter could be proven to be correct.
+But when we look at implementations and language modelling toolkits we frequently find many problems since a lot of formulas seem ambigious. 
+In these cases the implementations need to be checked for correctnes. 
+
+One simple yet very effective test for correctness is testing if the sum over the probability of all events that can occure is actually 1. 
+This is one reason why in a computer enviroment we will never talk about language models but $n$-gram models. 
+Even over finite alphabets there are infinite elements in the set of all sentences. 
+This means that doing this test for correct implementation is impossible for a computer.
+\section{Marginals are not conditional probabilities}
+\section{Marginals are not defined if the history was not seen}
+\section{Markov assumption}
+\section{Start and end of scentence tags}
+\section{Problems with the unk token}
+
+\chapter{Benchmark of Language model toolkits in terms of correctness (20 pages)}
+as we saw in the last chapter a lot of times notation is arbitrary.
+This means that we often have a choice. 
+The first goal of this chapter is to test all the choices one can make for the well established methods in order to understand what is the best known language model. 
+The second goal of this chapter is to test the existing implementations of the algorithms of correctness and be able to state which choices have been made by the toolkits.
+\section{metrics for measuring - do we really need this?}
+\section{used data sets}
+
+
+\chapter{Generalized Language Models (20 pages)}
+As we saw there exist good reasons to do backoff steps in language modelling. 
+The question is why making the history one word shorter?
+Another question is why actually making it shorter and not introducing a skip at the first position?
+At this point one might wonder why not introducing skips at other positions? 
+Introducing skips increases the probabilities. 
+Maybe this is too much so we would like to introduce something that is not an arbitrary skip but also not a concrete word. Part of speeches seem to be reasonable though they could be replaced by any class leading to class based aproaches\cite{CLASS:BASED:LMS} or factored language models\cite{FACTORED:LANGUAGE:MODEL}.
+
+Generalized Language models are a way to address these issues. 
+They are fully compatible with the above mentioned smoothing methods. 
+
+For the rest of this chapter we show how to define generalized language models and demonstrate their superiority in terms of perplexity. 
+We will also demonstrate their downsides in terms of model parameter and storage space.
+
+
+\section{Introductionary example, definition of the probem}
+Here we would just do a maximum likelihood estimation of $n$-grams. 
+Introduce one or two example sentences (which have to be very well choosen)
+\section{Definition of skipped $n$-grams and differential notation}
+\begin{enumerate}
+\item notation. 
+\item already have a motivation with some statistics taken from wikipedia or even put this earlier?
+\end{enumerate}
+
+
+\section{Generalized ARPA format for Generalized Language Models}
+Also talking about the decoder
+\section{API documentation to the GLM software toolkit}
+
+\section{Pascal triangle of generalized language models}
+how we can understand skipped $n$-grams and what our point of view should be
+
+\section{Standard language models as a special case of generalized language models}
+
+
+
+\chapter{Smoothing tequniques for generalized language models}
+ 
+\section{kneser ney}
+\section{laplace smoothing}
+\section{other smoothing technique?}
+
+
+\section{mathematical proof why generalized language models have to be better than language models}
+only if I find one and if this is possible
+
+
+
+\chapter{applications: next word prediction setting (5 pages)}
+We will answer the question if generalized language models are only better in terms of perplexity or also outperforming in an application like next word prediction.
+\section{recycle the old SIGIR submission and redo the experiments}
+
+\chapter{applications: machine translation (5 pages)}
+\section{Implementing GLM in KenLM}
+\section{MOSES and basics of statistical Machine Translation}
+\section{Results}
+We will also aim to answer the question of performance in the setting of machine translation.
+
+
+\chapter{Solving the Entropy Conjecture(10 - 15 pages)}
+The conjecture states: Better results in Entropy of a LM will always positive correlate with better BLUE scores or Word error rates. The reason why this did not happen is that many implementations did not produce proper probability distributions.
+\section{basics of speech recognition}
+find co-author maybe steffen can help
+\section{big comparison 3 methods: ASR, MT, NWP, vs various toolkits}
+
+
+\chapter{Open ends (3 pages)}
+\section{Pruning}
+\section{Indexing}
+
+first basic question: will indexing depend on the application ? I guess it does. but it sure makes sense to to be able to store generalized language models.
+\subsection{filtering GLM to acertain size}
+shall I make this?
+\subsection{a data structure to store GLM}
+also here no ideas and results available
+
+\section{Distributed implementation}
+\chapter{conclusion (2 pages)}
+
+
+
+\chapter{Won't do Future Work (3 pages)}
+\section{languagemodels for information retrieval}
+together with thomas gottron. idea every document has its own langauge model... an let us measure Kullback-Leibler divergence
+\subsection{semantic relatedness of words}
+ESA work together with christoph schaefer
+
+\begin{appendix}
+\chapter{Kneser Ney Smoothing}
+In the original paper Kneser and Ney introduce Kneser Ney Smoothing as a back-off method. 
+In the following we will write down the concrete semantics of Kneser Ney Smoothing acording to our notation. 
+\section{Kneser Ney Smoothing on n-gram models}
+We assume $\Omega=W^n$ to be the probability space of an $n$-gram model. 
+In this sense Kneser and Ney are interested in the following probability function
+\[
+p(w|h)=
+\begin{cases}
+  \alpha(w|h),&\text{if } c(h,w)>0 \iff h\cap w\not\subseteq c^{-1}(0)\\
+  \gamma(h)\beta(w|\hat h), &\text c(h,w)=0 \iff h\cap w\subset c^{-1}(0)
+\end{cases}
+\]
+\todo{technically I cannot put in sets to the counting function... defining c properly is really painful}
+where $\alpha,\beta: 2^\Omega \rightarrow [0,1]$ are probability functions and $c:\Omega\rightarrow \mathbb{N}$ is a discrete random variable. 
+In this setting we can define the following sets:
+\[
+h:=\{v_1^n\in\Omega|v_1^{n-1}=h_1^{n-1}\}
+\]
+\[
+w:=\{v_1^n\in\Omega|v_n=w\}
+\]
+\todo{sets have the same name as the variable especially w}
+and a generalization of $\hat h$ of $h$ such that $h\subset\hat h\subset\Omega$\footnote{note that the generalization Kneser and Ney probably had in their mind was the event that consisted of tuples where the first condition was ignored (which is equivalent to removing the first word). Generalized langauge models can be thought of removing any word.}
+With this understanding of $h$ and $w$ the conditional probabilities make sense as $\alpha(w|h)=\frac{\alpha(w \cap h)}{\alpha(h)}$ and $w\cap h=\{w_1^n\in \Omega | w_1^{n-1}=h_1^{n-1}, w_n=w\} = \{(h_1,\dots,h_{n-1},w)\}$ the set with just one n-gram consisting of the history followed by the word just as one expects.
+Analougus mathematically meaningful definitions hold for $\beta$ and $p$.
+
+Kneser Ney state that $p(.|h):2^W\rightarrow [0,1]$ are indeed a probability functions $\forall h$ if $\gamma$ is defined correctly to shift probability mass from $\alpha$ to $\beta$. 
+We already see some confusion: Starting with $n$-gram models $\alpha$ and $\beta$ we are now looking at a Next Word Model. 
+In order to calculate $\gamma$ the following equations must hold $P(W|h)=1, \forall h$.
+Now we can do the following calculation:
+\[
+1=p(W|h)=p(\cup_{w\in W}w|h)=\sum_{w\in W}p(w|h)=
+\sum_{w:c(h,w)>0}p(w|h)+\sum_{w:c(h,w)=0}p(w|h)
+\]
+\[
+=\sum_{w:c(h,w)>0}\alpha(w|h)+\sum_{w:c(h,w)=0}\gamma(h)\beta(w|h) = \sum_{w:c(h,w)>0}\alpha(w|h)+\gamma(h)\sum_{w:c(h,w)=0}\beta(w|\hat h)
+\] 
+\[
+\iff \gamma(h)=\frac{1-\sum_{w:c(h,w)>0}\alpha(w|h)}{\sum_{w:c(h,w)=0}\beta(w|\hat h)}
+\]
+In the original paper $\beta$ was an arbitrary probability function. 
+This yields a problem since it could be that the denominator would be $0$ and $\gamma$ is not well defined. 
+This happens in the following cases:
+\begin{enumerate}
+\item $\beta(\hat h)=0$ since the conditional probability $\beta(w|\hat h)$ is not defined. For most estimators this will happen if $\hat h$ was also not seen in the training data.\footnote{remember $\hat h$ was just a superset of $h$. By definition it has to contain one element. But it is not quite clear how this is reflected in the formalism of being a history of just one word shorter.}
+\item even if $\hat h$ was seen we still could have $\beta(\hat h,w)=0)\forall w\in W : c(h,w)=0$
+\end{enumerate}
+Luckily the goal of Kneser Ney Smoothing is to find $\beta$ such that the marginal constraint is given \todo{formulate the marginal constraint in a good way}\todo{check if this also implies the condition that the denominator is larger than zero.} \todo{check if the proof of Kneser Ney is given in a way such that the resulting $\beta$ is really bigger than zero on $\hat h$}
+
+With this notation and setting let us see how the argument of finding a good probability distribution $\beta$ goes along. 
+For the sake of better understanding let us assume $n=4$.\footnote{the proofs go the same for all $n\geq 2$ but in higher orders some side effects and questions arise.}
+It is assumed that for $c(h,w)>0$ the distribution $p(w|h)=\alpha(w|h)$ are well known and fixed. 
+take in mind $\alpha$ is usually thought of a discounted maximum likelihood estimator like: $\alpha(w|h)=\frac{|h \cap w|-D}{|h|}$ for some discount value $D$.\todo{defining this with the size of the sets does not work. But the counting function is also rather hard to define (one could do something like $c(h,w)=n \iff) h\cap w \subset c^{-1}(n)$}
+We emphasize that $|h|$ is not the same as the numbers of often the sequence $h_1^{n-1}$ occurs in the training data.
+It is rather the number of sequences $h_1^{n-1}$ followed by any word occure in the training data. 
+Since $\hat h$ is a superset of $h$ we have $|\hat h| \geq |h|$ as well as $|\hat h \cap w| \geq |h \cap w|$.
+In particular we can properly look at $p(h|\hat h)$ and $p(w|\hat h)$ which as $n$-gram models are well defined.
+For a stratification $G$\todo{look up the word and or explain it.} we can write: 
+\[
+p(w|\hat h) = \sum_{g\in G}p(w\cap g|\hat h)
+\]
+\[
+=\sum_{g\in G}\frac{p(w \cap g \cap \hat h)}{p(\hat h)}=\sum_{g\in G}\frac{p(w \cap g \cap \hat h)p(g \cap \hat h)}{p(\hat h)p(g \cap \hat h)}
+\]
+\[
+=\sum_{g\in G}\frac{p(w \cap g \cap \hat h)}{p(g\cap \hat h)}\frac{p(g\cap\hat h)}{p(\hat h)} = \sum_{g\in G}p(w|g\cap \hat h)p(g|\hat h)
+\]
+One has to pay attention that $p(g\cap \hat h)$ has to be unequal to zero. 
+The original paper writes this as $p(g|\hat h)=0$ if $\hat g \neq \hat h$. 
+This is a stronger requirement than having a non empty intersection of $g \cap \hat h$. 
+On the other side a non empty intersection is not suffucient since the probability of the event also has to be bigger than 0.
+\todo{check if Kneser Ney condition is sufficient I have the feeling it is not if g is a generalization of $\hat h$ then the intersection with $\hat h$ is $\hat h$ and in this case the conditional probability would always be one}.
+
+Appying the condition and inserting the backoff formula one gets:
+\todo{the following are not the same as in the paper}
+\[
+p(w|\hat h) =  \sum_{g\in G:\hat g = \hat h}p(w|g\cap \hat h)p(g|\hat h)
+\]
+\[
+=  \sum_{g\in G:\hat g = \hat h, c(\hat h, w)>0}\alpha(w|g\cap \hat h)p(g|\hat h) +  \sum_{g\in G:\hat g = \hat h, c(\hat h,w)=0}\beta(w|g\cap \hat h)p(g|\hat h)
+\]
+in order for $p$ to be a probability function $\gamma$ has to be defined correctly (for every $h$). 
+Especially for any history $h$ that was unseen. 
+
+\section{Kneser Ney Smoothing on parameterized Next Word Models}
+\todo{is next word model a good name?} asdf
+
+\section{common mistakes done in current implementations of Kneser Ney Smoothing}
+\subsection{recursive implementation}
+\todo{do the calculation and check if the following argument really is a problem.}
+Assume a trigram model where the highest order is done by absolute discounting. 
+In that case we already know from the original paper that the backoff that results from skipping the first word in the history is a countinuation count estimator.
+This is usually taken as the bigram model to smooth the trigram model.
+People then also take continuation counts for all other lower orders e.g. the unigram model but Kneser Ney do only say in the case of starting with a discounted maximum likelihood as $\alpha$ the probability function $\beta$ should be a countinuation count estimator.
+In the case where 2-gram model is already a continuation count estimator taken as $\alpha$ one has to follow the argument of Kneser Ney and see how the new $\beta$ for the unigram distribution has to look like.\todo{do that calculation}
+\subsection{estimations in the calculation}
+Kneser and Ney only estimate the denominator in their formula the following example should give you insight of how this can become a problem. \todo{tex the example and code a small example in which one can calculate the correct $\alpha, \beta, \gamma$, numerator and denominator and check how big the difference is.}
+\subsection{double backoff step}
+As $\hat h$ is usually taken to be the history in which the first word is skipped (not removed!) it could happen that $\hat h$ was still not seen (in particular with the word $w$) in the training data. 
+What one can find in implemenatations is that people just do another backoff (meaning to skipp another word at the beginning of the history) while this is totally correct or let us say possible in the sense of Kneser Ney Smoothing (which does not really specify how to choose $\hat h$ using just the the continuation count of the $n-3$ gram in the history will not be the $\beta$ that Kneser and Ney suggest. 
+If everything else is implemented correclty the resulting function will still be a probability function and sum up to $1$ (which is good news) but it is not the optimal choice of beta. 
+The optimal choice of $\beta$ in that case uses a continuation count that states how many bigrames proceeded that doubly skipped histroy instead of how many unigrams preceeded it.\todo{tex the calculation for this and double check it}
+
+\end{appendix}
