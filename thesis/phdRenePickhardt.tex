@@ -8,13 +8,17 @@
 \usepackage{amssymb}
 \usepackage{eqnarray}
 \usepackage{mathtools}
+
 % via: http://tug.ctan.org/macros/latex/contrib/glossaries/glossariesbegin.pdf
 \usepackage[colorlinks]{hyperref}
 \usepackage{glossaries}
 \makenoidxglossaries
 
 
-\newglossaryentry{ps}{name={probability space},description={A probability space - often denoted $\Omega$ is a set}}
+\newglossaryentry{os}{name={outcome space},description={A set - often denoted $\Omega$ - is called an outcome space}}
+\newglossaryentry{powerset}{name={power set}, description={Given a finite or infinite set $\Omega$. The set of all subsets - denoted with $s^\Omega$ - is called the power set. For finite sets of $N$ elements it has $2^N$ elements}}
+
+\newglossaryentry{ps}{name={probability space},description={A triplet $(\Omega, S, P)$ is called a probability space if $\Omega$ is an \gls{os}, $S$ is a \gls{sa} and $P$ is a \gls{pf}}}
 
 \newglossaryentry{sa}{name={$\sigma$-algebra},
 description={$S\subset 2^\Omega$ is called $\sigma$-algebra if the axioms of definition \ref{def:sa} hold}}
@@ -22,14 +26,14 @@ description={$S\subset 2^\Omega$ is called $\sigma$-algebra if the axioms of def
 description={$P:S\longrightarrow [0,1]$ is called P probability function if $S$ is a \gls{sa} and the axioms of definition \ref{def:pf} hold}}
 
 \newglossaryentry{lm}{name={language model},
-description={A triple $(\Omega,S,P)$ where $\Omega = W^{*}$ is the set of all sequences over a finite vocabulary $W$ and $S$ is a \gls{sa} over $\Omega$ and $P$ is a \gls{pf} over $S$}}
+description={\todo{rework! emphasize already in \gls{ps} that we usually write $P$ instead of the full triplet.}A triple $(\Omega,S,P)$ where $\Omega = W^{*}$ is the set of all sequences over a finite vocabulary $W$ and $S$ is a \gls{sa} over $\Omega$ and $P$ is a \gls{pf} over $S$}}
 
 \newglossaryentry{ngm}{name={$n$-gram model},
 description={A triple $(\Omega,S,P_n)$ where $\Omega = W^{n}$ is the set of all \glsplural{ngram} over a finite vocabulary $W$ and $S$ is a \gls{sa} over $\Omega$ and $P_n$ is a \gls{pf} over $S$ is called an $n$-gram model}}
 
 
 \newglossaryentry{ngram}{name={$n$-gram},description={An $n$-gram is an element of $W^{n}$ given a finite vocabulary $W$. We denote a specific $n$-gram $w_1^n$ or $w_1\dots w_n$ instead of $(w_1,\dots,w_n)$}}
-\newglossaryentry{sentence}{name={sentence}, description={A sentence is an element of $W^{*}$ given a finite vocabulary $W$}}
+\newglossaryentry{sentence}{name={sentence}, description={A sentence is an element of $W^{*}$ given a finite vocabulary $W$ \todo{what about corpora}}}
 \newglossaryentry{event}{name={event}, description={If $S$ is a \gls{sa} over $\Omega$ then subsets of $\Omega$ which are elements of $S$ are called events.}}
 
 \newglossaryentry{mm}{name={markov model},
@@ -55,15 +59,15 @@ P_{n}(w;w_1^n):=\frac{c_{n+1}^D(w_1^nw)}{\sum\limits_{v\in W}{c_{n+1}^D(w_1^nv)}
 \end{align*} is a Markov maximum likelihood model of order $n$.  It is a \gls{mlm} \todo{somewhere state that families of markov maximum likelihood models in practice will not exist and therefor a construction of a markov language model from a family of markov maximum likelihood models will most certainly}}}
 
 \newglossaryentry{word}{name={word},
-description={asdf}}
+description={to come}}
 \newglossaryentry{vocabulary}{name={vocabulary},
-description={asdf}}
+description={to come}}
 \newglossaryentry{token}{name={token},
-description={asdf}}
+description={to come}}
 \newglossaryentry{document}{name={document},
-description={asdf}}
+description={to come}}
 \newglossaryentry{corpus}{name={corpus},
-description={asdf}}
+description={to comef}}
 
 \newglossaryentry{cf}{name={counting function},
 description={Given a \gls{corpus} D of text documents. $c_n^D:W^{n}\longrightarrow\mathbb{N}_0$ is called a counting function if it returns the absolut frequency how often each $n$-gram $w_1^n\in W^n$ occurs in $D$}}
@@ -84,11 +88,15 @@ description={Given a \gls{corpus} D of text documents. $c_n^D:W^{n}\longrightarr
 \newcommand{\eqlab}[1]{\refstepcounter{equation}\label{#1}\textup{\tagform@{\theequation}}}
 \makeatother
 
-\newtheorem{definition}{Definition}[chapter]
+% following: http://web.mat.bham.ac.uk/R.W.Kaye/latex/thm.pdf
 \newtheorem{theorem}{Theorem}[chapter]
-\newtheorem{example}{Example}[chapter]
-\newtheorem{remark}{Remark}[chapter]
 \newtheorem{lemma}{Lemma}[chapter]
+\theoremstyle{remark}
+\newtheorem{remark}{Remark}[chapter]
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[chapter]
+\theoremstyle{remark}
+\newtheorem{example}{Example}[chapter]
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -145,97 +153,124 @@ The core idea would be to choose an example or example setting of a person in hi
 %%%	Let's try something
 %%% 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newcommand{\intersection}{\cap}
-\newcommand{\union}{\cup}
-\newcommand{\skp}{\_}
-\newcommand{\pow}[1]{2^{#1}}
 
-
-% what is the story line I am trying to tell?
-% basic definitions of probability functions (n-gram models)
-% conditionsl probabilities
-% a formular often defines infinite many probability functions
-% a lot of notation is unprecise and we need to think about how to interpret this (sometimes we even have choices)
-% putting the probability space to the probability function will help
-% chainrule (marginal vs conditional case)
-% introducing skips
-% bring real world examples that already show how it matters.
-
-\chapter{Mathematical foundations of Language Models and $n$-gram Models}
-In this chapter we will give an overview of the methods of statistical $n$-gram based language modeling and provide a mathematically rigorous and sound notation for language models.
-The later is needed since nowadays the notation in most publications is mathematically not sound and often oversimplified.
+\chapter{Mathematical foundations of Markov language models of order $n$ and $n$-gram language models}
+In this chapter we will give an overview of the methods of statistical $n$-gram based language modeling and provide a mathematically rigorous and sound notation for language models. \todo{already mention terms like markov language model and $n$-gram language model?}
+The later is needed since nowadays the notation in most publications is mathematically not sound and often oversimplified. Examples of this can be found in appendix \ref{a:ambigiousNotation}.
 This might lead to ambiguous semantics for many of the formulas even for expert readers. 
-We strongly suggest that even the expert reader should carefully study the following section and review our notation. 
-The formulas and ideas follow the standard text books and publications like \cite{chen:goodman}, \todo{add more bibliography} but the unification and notation is our contribution and an integral part of this thesis. 
+The practitioner is left in doubt how to implement well known language modeling techniques correctly. 
+We strongly suggest that the expert reader as well as the practitioner carefully study the following section and review our notation. 
+The formulas and ideas of constructing Markov language models of order $n$ follow the standard text books and publications like \cite{chen:goodman}, \todo{add more bibliography} 
+However the unification of the notation as well as our notion of what we call an $n$-gram language models (which we is different to what other authors mean by $n$-gram models) is our contribution and an integral part of this thesis. 
 
+\section{Formal definitions of Language Models, $n$-gram models and Markov models}\label{sec:basicDefinitions}
+\begin{definition}
+Let $W$ be a finite set such that $W = \{w_1,\dots,w_N\}$. The elements of $W$ are called \glsplural{word} and we call $W$ a \gls{vocabulary} $N$ words.
+\end{definition}
 
-\section{Formal Definition and Construction of Language Models and $n$-gram models}\label{sec:basicDefinitions}
-Given a finite Vocabulary $W = \{w^1,\dots,w^N\}$ of $N$ words. 
-We call $W^{n}$ the set of sequences of length $n$ over the vocabulary $W$ or the set of \glsplural{ngram} over $W$.
+\begin{definition}
+Given a finite Vocabulary $W = \{w_1,\dots,w_N\}$ of $N$ words. 
+We call $W^{n}=\underbrace{W\times \dots\times W}_{n-\texttt{times}}$ the set of sequences of length $n$ over the vocabulary $W$ or the set of \glsplural{ngram} over $W$. 
+\end{definition}
+
+\begin{definition}
 $W^{*}$ is called the set of all sequences over $W$ or the set of \glsplural{sentence} over $W$.
+\end{definition}
+
+\begin{remark}
+We state a couple of obvious observations and introduce some short forms to speed up notation while working with $n$-grams and sentences:
+\begin{description}
+\item[Size:] Obviously there are $N^n$ elements in the set of $n$-grams over $W$.
+\begin{align}
+\Leftrightarrow|W^{n}|=N^n
+\end{align}
+On the other hand the set of sequences over any vocabulary containing one or more words is infinite.
+\begin{align}
+\Leftrightarrow |W^{*}|=\infty
+\end{align}
+\item[Union:] We can understand $W^{*}$ as the countable but infinite union of sets of $n$-grams:
+\begin{align}
+W^{*}=\bigcup_{n=1}^\infty W^n
+\end{align}
+\item[Short forms] An element $(w_1,\dots,w_n) \in W^n$ will be written as $w_1\dots w_n$ or even shorter as $w_1^n$. For a sentence $s\in W^{*}$ we know $\exists ! m : s\in W^m$. We call $m$ the length of the sentence. In that case we will write $|s|=m$ or $len(s)=m$. Finally we often want to do operations on all words in a sentence. For example we might want to add something up for each word $w$ in $s$. By abuse of notation of the $\in$ operator we might write something like $\sum\limits_{w\in s}\dots$ in that case.
+\end{description}
+\end{remark}
+
+After having introduced terms specific for words and language we want to review some basic concepts of probability theory. 
+We have limited ourselves to the notion of a probability function using $\sigma$-algebras as the concept of $\sigma$-additivity plays a central role in the process of constructing all kind of language models presented in this text.
+However in order to stay as basic as possible for the non mathematician we omitted the notion of random variables as well as joint and marginal probability distributions.
+
+\begin{definition}
+Any set - usually denoted as $\Omega$ - can be called an \gls{os}. 
+We call $2^\Omega:=\{A| A\subset \Omega\}$ the \gls{powerset} over $\Omega$.
+\end{definition}
+In this text a typical choice for $\Omega$ will be $W$,$W^n$ and $W^{*}$ for $n\in\mathbb{N}$.
 
 \begin{definition}\label{def:sa}
-Let $\Omega$ be a \gls{ps}. 
-E.g. $\Omega=W$.
-$S$ is called a $\sigma$-algebra over $\Omega$ iff:
+Let $\Omega$ be an outcome space. 
+A subset $S$ of $2^\Omega$ is called a $\sigma$-algebra over $\Omega$ iff:
 
 \begin{description}
-\item[Subset of Power set] 
+\item[Universal set:] $\Omega$ is in $S \Leftrightarrow \Omega \in S$
+\item[Unions:] $S$ is closed under countable unions. 
 \begin{align}
-S\subset 2^{\Omega} \text{ where } 2^{\Omega} \text{ is the power set of } \Omega
-\end{align} 
-\item[Closed under countable unions] 
+ \Leftrightarrow A_1,A_2,\dots \in S \Rightarrow \bigcup_{n\in\mathbb{N}}A_n \in S \label{eq:closedUnion}
+\end{align}
+\item[Complements:] $S$ is closed under complements
 \begin{align}
-A_1,A_2,\dots \in S \Rightarrow \bigcup_{n\in\mathbb{N}}A_n \in S \label{eq:closedUnion}
-\end{align}. The same holds true for finite unions.
-\item[Universal set] \begin{align}\Omega \in S \end{align}
-\item[Closed under complementation] \begin{align} A\in S \Rightarrow \Omega\backslash A \in S \end{align}
+\Leftrightarrow  A\in S \Rightarrow \Omega\backslash A \in S 
+\end{align}
 \end{description}
+The elements of $S$ (which by definition are subsets of $\Omega$) are called \glsplural{event}.
+In computer science literature $S$ is often called the event space.
 \end{definition}
-\todo{formatting!!!}
-The elements of $S$ are called \glsplural{event}.
+
 
 \begin{definition}\label{def:pf}
-Let $S$ be a \gls{sa} over some \gls{ps} $\Omega$. $P:S\longrightarrow [0,1]$ is called a probability function iff: 
-$P$ respects all the properties of the \gls{sa} $S$.
-This means: 
-\begin{itemize}
-\item $P$ is $\sigma$-additive $\Leftrightarrow$ For $A,B \subset S \land A\cap B = \emptyset \Rightarrow P(A\cup B) = P(A)+P(B)$.
-\item The above property also holds for a countable set of elements in S if they are pairwise disjoint. 
-\item $P(\emptyset)=0$ and $P(S)=1$. 
-\end{itemize}
+Let $S$ be a \gls{sa} over an \gls{os} $\Omega$. $P:S\longrightarrow [0,1]$ is called a \gls{pf} iff: 
+$P$ respects the properties of a \gls{sa}. This means: 
+\begin{description}
+\item [$\sigma$-additivity:] $P$ is $\sigma$-additive which means for $A_1,A_2,\dots in S$ and $\forall i,j$
+\begin{align}
+A_i\cap A_j = \emptyset \Rightarrow P(A_i\cup A_j) = P(A_i)+P(A_j)
+\end{align}
+\item[Summing up to 1:] $P(\emptyset)=0$ and $P(S)=1$. 
+\end{description}
+\end{definition}
+
+\begin{definition}\label{def:ps}
+A triplet $(\Omega,S,P)$ where $\Omega$ is and \gls{os} and $S$ is a \gls{sa} over $\Omega$ and $P$ is a \gls{pf} over $S$ is called a \gls{ps}.  
 \end{definition}
 
 With this review of mathematical notation we can properly define the term \gls{lm} in consistence with the existing literature.
 
 \begin{definition}\label{def:lm}
-Let $\Omega = W^{*}$ be the set of \glsplural{sentence} over a finite vocabulary $W$ and $S$ be a \gls{sa} over $\Omega^{*}$.
-We call the triple $(\Omega, S, P)$ a \gls{lm}
+Let $\Omega = W^{*}$ be the set of \glsplural{sentence} over a finite vocabulary $W$ and $S$ be a \gls{sa} over $W^{*}$.
+In that case a probability space $(W^{*}, S, P)$ is called a \gls{lm}.
 \end{definition} 
 
-\begin{example}\label{ex:continuation}
-Events in $S$ are subsets in $\Omega$ and have thus a cardinality.
-If $S$ is generated by unions of events with a cardinality of $1$ it is sufficient to know the values of the \gls{pf} on the events with a cardinality of $1$. Because of the $\sigma$-additivity the continuation on all of $S$ is unique.  
-Conversely, knowing $P$ on all events which have a cardinality of $1$ in $\Omega$ is particularly useful since these events are usually what is measured and what computer scientists work with.
-\end{example}
+\begin{remark}
+As in the literature we might omit $\Omega$ and $S$ and only name the probability function $P$ when we want to talk about an entire probability space or a language model.
+Though we try to minimize this behavior we emphasize that from the context it should always be clear what the spaces $\Omega$ and $S$ are.
+\end{remark}
 
-The main question throughout this thesis reads:\\
+Having stated this the main question throughout this thesis (and the field of language modeling) reads:\\
 \\
-\textbf{Given a corpus of text documents, how can we estimate or learn a language model $P$ over the vocabulary that arises from that corpus?} 
+\textbf{Given a corpus\todo{not defined yet} of text documents, how can we estimate or learn a language model $P$ over the vocabulary that arises from that corpus?} 
 \\
 \\
 %Since $\Omega^{*}$ is infinite even for small vocabularies it is a little bit tricky to handle so that most People will use $n$ gram models in order to estimate a language model (of order $n$).
-Obviously it is not so clear how to define a probability function that assigns a probability for every sentence over an alphabet. 
+Obviously it is not so clear how to define a probability function that assigns a probability for every sentence over a vocabulary. 
 Since the set of all sentences is infinite we cannot use the uniform distribution (assuming each sentence is equally probable) since the uniform distribution is undefined over infinitely large probability spaces.  
-One might argue that a sentence like \cexp{the the the the the the the} is not a useful sentence and can be omitted. 
+One might argue that a sentence like \cexp{the the the the} is not a useful sentence and can be omitted. 
 A counter argument is that the sentence just occurred in this thesis. 
 But even the maximal subset of $W^{*}$ containing only plausible sentences is infinite.\footnote{I do not have a proof for this but it seems plausible when I see that James Joyce was able to put a sentence of 4,391 words into his novel Ulysses and techniques like recursion also exist for language. You could also read \url{https://en.wikipedia.org/w/index.php?title=Longest_English_sentence&oldid=736368728} for a discussion and further thoughts on this}
 Therefor we can as well directly work with the general case of $W^{*}$.
-In order to tackle the problem people often make use of \glsplural{ngm}, which will be defined in the next step, to construct a \gls{lm}.  
 
-\begin{definition}\label{def:ngram-model}We call the triple $(W^{n}, S, P_n)$ an \gls{ngm} if $S$ is a $\sigma$-algebra over $W^{n}$ and $P_n:S\longrightarrow [0,1]$ is a probability function. Often in the notation we omit the Triple and will just say the \gls{ngm} $P_n$. 
-\end{definition}
-\todo{discriminate against the classical known $n$-gram models which look rather like $P(w_n|w_1^{n-1})$}
+In order to tackle the problem of constructing a \gls{lm} people often make use of \glsplural{mm}, which will be defined later in this chapter, in order to construct \glsplural{mlm}. 
+In addition we introduce our notion of \glsplural{ngm} which lead to our novel approach of creating what we call \glsplural{nglm}. 
+Before we introduce all of that we want to make sense of the formal notation which was presented so far.
+Therefor we will now give three very simple examples to construct language models. 
 
 \begin{example}\label{ex:unigram-model}
 Given a corpus $D$ of text documents. We will - here and in future - assume that $D$ contains of only one text without loss of generality. \todo{handle sentences} Let $\Omega=W$ be the set of unique words in $D$ and $N = |W|$ its cardinality and $S=2^{W}$. There are three well known ways of constructing a unigram model unigram model $(W,S,P_1)$. In all cases one uses the trick of example \ref{ex:continuation} in its construction. 
@@ -287,6 +322,18 @@ Obviously we have: $cont_D(w) \leq c_D(w) \forall w\in W$. Therefore it can happ
 \todo{we don't need c or cont just an arbitrary function can be used.}
 \end{example}
 
+\section{Constructing Language Models}
+
+\begin{example}\label{ex:continuation}
+Events in $S$ are subsets in $\Omega$ and have thus a cardinality.
+If $S$ is generated by unions of events with a cardinality of $1$ it is sufficient to know the values of the \gls{pf} on the events with a cardinality of $1$. Because of the $\sigma$-additivity the continuation on all of $S$ is unique.  
+Conversely, knowing $P$ on all events which have a cardinality of $1$ in $\Omega$ is particularly useful since these events are usually what is measured and what computer scientists work with.
+\end{example}
+
+\begin{definition}\label{def:ngram-model}We call the triple $(W^{n}, S, P_n)$ an \gls{ngm} if $S$ is a $\sigma$-algebra over $W^{n}$ and $P_n:S\longrightarrow [0,1]$ is a probability function. Often in the notation we omit the Triple and will just say the \gls{ngm} $P_n$. 
+\end{definition}
+\todo{discriminate against the classical known $n$-gram models which look rather like $P(w_n|w_1^{n-1})$}
+
 We continue by proofing a useful lemma for the construction of language models. 
 
 \begin{lemma}\label{lem:sumProductProbabilitySpace}
@@ -314,6 +361,7 @@ The last step is true for the same reason as in the last steps of the basis.
 Since the lemma is true for $n=1$ and we can deduce from $m$ to $m+1$ we can conclude the lemma it is true for all $n$.
 \end{description}
 \end{proof}
+
 
 We can now proceed by constructing a language model.
 
@@ -355,9 +403,7 @@ In fact we would have had:
 P'(W^{*})= P(\bigcup_{i=1}^\infty W^n) = \sum_{i=1}^\infty P(W^n) = \sum_{i=1}^\infty 1
 \end{align}
 Since the result is not finite we would not have had the chance to take its inverse as a normalizing factor. 
-There is also a nice proof by contradiction that $P'$ cannot be a language model which can be found in the appendix \todo{create appendix, move and reference the following: $P'$ is not a probability distribution because $P'(\bigcup_{w\in W}\{w\})= P_1(\bigcup_{w\in W}\{w\})=\sum_{w\in W}P_1(\{w\}) = 1 \Rightarrow P'(W) = 1$. On the other hand if $P'$ were a probability distribution we would have $P'(W^{*}) =1$ by definition. 
-If both was true than due to $\sigma$-additivity for every $s= \{v,w\}$ we would have $P'(\{s\})=P_1(\{v\})P_1(\{w\}) = 0 \forall v,w \in W$.
-This can only be true if $P_1(\{w\}) = 0 \forall w$. That is an obvious contradiction to the assumption that $P_1$ is a probability distribution. Therefore we conclude that $P'$ could not be a probability distribution or a language model. }
+There is also a nice proof by contradiction that $P'$ cannot be a language model which can be found in the appendix \ref{a:proofs}
 
 The parameter $\rho$ can be understood as the probability for a sentence to stop. 
 It is thus an elegant way of expressing what the common literature is doing with begin of sentence tags and end of sentence tags.
@@ -604,6 +650,20 @@ following the structure from the last chapter we can smooth $n$-gram models, mar
 \begin{itemize}
 \item discuss smoothing problems in all three cases.
 \end{itemize}
+\section{Markov Models}
+\subsection{Laplace Smoothing}
+\subsection{Interpolated Methods}
+\subsection{Backing-off Methods}
+\subsection{Kneser-Ney Smoothing}
+
+\section{n-Gram Models}
+\subsection{Laplace Smoothing}
+\subsection{Interpolated Methods}
+\subsection{Backing-off Methods}
+\subsection{Kneser-Ney Smoothing}
+
+\section{Maybe also Language Models}
+
 
 \chapter{The case of generalized language models}
 \todo{maybe this is only a section in the smoothing chapter}
@@ -617,6 +677,13 @@ The highest value for entropy occurs with the uniform distribution. with $H(P^{u
 We therefor suggest to normalize all entropy values by dividing through the maximum entropy possible for probability space in question. 
 \todo{the problem is on $W^{*}$ this is impossible. since the uniform distribution will not exist. However we can construct the relative entropy for unigram and $n$-gram models. Maybe we find a away how to use the values to know the relative entropy of our constructed lms...}
 
+\chapter{Implementation hacks}
+\section{Begin of Sentence tags}
+maybe proof how begin of sentence tags translate to a certain kind of Markov Model. 
+\section{The unknown word token - UNK}
+Explain how to handle the unknown word token and why to best avoid it. 
+\subsection{Fixing the vocabulary}
+
 \chapter{empirical study, datasets, software toolkits, experiments.} 
 
 
@@ -626,11 +693,35 @@ Discuss statistical language modeling as well as smoothing but also modern appro
 \chapter{Conclusions and Future Work}
 
 \begin{appendix}
-\chapter{Some proofs}
+\chapter{Some proofs}\label{a:proofs}
 Proofs which didn't make it to the main text.
+\section*{Product Formula for Unigram Language Models}
+\begin{theorem}
+Let $P_1:2^W\longrightarrow[0,1]$ be a unigram model. For $s\in W^{*}$ set:
+\begin{align}
+P'(\{s\})= \prod_{w\in s}P_1(\{w\})
+\end{align} 
+Then $P'$ is not a language Model.
+\end{theorem}
+\begin{proof}
+Let us assume $P'$ was a language model. In that case we have  $P'(W^{*}) =1$ by definition. On the other hand we have:
+\begin{align}
+P'(W) & = P'(\bigcup_{w\in W}\{w\})= \sum_{w\in W}P'(\{w\}) = \sum_{w\in W}P_1(\{w\}) \\
+ & = P_1(\bigcup_{w\in W}\{w\})= P_1(W) = 1
+\end{align}
+Since $1 = P'(W^{*}) = P'(W^{*}\backslash W \cup W)= \underbrace{ P'(W^{*}\backslash W)}_{\text{must be }0} + \underbrace{•P'(W)}_{=1}$  \\
+From $P'(W^{*}\backslash W)=0$ it follows that $P(\{s\}) = 0 \forall s=(v,w)\in W^2$.\\
+By definition we have 
+\begin{align}
+P'(\{s\})=P_1(\{v\})P_1(\{w\})  = 0 \forall v,w \in W
+\end{align}
+This can only be true if $P_1(\{w\}) = 0 \forall w$. That is an obvious contradiction to the assumption that $P_1(W)=1$. We conclude that our assumption that $P'$ was a probability function or a language model could not be true.
+\end{proof}
 
 \chapter{Some tables and graphics}
 Empirical results which didn't make it to the main text.
+
+\chapter{Examples of ambigious notation for Language Modeling from the Literature}\label{a:ambigiousNotation}
 
 \end{appendix}
 
