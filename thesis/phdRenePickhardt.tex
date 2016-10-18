@@ -352,7 +352,7 @@ Afterwards we used the $\sigma$-additivity which $P_n^{uni}$ should have by defi
 
 \item[Maximum Likelihood Estimator]  Let $c_n^D:\Omega = W^n\longrightarrow\mathbb{N}$ be the counting function \footnote{Even though we decided to omit the notion of random variables we emphasize for the experienced reader that $c_n^D$ is actually a random variable on the outcome space mapping elements of $\Omega$ to natural numbers. The trick in this and the following example will work with any random variable of this form.} We set: 
 \begin{align}
-P_n^{mle}(\{s\})=\frac{c_n^D(s)}{\sum\limits_{s'\in \Omega}c_n^D(s')}
+P_n^{mle}(\{s\})=\frac{c_n^D(s)}{\sum\limits_{s'\in \Omega}c_n^D(s')} \label{eq:n-grammodel:mle}
 \end{align}
 $P_n^{mle}$ is a probability function:
 \begin{proof}
@@ -592,71 +592,80 @@ This makes it difficult to impractical to learn a unique probability function fo
 \end{remark}
 
 \begin{example}
-Transfere the stuff from the previous section (uniform, MLE and contcounter to markov assumption (at least with order $1$ it should be possible.) Also discuss zero probabilities problem and well defined problem in this or in order $2$ setting. 
+Given a corpus $D$ and a counting function $c_{n+1}^D:W^{n+1}\longrightarrow\mathbb{N}_0$. If $\exists w_1^n \in W^{n},v\in W$ such that $c_{n+1}^D(w_1^nv) > 0$ Then \begin{align*}
+P_{1}^n(w;w_1^n):=\frac{c_{n+1}^D(w_1^nw)}{\sum\limits_{v\in W}{c_{n+1}^D(w_1^nv)}}
+\end{align*} is a Markov maximum likelihood model of order $n$.  
+As discussed in the previous remark the assumption is rather strong. 
+Already for $n = 1$ there will most certainly be cases in which it does not hold. 
+This means that even though the formula gives rise to quite a lot of Markov models of order $n$ in general it does not define a family of Markov Models of order $n$. 
+
 \end{example}
-Despite the sparsity problems which will be fixed soon we can use families of conditioned unigram models of order $n$ or the markov assumption of order $n$ to construct another class of language models.  
+
+The problems one runs into when trying to learn a family of Markov Models of order $n$ from a corpus can be fixed with the help of smoothing techniques to be introduced in the next chapter.
+
+\begin{remark}
+If the condition of the above example does not hold one sees directly that the denominator will be zero making the fraction undefined. 
+Especially while implementing these models with the help of a computer one might be tempted to set $P_1^n(w;w_1^n) = 0 \forall w\in W$ in the case of an unseen history (or to $1$). Obviously this is not a probability function for the model parameters $w_1^n$. The choice of setting $P_1^n(w;w_1^n) = \frac{1}{N} \forall w\in W$ at least results in a probability function. However the uniform distribution is hardly following the Markov assumption. This very primitive approach of smoothing might work but there will be better techniques presented throughout this text.
+ \end{remark}
+
+Despite the fact, that we have not seen a direct way of constructing a family of Markov Models of order $n$ from a corpus we will for now assume the existence of such a family to demonstrate the construction of Markov language model of order $n$ with the help of such a family.  
 
 \begin{lemma}\label{lem:constructLowerOrderMarkovFamilies}
-Let $P_1^n$ be a family of markov models \todo{maybe this is a better name?} of order $n$. We can decrease the order by $1$ via the following process. 
-For each $h=w_1\dots w_n\in W^n$ 
+Let $P_1^n$ be a family of Markov models of order $n$.  
+For each $h=w_2\dots w_n\in W^{n-1}$ we set: 
 \begin{align}
-P_1^{n-1}:(w;w_2\dots w_n):=\frac{1}{|W|}\sum_{v\in W}P_1^n(w;v w_2\dots w_n)
+P_1^{n-1}(w;w_2\dots w_n):=\frac{1}{|W|}\sum_{v\in W}P_1^n(w;v w_2\dots w_n)
 \end{align}
-is a markov model or oder $n-1$ \todo{conflict how this process will not reflect BOS well which is why we need this process...}
+$P_1^{n-1}$ is a Markov model of order $n-1$ \todo{This process will not reflect BOS well, which is the main motivation for this process.}
 \begin{proof}
-Trivial! \todo{do it} Average of probability functions is a probability function. we just ddecreased the order by averaging over the first word (btw. there could have been other positions to average over and we arrive ad skip models. )
+In order to conclude the proof we have to show that for an arbitrary $w_2^{n}\in W^{n}$ the induced $P_1^{n-1}(\cdot;w_2^n)$ is a Markov Model of order $n-1$.
+By assumption for a fixed $v\in W$ the induced $P_1^n(\cdot ; vw_2^n)$ is a Markov Model of order $n$. 
+Since there exist $N$ words in $W$ which we can choose as $v$ we can build the average of the Markov Models for all $v$. 
+The average of $N$ probability functions is again a probability function \todo{need proof?} and is calculated by $\frac{1}{N}\sum_{v\in W}P_1^n(\cdot;vw_2^n)$ This is exactly how we chose it in the lemma since it is a probability function on $2^W$ depending on $w_2^n$ it is a Markov model of oder $n-1$
+\todo{There could have been other positions to average over and we arrive at skip models.}
 \end{proof}
 \end{lemma}
 
-like the unigram language model was constructed we can now construct a markov language model of order $n$ with the help of the lemma and we include the length distribution of sentences and copy the proof from above. \todo{rephrase sentence}
+We can now construct a Markov language model of order $n$.
+
 \begin{theorem}\label{thm:markovModelOrderN}
-Let $P_1$ be a unigram Model, $P_1^1,\dots,P_1^n$ be $n$ families of of Markov Models of order $1$ to $n$ and $\lambda:\mathbb{N}\longrightarrow [0,1]$ a function such that $\sum_{i=1}^\infty\lambda(i) = 1$. For every $s\in W^{*}$ consisting of $m$ words such that $s=w_1^m$ \todo{introduce notation} and $m\geq 1$ we set
+Let $P_1$ be a unigram Model, $P_1^1,\dots,P_1^n$ be $n$ families of of Markov Models of order $1$ to $n$ and $\lambda:\mathbb{N}\longrightarrow [0,1]$ a  sentence length distribution. For every $s\in W^{*}$ consisting of $m$ words such that $s=w_1^m$ and $m\geq 1$ we set
 \begin{align}
-P(\{s\})=\lambda(m)\prod_{i=n+1}^mP_1^n(w_i;w_{i-n}^{i-1})\prod_{j=1}^nP_1^{j}(w_j;w_1^{j-1})\label{formula:MarkovLMOrderN}
+P(\{s\})=\lambda(m)\left(\prod_{i=n+1}^mP_1^n(w_i;w_{i-n}^{i-1})\right)\left(\prod_{j=1}^nP_1^{j}(w_j;w_1^{j-1})\right)\label{formula:MarkovLMOrderN}
 \end{align}
 $P$ is a \gls{mlm} of order $n$.
 \begin{proof}
-The proof works exactly like theorem \ref{thm:unigram-lm} and \ref{thm:unigramLMPlusSentenceLength} using $\sigma$-additivity and the distributive law and is thus omitted. 
+The proof works exactly like theorem \ref{thm:unigram-lm} and \ref{thm:unigramLMPlusSentenceLength} using $\sigma$-additivity and the distributive law and is thus omitted. \todo{discuss if it should be LaTeXed here or in the appendix.}
 \end{proof}
 \end{theorem}
 
 \begin{remark}
 The Language Models in the literature are exactly of this form.
 However in the literature the motivation is completely different. 
-It starts with conditional probabilities and the chain rule of total probability and then making a Markov assumption as well as incorporating begin of sentence and end of sentence tags. 
+It will be presented in the appendix \todo{link to discussion from former remark with chainrule and so on}
 
 The second part of formula \ref{formula:MarkovLMOrderN} can be seen as the beginning of a sentence where one obviously doesn't have the preceeding $n$ words that would be needed to work with the Markov Model of order $n$. 
 
-Though it is sufficient to have learnt / trained \todo{do I already want to use that terminology} one family of Markov Models of order $n$. 
+It is sufficient to have trained a family of Markov Models of order $n$. 
 The lower order families can be constructed with the help of lemma \ref{lem:constructLowerOrderMarkovFamilies}. 
-It will be more accurate however - an most certainly lead to better results \footnote{we did not check this hypothesis} - if separate families are learnt just on the first $j$ words of the sentences in the corpora.  
-
-
+It will be more accurate however - an most certainly lead to better results \footnote{we did not check this hypothesis} - if separate families are learned just on the first $j$ words of the sentences in the corpora.  \todo{include emperical evaluation how a unigram model over all words is different to a unigram model which is only learnt on first words of a sentence}
 \end{remark}
 
-\todo{the interesting part is. All this is possible without smoothing and so on.}
 
-\todo{emperical evaluation how a unigram model over all words is different to a unigram model which is only learnt on first words of a sentence}
-
-
-\begin{itemize}
-\item standard literature now uses conditional probabilities, the markov assumption and $n$-gram models (which are not the same as we defined) and extend the construction from theorem \ref{thm:unigram-lm}. This again is pretty ugly since we always need to switch cases of which models we use around begin and end of sentences. We would like to demonstrate this.
-\item in particular discuss notion of chainrule and conditional probabilities
-\end{itemize}
-
-\section{Our approach of constructing higher order language models}
+\section{Novel approach for constructing $n$-gram language models}
 Having introduced the rigorous notation and having reviewed the well known techniques for constructing language models it is quite obvious that there is yet another way of constructing language models. 
 This time we use $n$-gram models as defined in definition \ref{def:ngram-model} in section \ref{sec:basicDefinitions}. 
 At a first glimpse the construction which we propose in this section seems to resemble the construction of Markov language models of order $n$. 
-However we will give an example that illustrates the differences and supports the novelty of the following construction. \footnote{This construction was developed in May 2014 while having discussions with Heinrich Hartman in which we tried to give proper semantics to the notion of language models from the literature. A preliminary version of the discussion can be found in his git repository to which we both contributed at that time \todo{find link}}
+However we will give an example that illustrates the differences and supports the novelty of the following construction. \footnote{This construction was developed in May 2014 while having discussions with Heinrich Hartmann in which we tried to give proper semantics to the notion of language models from the literature. A preliminary version of the discussion can be found in his git repository to which we both contributed at that time \todo{find link}}
+
 \begin{theorem}\label{thm:higherOrderLM}
 Let $\lambda:\mathbb{N}\longrightarrow [0,1]$ be a function such that $\sum_{i=1}^\infty\lambda(i) = 1$. 
 For each $n\in\mathbb{N}$ let $P_n$ be an $n$-gram model as in definition \ref{def:ngram-model}. 
-For every $s \in W^{*}$ with $s$ so consisting of $m$ words and $m\geq 1$ we set:
+For every $s \in W^{*}$ with $s$ consisting of $m$ words and $m\geq 1$ we set:
 \begin{align}
 P(\{s\}) = \lambda(m)P_m({s})
 \end{align}
-$P$ is an \gls{nglm} language model \todo{I need better names for the P's that arise from the three constructions}
+$P$ is an \gls{nglm}
 \begin{proof}
 As before we decompose $W^{*}$ into $\bigcup_{i=1}^\infty W^{i}$ so that we have:
 \begin{align}
@@ -668,27 +677,28 @@ P(W^{*}) & = P(\bigcup_{i=1}^\infty W^{i}) =\sum_{i=1}^\infty P(W^{i})  \\
 
 \begin{example}
 Let $D$ be a corpus consisting of one sentence \texttt{a b a a b} over a vocabulary $W=\{\texttt{a},\texttt{b}\}$ consisting of two words.
-Let $\lambda(n)=\rho(1-\rho)^{n-1}$ be a function used to construct the higher order language model and the Markov Model with $\rho \in (0,1)$. 
-Let $c_n^D:W^n\longrightarrow \mathbb{N}_0$ be the counting function counting how often a certain $n$-gram occurs in our corpus $D$.
-We can construct $n$-gram models in the following way:
+Let $\lambda(n)=\rho(1-\rho)^{n-1}$ with $\rho \in (0,1)$ be a a fixed sentence length distribution in the construction of $n$-gram language models and the Markov language model. 
+Let $c_n^D:W^n\longrightarrow \mathbb{N}_0$ be the counting function counting.
+We can construct $n$-gram models with the help of the maximum likelihood estimator as in equation \ref{eq:n-grammodel:mle}.
 \begin{align}
 P_n(\{s\})=\frac{c_n^D(s)}{\sum_{\omega\in W^n}c_n^D(\omega)}
 \end{align}
-The $P_n$ give rise to a higher order language model $P$ as in theorem \ref{thm:higherOrderLM}.
-For example we have $P(\{ab\})= \rho(1-\rho)\frac{2}{4}$ 
-
-On the other hand we can construct families of Markov models of order $n$ by setting:
+The $P_n$ give rise to a $n$-gram language model $P$ as in theorem \ref{thm:higherOrderLM}.
+For example we have 
 \begin{align}
-P_1^n(w;w_1\dots w_n) = \frac{c_{n+1}^D(w_1\dots w_nw)}{\sum_{v\in W}c_{n+1}^D(w_1\dots w_nv)}
+P(\{ab\}) & = \rho(1-\rho)P_2({a b}) \\
+ & =\rho(1-\rho)\frac{c_2^D(ab)}{c_2^D(a a)+c_2^D(a b)+c_2^D(b a)+c_2^D(b b)} \\
+ & =\rho(1-\rho)\frac{2}{4}
 \end{align}
-We emphasize here that one can already see a major drawback with the approach of Markov Models once a sequence $w_1\dots w_n$ was not seen in our corpus $D$ we have no unigram distribution for this combination of model parameters. \todo{somewhere discuss that higher order n-gram models also have many sparsities and at some point will also be undefined if $n$ is longer than the longest sentence in our corpus.}
-Obviously smoothing or just selecting another distribution can help here but it must be done explicitly.
-In particular there is a modeling choice to be made. 
-Our example is chosen in a way such that we do not run into this problem. 
 
-With the family of Markov Models we can construct Markov Language Models of order $n$ $P_n^{Markov}$ in the way as shown by theorem \ref{thm:markovModelOrderN}. 
-In Particular we have a Markov Model of order $1$ which would be called a two-gram model in the common literature. 
-We count:
+On the other hand we can build the Maximum likelihood Markov Model of order $1$ which in this simple case is already a family of Markov models of order $1$ by setting:
+\begin{align}
+P_1^1(w;w_1) = \frac{c_{2}^D(w_1w)}{\sum_{v\in W}c_{2}^D(w_1v)}
+\end{align}
+Also we have the unigram maximum likelihood estimator
+With the family of Markov Models of order $1$ and the unigram maximum likelihood estimator we can construct Markov Language Models of order $1$ $P_1^{Markov}$ in the way as shown by theorem \ref{thm:markovModelOrderN}. 
+Our Markov Model of order $1$ would be called a two-gram model in the literature. 
+To see that it is different to the $n$-gram language model we count:
 \begin{align}
 P_1^{Markov}(\{ab\}) & = \rho(1-\rho) P_1^1(\{b\};\{a\})P_1(\{b\}) = \rho(1-\rho) \frac{2}{3}\cdot\frac{2}{5} \\
  & = \rho(1-\rho)\frac{4}{15} \\
@@ -696,11 +706,12 @@ P_1^{Markov}(\{ab\}) & = \rho(1-\rho) P_1^1(\{b\};\{a\})P_1(\{b\}) = \rho(1-\rho
 \end{align}
 \end{example}
 
-The example shows that even when the same $\lambda$ was chosen and maximum likelihood estimators on $n$ grams the higher order language model and the Markov model would not coincide. 
+The example shows that even when the same $\lambda$ was chosen and in both processes we used maximum likelihood estimators an basically just counting relative frequencies of bigrams our novel $n$-gram language model and the Markov language model of order $1$ did not produce the same probabilities. 
 This demonstrates the novelty of our construction of a language model. 
 
 \begin{remark}
 \begin{description}
+\item[Quality] We did not make any statement about the quality of the $n$-gram language model yet. This will be part of the empirical evaluation at the end of the text. 
 \item[Sparcity and Choices] \todo{move thoughts that are within the example to here}
 \item[Relation of Markov Models and Conditional Probabilities] conditional probabilities of $n$-gram models will be calculated exactly in the way how the markov models of order $n-1$ are defined. \todo{do an example but put this maybe to another position.}
 \item[Dependence of Context] not only the markov models but also our higher order models depend on the last couple words and introduce this kind of dependency. \todo{discuss this further}
@@ -735,6 +746,15 @@ Therefore we have two substantially different constructions of Language Models w
 \item introduce shorter notation for sequences like $w_1^n$
 \item resolve slight notation inconsistencies from above. 
 \end{itemize}
+
+\begin{example}
+Transfere the stuff from the section (uniform, MLE and contcounter to markov assumption (at least with order $1$ it should be possible.) Also discuss zero probabilities problem and well defined problem in this or in order $2$ setting. 
+\end{example}
+
+We emphasize here that one can already see a major drawback with the approach of Markov Models once a sequence $w_1\dots w_n$ was not seen in our corpus $D$ we have no unigram distribution for this combination of model parameters. \todo{somewhere discuss that higher order n-gram models also have many sparsities and at some point will also be undefined if $n$ is longer than the longest sentence in our corpus.}
+Obviously smoothing or just selecting another distribution can help here but it must be done explicitly.
+In particular there is a modeling choice to be made. 
+Our example is chosen in a way such that we do not run into this problem. 
 
 \chapter{Smoothing}
 following the structure from the last chapter we can smooth $n$-gram models, markov families of order $n$ and any language model (most likely be smoothing the models which have been used to construct them. 
@@ -814,6 +834,11 @@ This can only be true if $P_1(\{w\}) = 0 \forall w$. That is an obvious contradi
 Empirical results which didn't make it to the main text.
 
 \chapter{Examples of ambigious notation for Language Modeling from the Literature}\label{a:ambigiousNotation}
+
+\begin{itemize}
+\item standard literature now uses conditional probabilities, the markov assumption and $n$-gram models (which are not the same as we defined) and extend the construction from theorem \ref{thm:unigram-lm}. This again is pretty ugly since we always need to switch cases of which models we use around begin and end of sentences. We would like to demonstrate this.
+\item in particular discuss notion of chainrule and conditional probabilities
+\end{itemize}
 
 \end{appendix}
 
