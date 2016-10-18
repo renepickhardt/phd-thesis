@@ -163,7 +163,7 @@ We strongly suggest that the expert reader as well as the practitioner carefully
 The formulas and ideas of constructing Markov language models of order $n$ follow the standard text books and publications like \cite{chen:goodman}, \todo{add more bibliography} 
 However the unification of the notation as well as our notion of what we call an $n$-gram language models (which we is different to what other authors mean by $n$-gram models) is our contribution and an integral part of this thesis. 
 
-\section{Formal definitions of Language Models, $n$-gram models and Markov models}\label{sec:basicDefinitions}
+\section{Formal definitions of language models and $n$-gram models}\label{sec:basicDefinitions}
 \begin{definition}
 Let $W$ be a finite set such that $W = \{w_1,\dots,w_N\}$. The elements of $W$ are called \glsplural{word} and we call $W$ a \gls{vocabulary} $N$ words.
 \end{definition}
@@ -195,6 +195,54 @@ W^{*}=\bigcup_{n=1}^\infty W^n
 \item[Short forms] An element $(w_1,\dots,w_n) \in W^n$ will be written as $w_1\dots w_n$ or even shorter as $w_1^n$. For a sentence $s\in W^{*}$ we know $\exists ! m : s\in W^m$. We call $m$ the length of the sentence. In that case we will write $|s|=m$ or $len(s)=m$. Finally we often want to do operations on all words in a sentence. For example we might want to add something up for each word $w$ in $s$. By abuse of notation of the $\in$ operator we might write something like $\sum\limits_{w\in s}\dots$ in that case.
 \end{description}
 \end{remark}
+
+\begin{definition}
+A training \gls{document} $d$ is a series $(s_i)_{i=1\dots m}$ of $m$ sentences. We make the strong assumption that a word in a training corpus can be identified as something between two consecutive white space elements. 
+\end{definition}
+
+\begin{remark}
+Since sentences are sequences of words e.g $s_1=w_1\dots w_x$ and $s_2=v_1\dots v_y$ we would run into the problem when we see something like $s_1s_2=w_1\dots w_xv_1\dots v_y$. 
+Formally for the later there exist quite some combinations to draw two or more sentence borders.
+However we do not wish to model punctuation marks into our vocabulary since these marks have special semantics and we would need to treat them with special caution within our calculations. 
+Thus we assume that sentences have no punctuation marks at their end.
+For a real training corpus we expect the corpus follows a format making sentence boundaries clear without punctuation marks.
+For example we could have one sentence per line or the corpus comes as an XML-file where the sentences are enclosed by begin of sentence and end of sentence tags. 
+\end{remark}
+
+\begin{definition}
+A training \gls{corpus} $D$ is a collection of documents. $D=\{d_1,\dots,d_M\}$
+\end{definition}
+
+\begin{remark}
+Despite the fact that in many applications people wish to learn separate language models for separate documents in this thesis we are mainly interested learn a language model on a collection of sentences. We therefor assume - unless explicitly otherwise stated - that our training corpus consists of a single document. 
+Further we will assume that the corpus comes in the format of one sentence per line without punctuation marks. 
+\end{remark}
+
+\begin{definition}
+Given a \gls{corpus} D of text documents. $c_n^D:W^{n}\longrightarrow\mathbb{N}_0$ is called a counting function for $n$-grams if it returns the absolute frequency of how often each $n$ $w_1^n\in W^n$ occurs in all the sentences of $D$. In an $n$-gram is only counted if it stays within the sentence borders.
+\end{definition}
+
+\begin{example} A small text corpus $D$ is given by: \\
+\texttt{a b b a c} \\
+\texttt{a b c c b a} \\
+\texttt{b b a c} \\
+\texttt{c b a} \\
+$D$ consists of one document with a vocabulary $W=\{\texttt{a,b,c}\}$ of three unique words building 4 sentences and a total of $18$ words. We have
+\begin{align}
+c_1^D(\texttt{a})=6 \hspace{1cm} c_1^D(\texttt{b})= 7 \hspace{1cm} c_1^D(\texttt{c})=5
+\end{align}
+with $\sum\limits_{w\in W}c_1^D(w) = 18$ the number of words in the corpus. We also have 
+\begin{align*}
+c_2^D(\texttt{a a})=0\hspace{1cm} c_2^D(\texttt{a b})=2\hspace{1cm}  c_2^D(\texttt{a c})=2 \\ 
+c_2^D(\texttt{b a})=4\hspace{1cm} c_2^D(\texttt{b b})=2\hspace{1cm}  c_2^D(\texttt{b c})=1 \\
+c_2^D(\texttt{c a})=0\hspace{1cm} c_2^D(\texttt{c b})=2\hspace{1cm}  c_2^D(\texttt{c c})=1 
+\end{align*}
+with $\sum\limits_{s\in W^2}c_2^D(w) = 14$ which is the number of words minus the number of sentences. \footnote{This will not directly generalize to some formula of counting how many $n$-grams exists. Though $|W| - (n-1)\times \texttt{\#sentences}$ seems tempting it already breaks in our example when counting the number of $5$-grams in this corpus or in general as soon as sentences of length shorter than $n$ exist. We provide this example to illustrate how we exactly count when doing implementations on a computer later on.} 
+We also emphasize that $\sum_{w\in W}c_2^D(ww_i) \neq c_1^D(w_i)$ so for example $c_2^D(\texttt{a b}) + c_2^D(\texttt{b b})+ c_2^D(\texttt{c b}) = 2 + 2 + 2 = 6$ which is one less than $c_1^D(\texttt{b}) = 7$. This is quite clear since sentence $3$ starts with $\texttt{b}$ which leads to the fact that for one of the $7$ $\texttt{b}$'s in the corpus there is no bigram such that $\texttt{b}$ is the second letter. We only state this obvious observation this since in many text books including \cite{book:Jurafsky} it is falsely stated that $\sum_{w\in W}c_2^D(ww_i) = c_1^D(w_i)$ and that the reader should take a moment to be convinced of this.
+
+Obviously real world corpora will most certainly consist of thousands of unique words building thousands or even millions of sentences and could easily have a billions words.
+\end{example}
+
 
 After having introduced terms specific for words and language we want to review some basic concepts of probability theory. 
 We have limited ourselves to the notion of a probability function using $\sigma$-algebras as the concept of $\sigma$-additivity plays a central role in the process of constructing all kind of language models presented in this text.
@@ -230,9 +278,9 @@ In computer science literature $S$ is often called the event space.
 Let $S$ be a \gls{sa} over an \gls{os} $\Omega$. $P:S\longrightarrow [0,1]$ is called a \gls{pf} iff: 
 $P$ respects the properties of a \gls{sa}. This means: 
 \begin{description}
-\item [$\sigma$-additivity:] $P$ is $\sigma$-additive which means for $A_1,A_2,\dots in S$ and $\forall i,j$
+\item [$\sigma$-additivity:] $P$ is $\sigma$-additive which means for $A_1,A_2,\dots \in S$ with $A_i\cap A_j = \emptyset$ for all $i,j$ we have:
 \begin{align}
-A_i\cap A_j = \emptyset \Rightarrow P(A_i\cup A_j) = P(A_i)+P(A_j)
+P(\bigcup_iA_i) = \sum_iP(A_i)
 \end{align}
 \item[Summing up to 1:] $P(\emptyset)=0$ and $P(S)=1$. 
 \end{description}
@@ -241,6 +289,19 @@ A_i\cap A_j = \emptyset \Rightarrow P(A_i\cup A_j) = P(A_i)+P(A_j)
 \begin{definition}\label{def:ps}
 A triplet $(\Omega,S,P)$ where $\Omega$ is and \gls{os} and $S$ is a \gls{sa} over $\Omega$ and $P$ is a \gls{pf} over $S$ is called a \gls{ps}.  
 \end{definition}
+
+\begin{remark}\label{rem:continuation}
+Let $(\Omega,S,P)$ be a probability space. Let $S_1\subset {S}=\{s\in S : |s|=1\}$ be the set of all events in $S$ with a cardinality of $1$ in $\Omega$. Let as further assume $S_1$ generates $S$ via unions which means: $\forall s\in S \exists s_1,s_2,\dots \in S_1 : s = \bigcup_{i}s_i$. \footnote{Though this is a strong assumption it always holds if $S=2^\Omega$ which we assume throughout the text.} Knowing $P$ on $S_1$ is sufficient to know $P$ on all of $S$.
+\begin{proof}
+For an arbitrary $s\in S$ we can by assumption write:
+\begin{align}
+P(\{s\}) =  P(\bigcup_{i}\{s_i\}) = \sum_iP(\{s_i\})
+\end{align}
+We can use the $\sigma$-additivity in the last step since the sets $s_i,s_j$ contain just one element. Therefor they must be either pairwise disjoint or the same. Since the union of same elements will not change the result we can assume they are different and thus pairwise disjoint. 
+\end{proof} 
+Conversely, knowing $P$ on all events which have a cardinality of $1$ in $\Omega$ is particularly useful since these events are usually what is measured and what computer scientists work with.
+\end{remark}
+
 
 With this review of mathematical notation we can properly define the term \gls{lm} in consistence with the existing literature.
 
@@ -256,7 +317,7 @@ Though we try to minimize this behavior we emphasize that from the context it sh
 
 Having stated this the main question throughout this thesis (and the field of language modeling) reads:\\
 \\
-\textbf{Given a corpus\todo{not defined yet} of text documents, how can we estimate or learn a language model $P$ over the vocabulary that arises from that corpus?} 
+\textbf{Given a corpus of text documents, how can we estimate or learn a language model $P$ over the vocabulary that arises from that corpus?} 
 \\
 \\
 %Since $\Omega^{*}$ is infinite even for small vocabularies it is a little bit tricky to handle so that most People will use $n$ gram models in order to estimate a language model (of order $n$).
@@ -267,74 +328,67 @@ A counter argument is that the sentence just occurred in this thesis.
 But even the maximal subset of $W^{*}$ containing only plausible sentences is infinite.\footnote{I do not have a proof for this but it seems plausible when I see that James Joyce was able to put a sentence of 4,391 words into his novel Ulysses and techniques like recursion also exist for language. You could also read \url{https://en.wikipedia.org/w/index.php?title=Longest_English_sentence&oldid=736368728} for a discussion and further thoughts on this}
 Therefor we can as well directly work with the general case of $W^{*}$.
 
-In order to tackle the problem of constructing a \gls{lm} people often make use of \glsplural{mm}, which will be defined later in this chapter, in order to construct \glsplural{mlm}. 
-In addition we introduce our notion of \glsplural{ngm} which lead to our novel approach of creating what we call \glsplural{nglm}. 
-Before we introduce all of that we want to make sense of the formal notation which was presented so far.
-Therefor we will now give three very simple examples to construct language models. 
+\todo{maybe move to different place?} In order to tackle the problem of constructing a \gls{lm} people often make use of \glsplural{mm}, which will be defined later in this chapter, in order to construct \glsplural{mlm}. 
+In addition now introduce our notion of \glsplural{ngm} which lead to our novel approach of creating what we call \glsplural{nglm}. 
+
+\begin{definition}\label{def:ngram-model}We call the triplet $(W^{n}, S, P_n)$ an \gls{ngm} if $S$ is a $\sigma$-algebra over $W^{n}$ and $P_n:S\longrightarrow [0,1]$ is a probability function. We might omit the triplet and just say the $n$-gram model $P_n$. \footnote{$n$-gram models in the literature often have a form that looks like $P(w_n|w_1^{n-1})$ we refer to the appendix \ref{a:ambigiousNotation} to point out the problems with this definition. However we selected the same name for reasons that become clear throughout the text.}
+\end{definition}
+
+Before we introduce the Markov language models and the $n$-gram language models we want to make sense of the formal notation which was presented so far.
+Therefor we will now give three very simple examples to construct $n$-gram models. If $n=1$ we will call them unigram models for $n=2$ we will call them bigram models and for $n=3$ we call them trigram models. 
 
 \begin{example}\label{ex:unigram-model}
-Given a corpus $D$ of text documents. We will - here and in future - assume that $D$ contains of only one text without loss of generality. \todo{handle sentences} Let $\Omega=W$ be the set of unique words in $D$ and $N = |W|$ its cardinality and $S=2^{W}$. There are three well known ways of constructing a unigram model unigram model $(W,S,P_1)$. In all cases one uses the trick of example \ref{ex:continuation} in its construction. 
+Given a corpus $D$ of text documents. Let $W$ be the set of unique words in $D$, with $|W|=N=\sum_{w\in W}c_1^D(w)$. Let $\Omega=W^n$ and $S=2^{\Omega}$. There are three well known ways of constructing $n$-gram models $(W^n,S,P_n)$. In particular for $n=1$ we call them unigram models. In all cases one uses the remark \ref{rem:continuation} during the construction. 
 \begin{description}
-\item[Uniform Model] We set $P_1^{uni}(\{w\})=\frac{1}{N}$ assigning all words an equal probability.  $P_1^{uni}$ is a probability function. 
+\item[Uniform Model] We set $P_n^{uni}(\{w\})=\frac{1}{N^n}$ assigning all words an equal probability.  $P_n^{uni}$ is a probability function. 
 \begin{proof}
 \begin{align}
-P_1^{uni}(\Omega) & = P_1^{uni}(\bigcup_{w\in\Omega}\{w\}) = \sum_{w\in\Omega}P_1^{uni}(\{w\}) \label{eq:uniform-model}\\
- &  = \sum_{w\in\Omega}\frac{1}{N}  =  \frac{1}{N} \sum_{w\in\Omega}1= \frac{N}{N} = 1 
+P_n^{uni}(\Omega) & = P_n^{uni}(\bigcup_{s\in\Omega}\{s\}) = \sum\limits_{s\in\Omega}P_n^{uni}(\{s\}) \label{eq:uniform-model}\\
+ &  = \sum\limits_{s\in\Omega}\frac{1}{N^n}  =  \frac{1}{N^n} \sum\limits_{s\in\Omega}1= \frac{N^n}{N^n} = 1 
 \end{align}
-In \ref{eq:uniform-model} we used the $\sigma$-additivity which $P_1^{uni}$ should have by definition. 
+In \ref{eq:uniform-model} we first used remark \ref{rem:continuation} noting that $\Omega$ can be constructed from subsets containing just one element. 
+Afterwards we used the $\sigma$-additivity which $P_n^{uni}$ should have by definition. 
 \end{proof}
-\item[Maximum Likelihood Estimator]  Let $c_D:W\longrightarrow\mathbb{N}$ be  the counting function \footnote{actually it is a random variable - isn't it?} measuring  how often each word occurs we set: 
+
+\item[Maximum Likelihood Estimator]  Let $c_n^D:\Omega = W^n\longrightarrow\mathbb{N}$ be the counting function \footnote{Even though we decided to omit the notion of random variables we emphasize for the experienced reader that $c_n^D$ is actually a random variable on the outcome space mapping elements of $\Omega$ to natural numbers. The trick in this and the following example will work with any random variable of this form.} We set: 
 \begin{align}
-P_1^{mle}(\{w\})=\frac{c_D(w)}{\sum_{v\in W}c_D(v)}
-\end{align}. 
-$P_1^{mle}$ is a probability function:
-\begin{proof}
-Again we can use $\sigma$-additivity to show that this will sum to $1$. 
-\begin{align}
-P_1^{mle}(\Omega) & = P_1^{mle}(\bigcup_{w\in\Omega}\{w\}) = \sum_{w\in\Omega}P_1^{mle}(\{w\} )  \\
-& =  \sum_{w\in\Omega} \frac{c_D(w)}{\sum_{v\in W}c_D(v)} = \frac{\sum_{w\in \Omega}c_D(w)}{\sum_{v\in W}c_D(v)} = 1
+P_n^{mle}(\{s\})=\frac{c_n^D(s)}{\sum\limits_{s'\in \Omega}c_n^D(s')}
 \end{align}
-\todo{be consistent with use of $W$ and $\Omega$}
-\todo{c, cont and P have the n-gram count as sub and as super index this inconsistency should be resolved}.
+$P_n^{mle}$ is a probability function:
+\begin{proof}
+Again we can first use remark \ref{rem:continuation} and $\sigma$-additivity to demonstrate that $P_n^{mle}$ will sum to $1$. 
+\begin{align}
+P_n^{mle}(\Omega) & = P_n^{mle}(\bigcup_{s\in\Omega}\{s\}) = \sum\limits_{s\in\Omega}P_n^{mle}(\{s\} )  \\
+& =  \sum\limits_{s\in\Omega} \frac{c_n^D(s)}{\sum\limits_{s'\in \Omega}c_n^D(s')} = \frac{\sum\limits_{s\in \Omega}c_n^D(s)}{\sum\limits_{s'\in \Omega}c_n^D(s')} = 1
+\end{align}
 \end{proof}
-\item[Continuation Count Estimator] Let $W^2$ be the set of $2$-grams. 
-Further the counting function $c_D^2:W^2\longrightarrow \mathbb{N}$ measures how often each $2$-gram occurs in $D$. 
-We can create 
+
+\item[Continuation Count Estimator] We can create 
 \begin{align}
-cont_D:  W & \rightarrow\mathbb{N} \\
-w  & \mapsto |\{v| c_D^2(v,w) > 0\}|
+cont_{n}^{D}:  \Omega = W^n & \rightarrow\mathbb{N} \\
+w_1^n  & \mapsto |\{v| c_{n+1}^D(vw_1^n) > 0\}|
 \end{align}
-We can now set 
+Similar to the previous example we can now set 
 \begin{align}
-P_1^{cont}(\{w\}) = \frac{cont_D(w)}{\sum_{v\in\Omega}cont_D(v)}
+P_n^{cont}(\{w\}) = \frac{cont_n^D(w_1^n)}{\sum\limits_{s'\in\Omega}cont_n^D(s')}
 \end{align}
-$P_1^{cont}$ is a probability function:
+$P_n^{cont}$ is a probability function:
 \begin{proof}
-Again we use $\sigma$-additivity.
+Again we make use of remark \ref{rem:continuation} and $\sigma$-additivity.
 \begin{align}
-P_1^{cont}(\Omega) & = P_1^{cont}(\bigcup_{w\in\Omega}\{w\}) = \sum_{w\in\Omega}P_1^{cont}(\{w\} )  \\
-& =  \sum_{w\in\Omega} \frac{cont_D(w)}{\sum_{v\in W}cont_D(v)} = \frac{\sum_{w\in \Omega}cont_D(w))}{\sum_{v\in W}cont_D(v)} = 1
+P_n^{cont}(\Omega) & = P_n^{cont}(\bigcup_{s\in\Omega}\{s\}) = \sum_{s\in\Omega}P_n^{cont}(\{s\} )  \\
+& =  \sum_{s\in\Omega} \frac{cont_n^D(s)}{\sum\limits_{s'\in \Omega}cont_n^D(s')} = \frac{\sum\limits_{s\in \Omega}cont_n^D(s))}{\sum\limits_{s'\in \Omega}cont_n^D(s')} = 1
 \end{align} 
 \end{proof}
-Obviously we have: $cont_D(w) \leq c_D(w) \forall w\in W$. Therefore it can happen that even though $c_D(w) \neq 0$ we have $P_1^{cont}(\{w\}) = 0$. This will be the case if $w$ only occurs at the beginning of documents in $D$.
- \todo{we have not specified the problem of sentences yet. This is particularly sad, since the entire notation makes BOS and EOS useless.}
+Obviously we have: $cont_n^D(s) \leq c_n^D(s) \forall s\in \Omega$. Therefore it can happen that even though $c_n^D(s) \neq 0$ we have $P_n^{cont}(\{s\}) = 0$. This will be the case if $s$ only occurs at the beginning of sentences in $D$.
 \end{description}
-\todo{we don't need c or cont just an arbitrary function can be used.}
 \end{example}
 
-\section{Constructing Language Models}
-
-\begin{example}\label{ex:continuation}
-Events in $S$ are subsets in $\Omega$ and have thus a cardinality.
-If $S$ is generated by unions of events with a cardinality of $1$ it is sufficient to know the values of the \gls{pf} on the events with a cardinality of $1$. Because of the $\sigma$-additivity the continuation on all of $S$ is unique.  
-Conversely, knowing $P$ on all events which have a cardinality of $1$ in $\Omega$ is particularly useful since these events are usually what is measured and what computer scientists work with.
-\end{example}
-
-\begin{definition}\label{def:ngram-model}We call the triple $(W^{n}, S, P_n)$ an \gls{ngm} if $S$ is a $\sigma$-algebra over $W^{n}$ and $P_n:S\longrightarrow [0,1]$ is a probability function. Often in the notation we omit the Triple and will just say the \gls{ngm} $P_n$. 
-\end{definition}
-\todo{discriminate against the classical known $n$-gram models which look rather like $P(w_n|w_1^{n-1})$}
-
-We continue by proofing a useful lemma for the construction of language models. 
+\section{Simple constructions of language models}
+In this section we want to more closely examine the special case of $n=1$ and use the introduced unigram models from the last section (or any arbitrary known unigram model) in order to construct a language model. 
+Later constructions in this text will follow the same principles. 
+However we decided to first present the special case instead of the most general and abstract case in order to make this text more accessible for readers with fewer experience with mathematical literature.
+We start by proofing a useful lemma that takes a central role in our constructions. 
 
 \begin{lemma}\label{lem:sumProductProbabilitySpace}
 Let $P_1$ be a unigram model over a vocabulary $W$. Then for all $n$ we have:
@@ -345,15 +399,15 @@ Let $P_1$ be a unigram model over a vocabulary $W$. Then for all $n$ we have:
 \begin{proof}
 We proof this by induction.
 \begin{description}
-\item[Basis:] For $n=1$ the product term contains only one term. So we have:
+\item[Basis:] For $n=1$ the product contains only one term. So we have:
 \[
 \sum_{s\in W^n}\prod_{w\in s}P_1(\{w\}) = \sum_{w\in W}P_1(\{w\}) = P_1(\bigcup_{w\in W}\{w\}) = P_1(W) =  1
 \]
 
-\item[inductive step:] Let us assume the lemma already holds for $m$. Let us see how we could make use for this in the case of $m+1$:
+\item[inductive step:] Let us assume the lemma already holds for $m$. Let us see how we could make use of this in the case of $m+1$:
 % \stackrel{\mathmakebox[\widthof{=}]\text{distributive law}}{=} http://tex.stackexchange.com/questions/217497/aligning-stackrel-signs-beneath-each-other-using-split
 \begin{align}
- \sum_{s\in W^{m+1}}\prod_{w\in s}P_1(\{w\}) & = \sum_{w\in W}\left(P(\{w\})\underbrace{ \sum_{s\in W^m}\prod_{v\in s}P_1(\{v\}) } _{\text{=1 by assumption}}\right) \label{eq:lemSumProductProbabilitySpace}  \\
+ \sum_{s\in W^{m+1}}\prod_{w\in s}P_1(\{w\}) & = \sum_{w\in W}\left(P_1(\{w\})\underbrace{ \sum_{s\in W^m}\prod_{v\in s}P_1(\{v\}) } _{\text{=1 by assumption}}\right) \label{eq:lemSumProductProbabilitySpace}  \\
  &= \sum_{w\in W}P_1(\{w\}) = 1
 \end{align}
 Equation \ref{eq:lemSumProductProbabilitySpace} is true because of the distributive law.
@@ -373,7 +427,9 @@ P(\{s\}) = \frac{\rho}{1-\rho}\prod_{w\in s}(1-\rho)P_1(\{w\}) =  \rho(1-\rho)^{
 \end{equation}
 $P$ is a (unigram) language model over $W^{*}$.
 \begin{proof}
-Since the sets $\{s\}$ for $s\in W^{*}$ generate our $\sigma$-algebra $2^{W^{*}}$ and are pairwise disjoint we need to show that $P(W^{*})=1$ to check weather $P$ is a probability function and to conclude the proof.
+We make use of remark \ref{rem:continuation}. 
+Since the sets $\{s\}$ for $s\in W^{*}$ generate our $\sigma$-algebra $2^{W^{*}}$ and are pairwise disjoint we need to show that $P(W^{*})=1$ to check weather $P$ is a probability function 
+If we manage to do so the proof is concluded.
 
 \begin{description}
 \item[First step] 
@@ -394,36 +450,40 @@ We could got from \ref{eq:geometricSeriesLHS} to \ref{eq:geometricSeriesRHS} bec
 \end{description} 
 \end{proof}
 \end{theorem}
-\todo{This is basically also what in the literature is being done with markov and chainrule. the factors in the product are just various unigram models parameterize by the last $n$ words and often written as $P(w_n|w_1^{n=1})$ these 'conditional' probabilities are constructed with the help on $n$-grams but can be seen as unigram models $P_1^{w_1^{n-1}}(\{w_n\})$}
+
 \begin{remark}
 The parameter $\rho$ is crucial for our proof to conclude.
 If we had set $P'(\{s\}) = \prod_{w\in s}P_1(\{w\})$ we would not have been able to show that $P'(W^{*})=1$. 
 In fact we would have had:
 \begin{align}
-P'(W^{*})= P(\bigcup_{i=1}^\infty W^n) = \sum_{i=1}^\infty P(W^n) = \sum_{i=1}^\infty 1
+P'(W^{*})= P(\bigcup_{i=1}^\infty W^n) = \sum_{i=1}^\infty P(W^n) = \sum_{i=1}^\infty 1 \label{tmp:eq:infty}
 \end{align}
-Since the result is not finite we would not have had the chance to take its inverse as a normalizing factor. 
+Since the result of equation \ref{tmp:eq:infty} is not finite we would not have had the chance to take its inverse as a normalizing factor in order to construct a probability function by force. 
 There is also a nice proof by contradiction that $P'$ cannot be a language model which can be found in the appendix \ref{a:proofs}
-
-The parameter $\rho$ can be understood as the probability for a sentence to stop. 
-It is thus an elegant way of expressing what the common literature is doing with begin of sentence tags and end of sentence tags.
-In the standard literature having formulas like $P(\texttt{<BOS>})\left(=P(\texttt{<s>})\right)$ or $P(\texttt{<EOS>})\left(=P(\texttt{</s>})\right)$ \todo{missleading to have both formulations} lets one wonder why it is just forbidden to ask for $P(\texttt{</s><s>})$ which in the semantics of modeling language might not make sense but within the semantics of pure mathematics is a perfectly reasonable formula.
-While these tokens might be a reasonable trick when implementing language models in software from a mathematical point of view they are disturbing.
-In particular one does not need to add another token to the probability space in question - which again would results in strange behavior.   
-
-The way $\rho$ was used to encode the length distribution as a geometric distribution is consistent with what is being done in the literature (despite the fact that tokens like $\texttt{<s>}$ and $\texttt{</s>}$ are being used). This is in fact an oversimplification but it is not reflecting empirical evidence that the sentence length distribution is not a geometric distribution but rather a hypergeometric poisson distribution \footnote{c.f. \url{https://de.wikipedia.org/w/index.php?title=Gesetz_der_Verteilung_von_Satzl\%C3\%A4ngen&oldid=150830900}\todo{create some empirical plots on this}}.
-
 \end{remark}
-\todo{technically $w\in s$ the in-operator is not well defined!}
+
+\begin{remark}
+The parameter $\rho$ can be understood as the probability for a sentence to stop. 
+It is an elegant way of expressing what many computer linguists are doing with begin of sentence tags like $\texttt{<BOS>}$ or $\texttt{<s>}$ and the corresponding end of sentence tags $\texttt{<EOS>}$ or $\texttt{</s>}$.
+Having those one wonders if $\texttt{<s>}\in W$ and why it is forbidden to calculate $P(\texttt{</s><s>})$ which in the semantics of modeling language might not make sense but within the semantics of pure mathematics is a perfectly reasonable formula. \footnote{It is strange that in all papers and text books that I have looked at it is mentioned in a footnote that this trick with the tags makes language models some up to $1$ on the subset of $W^{*}$ in which sequences start with such a tag and end with the corresponding one. But only Ralf Schl\"uter from RWTH Aachen could show me an unpublished written proof of this fact in an oral discussion.} While these tokens might be a reasonable trick when implementing language models in software from a mathematical point of view they are disturbing.
+\end{remark}
+
+\begin{remark}
+The way $\rho$ was used to encode the length distribution as a geometric distribution is consistent with what is being done in the literature (despite the fact that tokens like $\texttt{<s>}$ and $\texttt{</s>}$ are being used). This is in fact an oversimplification of empirical evidence showing that in reality the sentence length distribution is not a geometric distribution but rather a hypergeometric poisson distribution \footnote{c.f. \url{https://de.wikipedia.org/w/index.php?title=Gesetz_der_Verteilung_von_Satzl\%C3\%A4ngen&oldid=150830900}\todo{create some empirical plots on this}}.
+\end{remark}
+
+\begin{definition}
+A function $\lambda:\mathbb{N}\longrightarrow [0,1]$ such that $\sum_{n=1}^\infty \lambda(n) = 1$ is called a sentence length distribution. It can easily be learned from any corpus.
+\end{definition}
 
 The just proofed theorem \ref{thm:unigram-lm} is a special case of the following more general theorem. 
-Despite the fact that the proof follows exactly the same train of thoughts we followed it through once more since the argument is so central to this thesis..
+Despite the fact that the proof follows exactly the same train of thoughts we followed it through once more since the argument is so central to this thesis.
 \begin{theorem}\label{thm:unigramLMPlusSentenceLength}
-Let $\lambda:\mathbb{N}\longrightarrow [0,1]$ be a function such that $\sum_{n=1}^\infty \lambda(n) = 1$ then for $s\in W^{*}$ with $s$ consisting of $m$ words and $m\geq 1$ we set
+Let $\lambda:\mathbb{N}\longrightarrow [0,1]$ be a sentence length distribution and $(W,2^W,P_1)$ a unigram model. For $s\in W^{*}$ with $s$ consisting of $m$ words and $m\geq 1$ we set
 \begin{equation}
 P(\{s\}) = \lambda(m)\prod_{w\in s}P_1(\{w\})
 \end{equation}
-$P$ is a (unigram) language model over $W^{*}$.
+The triplet $(W^{*},2^{W^{*}},P)$ is a (unigram) language model.
 \begin{proof}
 \begin{description}
 \item[First step] 
@@ -443,21 +503,22 @@ P(W^{*}) & = P(\bigcup_{n=1}^\infty W^n) = \sum_{n=1}^\infty P(W^n) = \sum_{n=1}
 \end{theorem}  
 
 \begin{remark}
-$\lambda$ can be seen as the sentence length distribution and should be learned from the empirical data.
-
 In theorem \ref{thm:unigram-lm} it was set to $\lambda(n) = \rho(1-\rho)^{n-1}$ following a geometric distribution. 
 This situation is what seems to be implemented in most software toolkits and papers. \todo{double check and reference this}
 \end{remark}
 
-\section{Semantics of Conditional Probabilities, Markov Assumption and number of model parameters}
-The careful reader will have realized that our definition of an $n$-gram model as a triple $(W^n,S,P_n)$ over a vocabulary $W$ is different - and purposely meant to be different - to the definition from the standard literature.
-In the following we want to explore the differences and thereby defend the rational for our naming convention. 
 
-\subsection{Status quo}
-Within papers we frequently see something like: \textit{We are interested in the probability $P$ of a word $w$ given a history $h$ of preceding words.}\todo{in the best case find a quote}
-This is often stated as $P(w|h)$ or in our more concrete setting as $P(\texttt{Model}|\texttt{This is a Language})$. 
-While most readers will have an intuition what is meant with this conditional probability from a mathematical point of view the semantics of the above formulas are not clear.
-Not only is in the Papers omitted if $\Omega$ is chosen to be $W, W^n$ or $W^{*}$ but more important the notation of conditional probability is abused.
+
+\section{Conditional Probabilities and Markov Assumption}
+The careful reader will have realized that our definition of an $n$-gram model as a triple $(W^n,S,P_n)$ over a vocabulary $W$ is (purposely!) chosen differently to the definition of an $n$-gram model from the standard textbooks like \cite{book:Manning} or \cite{book:Jurafsky}. \todo{check bibliography}
+In this section we want to explore the differences and thereby defend the rational for our naming convention. 
+
+\subsection{Problem with conditional probabilities in the literature}
+Within papers we frequently see something like: \textit{"We are interested in the probability $P$ of a word $w$ given a history $h$ of preceding words."}\todo{in the best case find a quote}
+This is often stated as $P(w|h)$ or for a concrete example as $P(\texttt{Model}|\texttt{This is a Language})$. 
+While most readers will have an intuition what is meant with this conditional probability from a mathematical point of view the semantics of the above formulas are not clear. \todo{totally unclear how deep I should dig. I have the feeling when staying so high level in my criticism that it might be defended. Opening up all the problems seems overwhelming. Maybe refering to the appendix?}
+In these papers it is often omitted how $\Omega$ is chosen to be $W, W^n$ or $W^{*}$. 
+More importantly the notation of a conditional probability is abused by this notation.
 To illustrate this we recall the mathematical definition of a conditional probability.
 \begin{definition}
 Let $P$ be a probability function and $A,B$ to events such that $P(B)>0$.
@@ -478,9 +539,38 @@ Even when assuming that the above formula should have looked like this
 P(\{\texttt{Model}\}|\{\texttt{This is a Language}\}) = \frac{P(\{\texttt{Model}\}\cap\{\texttt{This is a Language}\})}{P(\{\texttt{This is a Language}\})}
 \end{align}
 one realizes that the fraction only has a non empty intersection if $w$ is a subset of $h$ which is most certainly not the semantics that computer scientists wanted to express. 
+\begin{remark}
+Expert readers and critics might now argue that the literature at that point is implicitly introducing random variables 
+\begin{align}
+W_1,\dots W_n: W^{*}: \longrightarrow W
+\end{align} where $W_i$ maps a sentence to its $i$-th word. 
+In that case the meaning should rather be interpreted in the following way $P(\texttt{Model}|\texttt{This is a Language}) = P(W_5 = \texttt{Model}| W_1 = \texttt{This}, W_2=\texttt{is}, W_3 = \texttt{a}, W_4= \texttt{Language})$. 
+While this in deed solves the problem at this stage one runs into severe problems as soon as we talk about the chain rule of total probability and the Markov assumption that is being made.
+In that case by definition the resulting models will not sum up to $1$ making the perplexity measure which is used for evaluation completely meaningless. 
+This again can be fixed by changing the semantics of the terms in the resulting product of the chain rule. We refer to the appendix \ref{a:ambigiousNotation} for a thorough discussion of these issues.
+Introducing all this overhead and fixing the problems with the semantics of conditional probabilities leads to our following definition of Markov models. 
+Therefore at this point we omit all this overhead and introduce these models directly.
+\end{remark}
 
-\subsection{Markov Assumption}
-We suggest in the case of words and language modeling to give another mathematical semantics to formulas looking like $P(w|h)$ which is reflecting the wish of computer scientists to express the probability of a word $w$ given the fact that it follows a history\todo{add to glossary} of words $h$. 
+\subsection{Markov Assumption, History and Markov Models}
+The constructed language models from theorem \ref{thm:unigram-lm} and \ref{thm:unigramLMPlusSentenceLength} have the problem that they will assign the most probable sequence of length $m$ as the sequence consisting of $m$ times the most probable word.
+In such a language model trained on a real world corpus the sentence $\texttt{the the the the}$ would be more likely than $\texttt{I like language models}$ which would be an undesirable result. 
+One way to tackle this problem is by changing the product formula of theorem \ref{thm:unigramLMPlusSentenceLength} so that its factors will become different probability functions for the probability of a word $w_i$ to occur at the $i$-the position in a resulting sentence.
+One way is to make these probabilities depend on the last $n$ words that have been seen which is what people have been doing and what will be introduced now.
+
+\begin{definition}
+Let $S$ be a $\sigma$-algebra over $W$ for example $S=2^W$ and let $w_1^n\in W^n$ be a fixed $n$-gram.
+We call the probability space $(W,2^W, P_1(\cdot ;w_1\dots w_n))$ a Markov model of order $n$. 
+In particular we call $h=w_1\dots w_n = w_1^n$ the history.  
+\end{definition}
+
+\begin{remark}
+$P_1(\cdot ; h)$ is basically a unigram model with outcome space $W$ and event space $2^W$. 
+It has the parameters $h = w_1^n$.  
+In that sense it can be seen exactly as probability function to predict a word $w$ following the history $h$ which formally was expressed with the help of conditional probabilities. 
+\end{remark} 
+
+Since at every position in a sentence we could not just have a fixed history $h$ but an arbitrary history we need to extend our definition.
 
 \begin{definition}
 Let $S$ be a $\sigma$-algebra over $W$.
@@ -488,18 +578,19 @@ We call
 \begin{align}
 P_1^n(\cdot ; \cdot): S\times W^{n}:\longrightarrow [0,1]
 \end{align}
-a \gls{fomm} of order $n$ if $\forall h\in W^n$ the associated function $P_1^n(\cdot ; h):S\longrightarrow [0,1]$ is a unigram model over $W$. \todo{make sure index shifts are sensefull. it could also be $n-1$ or $n+1$}
+a \gls{fomm} of order $n$ if $\forall h\in W^n$ the associated function $P_1^n(\cdot ; h):S\longrightarrow [0,1]$ is a Markov model $(W,2^W,P_1(\cdot ; h))$.
 \end{definition}
 \begin{remark}
 \begin{description}
-\item[Markov Assumption] \todo{glossary AND leaving in remark?} Having a family of conditioned unigram models of order $n$ means that we have a Markov assumption of order $n$ since we can interpret the outcome of each unigram model for each combination $h$ of $n$ words as the probability distrubtion of a word following $h$. Thus the word $w$ is depending on the last $n$ words $h$
-\item[Number of model parameters] Assuming a vocabulary with  $|W| = 100k = 10^5$ words. one sees that for $n=3$ one already has $10^{15}$ amount of word triples. \todo{relate to petabytes or the number of words in the world wide web} 
-For each of those a different unigram model has to be learnt.
-We see that this task might be quite difficult. This is true in particular because of the following.  
-\item[Sparsity] With this huge amount of modeling parameters it is quite clear that even when taking a web corpus as our training data and when increasing the order of our Markov Assumption to $3$ or higher more than half of all possible combinations for our parameters might not have seen in the training data.
-This makes it impossible to learn a unigram distribution for such model parameter combinations ins an obvious way without introducing techniques like smoothing which will be explained in a later chapter.
+\item[Markov Assumption] \todo{glossary} Having a family of Markov models of order $n$ means that we have introduced a Markov assumption of order $n$. For each $h$ of $n$ words we can interpret the outcome of the induced Markov model $P_1^n(\cdot ; h)$ as the probability function encoding the probability of a word to follow $h$. 
+\item[Number of model parameters] Assuming a vocabulary with  $|W| = 100k = 10^5$ words. one sees that for $n=3$ one already has $10^{15}$ amount of word triples $h$. \todo{relate to petabytes or the number of words in the world wide web} 
+In order to have a family of Markov Models of order $3$ for each of those a different histories a (separate) probability function has to be learned.
+We call the number of probability functions that can be induced from a family of Markov models of order $n$ the number of model parameters. 
+\item[Sparsity] We see that the task of learning a separate probability function for each model parameter will be quite challenging. With this huge amount of modeling parameters and the hapax legomenon property of language it is quite clear that even when taking a web corpus as our training data and when increasing the order of our Markov Assumption to $3$ or higher more than half of all possible histories might not have seen in the training data.
+This makes it difficult to impractical to learn a unique probability function for each model parameter without introducing techniques like smoothing which will be explained in a later chapter.\footnote{Introducing smoothing will basically mean that the Markov assumption is weakened locally by decreasing its order at points where the training data is to sparse. In that sense we reduce the number of model parameters or at least do not have unique probability functions for each possible model parameter.}
 \end{description}
 \end{remark}
+
 \begin{example}
 Transfere the stuff from the previous section (uniform, MLE and contcounter to markov assumption (at least with order $1$ it should be possible.) Also discuss zero probabilities problem and well defined problem in this or in order $2$ setting. 
 \end{example}
@@ -627,6 +718,7 @@ This demonstrates the novelty of our construction of a language model.
 \section{Conclusion and open questions}
 We have seen three different constructions of language models the Unigram model as constructed in theorem \ref{thm:unigram-lm} and \ref{thm:unigramLMPlusSentenceLength}, the well known Markov language model of order $n$ as introduced in theorem \ref{thm:markovModelOrderN}, and our novel higher order language models as constructed in theorem \ref{thm:higherOrderLM}.
 To be precise the Unigram Model can be seen as a Markov Model of order $0$.
+\todo{Think about the following: To be precise a unigram model from Chapter 2 section 2 is a markov language model of order 0. I can also see them as 1-gram model. what about constructing a 2-gram language model by using a 2-gram model and multiplying all probabilities of 2-grams in the sentence. would this correspond to the markov model of order 1 or is this something completely different? Maybe my term $n$-gram language model is not so great after all?}
 Therefore we have two substantially different constructions of Language Models which naturally leads to the following questions: 
 \begin{enumerate}
 \item Which of the two constructions is more accurate and yields better results in terms of perplexity but also in terms of applications?
@@ -635,7 +727,7 @@ Therefore we have two substantially different constructions of Language Models w
 \end{enumerate}
 \todo{Actually we have Markov models and $n$-gram models. both can via a similar construction with the help of a sentence length distribution be used to construct a language model. We need good naming conventions for the components (Markov models and $n$-gram models, the families of those and the constructed Language models...)}
 
-
+\todo{This is basically also what in the literature is being done with markov and chainrule. the factors in the product are just various unigram models parameterize by the last $n$ words and often written as $P(w_n|w_1^{n=1})$ these 'conditional' probabilities are constructed with the help on $n$-grams but can be seen as unigram models $P_1^{w_1^{n-1}}(\{w_n\})$}
 
 
 \subsection{Roadmap:}
